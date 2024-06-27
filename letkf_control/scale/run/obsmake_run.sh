@@ -1,0 +1,1 @@
+config/case_tc/obsmake_run.sh
