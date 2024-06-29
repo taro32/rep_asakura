@@ -38,11 +38,12 @@ for i in range(0,nens):
 #show()
 
 # LETKF mean
-workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_fcst/result/case_tc/200001'
+workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkf_withmdet/result/case_tc/200001'
 day = 1
 hour = 0
 i = 0
 minpres_letkf = np.zeros((81,nens))
+minpres_mdet = np.zeros((81,nens))
 for day in range(1,10):
     if day < 10:
         strday = '0'+str(day)
@@ -57,8 +58,12 @@ for day in range(1,10):
         data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
         pres = data.variables['PRES']
         minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
+        pres = data.variables['PRES']
+        minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         i = i + 1
 plt.plot(minpres_letkf[:],color='blue')
+plt.plot(minpres_mdet[:],color='green')
 plt.ylim(900,1000)
 plt.show()
 

@@ -14,7 +14,7 @@ ALLVAR=T
 SINGLE_VAR=F
 
 tint=10800 #864000 # [second]
-tstart='2000-01-06 0:00:00'
+tstart='2000-01-01 0:00:00'
 #tend=$tstart
 tend='2000-01-10 0:00:00'
 . ./config.main
@@ -419,11 +419,11 @@ cd ${RUNDIR}
 pjsub --bulk --sparam "1-10" job_sno.sh 
 pjsub --bulk --sparam "11-20" job_sno.sh 
 pjsub --bulk --sparam "21-30" job_sno.sh 
-pjsub --bulk --sparam "31-32" job_sno.sh 
-#pjsub --bulk --sparam "41-50" job_sno.sh 
-#pjsub --bulk --sparam "51-60" job_sno.sh 
-#pjsub --bulk --sparam "61-67" job_sno.sh 
-#pjsub --bulk --sparam "71-80" job_sno.sh
+pjsub --bulk --sparam "31-40" job_sno.sh 
+pjsub --bulk --sparam "41-50" job_sno.sh 
+pjsub --bulk --sparam "51-60" job_sno.sh 
+pjsub --bulk --sparam "61-70" job_sno.sh 
+pjsub --bulk --sparam "71-72" job_sno.sh
 #sleep 300
 #pjsub --bulk --sparam "81-90" job_sno.sh 
 #pjsub --bulk --sparam "91-100" job_sno.sh 
