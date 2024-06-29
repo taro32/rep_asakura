@@ -13,7 +13,7 @@ DIR="$(cd "$(pwd)/.." && pwd)"    # Root directory of the SCALE-LETKF
 
 DATADIR=${SCALE_DB}          # Directory of the SCALE database
 
-OUTDIR=/work/jh220020o/f00019/scale_enkc/test_letkf/result/case_tc ### EDIT HERE ### 
+OUTDIR=/work/jh220020o/f00019/scale_enkc/test_letkf_withmdet/result/case_tc ### EDIT HERE ### 
 INDIR="$OUTDIR"
 
 #===============================================================================
@@ -38,7 +38,7 @@ OBS="$OUTDIR/obs"
 #===============================================================================
 # model/data file options
 
-DET_RUN=0               # 0: Disable the deterministic run
+DET_RUN=1               # 0: Disable the deterministic run
                         # 1: Enable  the deterministic run
 
 TOPO_FORMAT='none'      # 'prep': Use prepared topo files in $DATA_TOPO
