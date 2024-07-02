@@ -355,7 +355,8 @@ while ((time <= ETIME)); do
 
       nodestr=proc
 
-      if ((s <= 3)); then
+      #if ((s <= 3)); then
+      if ((s <= 4)); then
         conf_time=$time
       else
         conf_time=$atime
@@ -376,7 +377,7 @@ while ((time <= ETIME)); do
           grep 'finished successfully' ${logd_org}/0/NOUT_${conf_time}.${mpiexec_cnt}.0 >/dev/null || exit 1 
         fi
 	if ((s == 4)); then
-	  cp $TMP/obsin/obsin.dat.out $OBS/${OBSNAME[1]}_\${time}.dat
+	  cp $TMP/obsin/obsin.dat.out $OBS/${OBSNAME[1]}_${atime}.dat
         fi	  
         echo "[$(datetime_now)] ${time}: ${stepname[$s]}: $it: end" >&2
       done
