@@ -120,6 +120,7 @@ cp ${ENSMODEL_DIR}/scale-rm_pp_ens ${TMPROOT}/scale-rm_pp_ens
 cp ${ENSMODEL_DIR}/scale-rm_init_ens ${TMPROOT}/scale-rm_init_ens
 cp ${ENSMODEL_DIR}/scale-rm_ens ${TMPROOT}/scale-rm_ens
  
+cp ${OBSUTIL_DIR}/obsmake ${TMPROOT}/obsmake # YSaw 20240702
 cp ${OBSUTIL_DIR}/obsope ${TMPROOT}/obsope
 if (( PAWR_DECODE == 1 )) ;then
   cp ${OBSUTIL_DIR}/dec_pawr ${TMPROOT}/dec_pawr
@@ -1096,7 +1097,7 @@ while ((time <= ETIME)); do
     -e "/!--SLOT_START--/a SLOT_START=$nslot,"  \
     -e "/!--SLOT_END--/a SLOT_END=$slot_e,"  \
     -e "/!--SLOT_BASE--/a SLOT_BASE=$slot_e,"  \
-    -e "/!--SLOT_TINTERVAL--/a SLOT_TINTERVAL=$FCSTOUT,"  \
+    -e "/!--SLOT_TINTERVAL--/a SLOT_TINTERVAL=$CYCLEFOUT.D0,"  \
   > $conf_file
 
   cat $SCRP_DIR/config.nml.scale | sed \

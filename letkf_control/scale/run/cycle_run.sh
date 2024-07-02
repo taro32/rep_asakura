@@ -87,6 +87,10 @@ safe_init_tmpdir $STAGING_DIR || exit $?
 staging_list_static || exit $?
 config_file_list $TMPS/config || exit $?
 
+# obsmake YSaw 20240702
+mkdir -p $TMP/obsin
+cp $OBSIN $TMP/obsin/obsin.dat
+
 #-------------------------------------------------------------------------------
 # Add shell scripts and node distribution files into the staging list
 

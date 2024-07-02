@@ -34,6 +34,8 @@ DATA_BDY_NICAM=              # Directory of the boundary data in NICAM format (n
 DATA_BDY_GRADS=""
 
 OBS="$OUTDIR/obs"
+OBSIN=/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/run/config/case_tc/make_obsin/test_obs_3d_xyp.dat  #YSaw 20240702
+OBS_IN_FORMAT="PREPBUFR" # YSaw 20240702
 
 #===============================================================================
 # model/data file options
