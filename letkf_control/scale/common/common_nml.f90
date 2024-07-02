@@ -43,6 +43,7 @@ MODULE common_nml
   logical :: CONF_FILES_SEQNUM = .false.
 
   logical :: DET_RUN = .false.
+  logical :: DET_RUN_UPDATE = .false.  ! YSaw for EnKC 20240702
   logical :: DET_RUN_CYCLED = .true.
 
   logical :: EFSO_RUN = .false.
@@ -378,6 +379,7 @@ subroutine read_nml_ensemble
     CONF_FILES, &
     CONF_FILES_SEQNUM, &
     DET_RUN, &
+    DET_RUN_UPDATE, &  ! YSaw 20240702
     DET_RUN_CYCLED, &
     EFSO_RUN
 
