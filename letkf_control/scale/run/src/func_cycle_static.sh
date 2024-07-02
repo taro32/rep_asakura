@@ -1094,8 +1094,8 @@ while ((time <= ETIME)); do
     -e "/!--HISTORY_IN_BASENAME--/a HISTORY_IN_BASENAME=\"${HISTORY_PATH[$d]}/mdet/history\"," \
     -e "/!--GUES_IN_BASENAME--/a GUES_IN_BASENAME=\"${HISTORY_PATH[$d]}/../anal/mdet/init_$(datetime_scale $atime))\"," \
     -e "/!--SLOT_START--/a SLOT_START=$nslot,"  \
-    -e "/!--SLOT_END--/a SLOT_END=$nslot,"  \
-    -e "/!--SLOT_BASE--/a SLOT_BASE=$nslot,"  \
+    -e "/!--SLOT_END--/a SLOT_END=$slot_e,"  \
+    -e "/!--SLOT_BASE--/a SLOT_BASE=$slot_e,"  \
     -e "/!--SLOT_TINTERVAL--/a SLOT_TINTERVAL=$FCSTOUT,"  \
   > $conf_file
 
