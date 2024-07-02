@@ -1093,7 +1093,7 @@ while ((time <= ETIME)); do
     -e "/!--OBS_IN_FORMAT--/a OBS_IN_FORMAT=\"${OBS_IN_FORMAT}\","  \
     -e "/!--LETKF_TOPOGRAPHY_IN_BASENAME--/a LETKF_TOPOGRAPHY_IN_BASENAME=\"$OUTDIR/const/topo/topo\"," \
     -e "/!--HISTORY_IN_BASENAME--/a HISTORY_IN_BASENAME=\"${HISTORY_PATH[$d]}/mdet/history\"," \
-    -e "/!--GUES_IN_BASENAME--/a GUES_IN_BASENAME=\"${HISTORY_PATH[$d]}/../anal/mdet/init_$(datetime_scale $atime))\"," \
+    -e "/!--GUES_IN_BASENAME--/a GUES_IN_BASENAME=\"${HISTORY_PATH[$d]}/../anal/mdet/init_$(datetime_scale $atime)\"," \
     -e "/!--SLOT_START--/a SLOT_START=$nslot,"  \
     -e "/!--SLOT_END--/a SLOT_END=$slot_e,"  \
     -e "/!--SLOT_BASE--/a SLOT_BASE=$slot_e,"  \
@@ -1103,7 +1103,7 @@ while ((time <= ETIME)); do
   cat $SCRP_DIR/config.nml.scale | sed \
     -e "/!--TIME_STARTDATE--/a TIME_STARTDATE = ${time:0:4}, ${time:4:2}, ${time:6:2}, ${time:8:2}, ${time:10:2}, ${time:12:2}," \
     -e "/!--TIME_DURATION--/a TIME_DURATION = ${LCYCLE}.D0," \
-    -e "/!--RESTART_IN_BASENAME--/a RESTART_IN_BASENAME=\"${HISTORY_PATH[$d]}/../anal/mdet/init_$(datetime_scale $atime))\","  \
+    -e "/!--RESTART_IN_BASENAME--/a RESTART_IN_BASENAME=\"${HISTORY_PATH[$d]}/../anal/mdet/init_$(datetime_scale $atime)\","  \
     -e "/!--RESTART_OUT_BASENAME--/a RESTART_OUT_BASENAME=\"${HISTORY_PATH[$d]}/../anal/mdet/init\","  \
     -e "/!--TOPOGRAPHY_IN_BASENAME--/a TOPOGRAPHY_IN_BASENAME=\"$OUTDIR/const/topo/topo\"," \
     -e "/!--FILE_HISTORY_DEFAULT_BASENAME--/a FILE_HISTORY_DEFAULT_BASENAME=\"${HISTORY_PATH[$d]}/mdet/history\"," \
