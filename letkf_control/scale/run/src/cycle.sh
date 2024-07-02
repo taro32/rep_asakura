@@ -375,7 +375,9 @@ while ((time <= ETIME)); do
           mpiexec_cnt=$((mpiexec_cnt+1))
           grep 'finished successfully' ${logd_org}/0/NOUT_${conf_time}.${mpiexec_cnt}.0 >/dev/null || exit 1 
         fi
-
+	if ((s == 4)); then
+	  cp $TMP/obsin/obsin.dat.out $OBS/${OBSNAME[1]}_\${time}.dat
+        fi	  
         echo "[$(datetime_now)] ${time}: ${stepname[$s]}: $it: end" >&2
       done
 
@@ -386,7 +388,7 @@ while ((time <= ETIME)); do
         elif (( s == 6 && ANAL_LLIO_TMP == 1)) ; then
           mpiexec rm -rf ${ANAL_LLIO_TMPDIR_TOP_OLD}
           mpiexec_cnt=$((mpiexec_cnt+1))
-        elif (( s == 4 && BDY_LLIO_TMP == 1)) ; then
+        elif (( s == 3 && BDY_LLIO_TMP == 1)) ; then
           mpiexec rm -rf ${BDY_LLIO_TMPDIR_TOP}
           mpiexec_cnt=$((mpiexec_cnt+1))
         fi

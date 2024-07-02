@@ -1425,7 +1425,8 @@ stepexecname[2]="scale-rm_init_ens"
 stepname[3]='Run ensemble forecasts'
 stepexecdir[3]="$TMPRUN/scale"
 stepexecname[3]="scale-rm_ens"
-stepexecdir[4]="$TMPRUN/obsope"
+stepname[4]='Run obsmake'
+stepexecdir[4]="$TMPRUN/obsmake"
 stepexecname[4]="obsmake"
 if (( OBSOPE_RUN == 0 )) && (( PAWR_DECODE == 1 )) ; then
 stepname[5]='Run PAWR decoder'

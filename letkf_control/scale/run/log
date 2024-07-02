@@ -1,17 +1,17 @@
-[2024-07-02 12:45:01] Start cycle_run.sh 
+[2024-07-02 15:07:02] Start cycle_run.sh 
 
   DIR                  = /work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale
   DOMAIN               = 
-  INDIR[1]             = /work/jh220020o/f00019/scale_enkc/test_letkf_withmdet/result/case_tc
-  OUTDIR[1]            = /work/jh220020o/f00019/scale_enkc/test_letkf_withmdet/result/case_tc
-  DATA_TOPO[1]         = /work/jh220020o/f00019/scale_enkc/test_letkf_withmdet/result/case_tc
+  INDIR[1]             = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake/result/case_tc
+  OUTDIR[1]            = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake/result/case_tc
+  DATA_TOPO[1]         = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake/result/case_tc
   DATA_TOPO_BDY_SCALE  = 
-  DATA_LANDUSE[1]      = /work/jh220020o/f00019/scale_enkc/test_letkf_withmdet/result/case_tc
+  DATA_LANDUSE[1]      = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake/result/case_tc
   DATA_BDY_SCALE       = 
-  DATA_BDY_SCALE_PREP  = /work/jh220020o/f00019/scale_enkc/test_letkf_withmdet/result/case_tc
+  DATA_BDY_SCALE_PREP  = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake/result/case_tc
   DATA_BDY_WRF         = 
   DATA_BDY_NICAM       = 
-  OBS                  = /work/jh220020o/f00019/scale_enkc/test_letkf_withmdet/result/case_tc/obs
+  OBS                  = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake/result/case_tc/obs
   OBSNCEP              = 
   DET_RUN              = 1
   TOPO_FORMAT          = none
@@ -54,9 +54,9 @@
   LOG_OPT              = 2
   LOG_TYPE             = 2
 
-[2024-07-02 12:45:01] Create and clean the temporary directory
-[2024-07-02 12:45:01] Determine the distibution schemes
-[2024-07-02 12:45:02] Determine the staging list
+[2024-07-02 15:07:02] Create and clean the temporary directory
+[2024-07-02 15:07:03] Determine the distibution schemes
+[2024-07-02 15:07:03] Determine the staging list
 
 Generate configration files...
   scale-rm_init_ens_20000101000000.conf
@@ -66,11 +66,11 @@ Generate configration files...
 
 backup
 
-[2024-07-02 12:45:05] Create a job script '/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/tmp/tropicalcyclone/cycle_job.sh'
-[2024-07-02 12:45:05] Run cycle job on PJM
+[2024-07-02 15:07:07] Create a job script '/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/tmp/tropicalcyclone/cycle_job.sh'
+[2024-07-02 15:07:07] Run cycle job on PJM
 
-[INFO] PJM 0000 pjsub Job 4593417 submitted.
+[INFO] PJM 0000 pjsub Job 4593726 submitted.
 
-[2024-07-02 12:54:52] Finalization
+[2024-07-02 15:07:39] Finalization
 
-[2024-07-02 12:54:52] Finish cycle_run.sh 
+[2024-07-02 15:07:39] Finish cycle_run.sh 
