@@ -301,6 +301,13 @@ if ((DET_RUN == 1)); then
   DET_RUN_TF='.true.'
 fi
 
+# YSaw 20240702
+DET_RUN_UPDATE_TF='.false.'
+if ((DET_RUN_UPDATE == 1 && DET_RUN == 1)); then
+  DET_RUN_UPDATE_TF='.true.'
+fi
+
+
 EFSO_RUN_TF='.false.'
 if (( EFSO_RUN == 1 )); then
   EFSO_RUN_TF='.true.'
@@ -316,6 +323,7 @@ cat $SCRP_DIR/config.nml.ensmodel | \
         -e "/!--CONF_FILES--/a CONF_FILES = \"${CONF_NAME}.d<domain>_${time}.conf\"," \
         -e "/!--CONF_FILES_SEQNUM--/a CONF_FILES_SEQNUM = $CONF_FILES_SEQNUM," \
         -e "/!--DET_RUN--/a DET_RUN = $DET_RUN_TF," \
+        -e "/!--DET_RUN_UPDATE--/a DET_RUN_UPDATE = $DET_RUN_UPDATE_TF," \
         -e "/!--EFSO_RUN--/a EFSO_RUN = $EFSO_RUN_TF," \
         -e "/!--PPN--/a PPN = $PPN_APPAR," \
         -e "/!--MEM_NODES--/a MEM_NODES = $mem_nodes," \
