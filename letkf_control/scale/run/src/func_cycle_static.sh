@@ -1081,9 +1081,38 @@ while ((time <= ETIME)); do
 
    done # [ d in $(seq $DOMNUM) ]
 
+   #------------------------------------------------------------------------------------------------
+   # obsmake by Y.Saw
+   #------------------------------------------------------------------------------------------------
+  conf_file=$TMP/config/obsmake_${time}.conf
+  cat $SCRP_DIR/config.nml.obsmake | sed \
+    -e "/!--PPN--/a PPN=$PPN,"  \
+    -e "/!--PRC_DOMAINS--/a PRC_DOMAINS=$SCALE_NP,"  \
+    -e "/!--OBS_IN_NAME--/a OBS_IN_NAME=\"$TMP/obsin/obsin.dat\","  \
+    -e "/!--OBS_IN_FORMAT--/a OBS_IN_FORMAT=\"${OBS_IN_FORMAT}\","  \
+    -e "/!--LETKF_TOPOGRAPHY_IN_BASENAME--/a LETKF_TOPOGRAPHY_IN_BASENAME=\"$OUTDIR/const/topo/topo\"," \
+    -e "/!--HISTORY_IN_BASENAME--/a HISTORY_IN_BASENAME=\"${HISTORY_PATH[$d]}/mdet/history\"," \
+    -e "/!--GUES_IN_BASENAME--/a GUES_IN_BASENAME=\"${HISTORY_PATH[$d]}/../anal/mdet/init_$(datetime_scale $atime))\"," \
+    -e "/!--SLOT_START--/a SLOT_START=$nslot,"  \
+    -e "/!--SLOT_END--/a SLOT_END=$nslot,"  \
+    -e "/!--SLOT_BASE--/a SLOT_BASE=$nslot,"  \
+    -e "/!--SLOT_TINTERVAL--/a SLOT_TINTERVAL=$FCSTOUT,"  \
+  > $conf_file
+
+  cat $SCRP_DIR/config.nml.scale | sed \
+    -e "/!--TIME_STARTDATE--/a TIME_STARTDATE = ${time:0:4}, ${time:4:2}, ${time:6:2}, ${time:8:2}, ${time:10:2}, ${time:12:2}," \
+    -e "/!--TIME_DURATION--/a TIME_DURATION = ${LCYCLE}.D0," \
+    -e "/!--RESTART_IN_BASENAME--/a RESTART_IN_BASENAME=\"${HISTORY_PATH[$d]}/../anal/mdet/init_$(datetime_scale $atime))\","  \
+    -e "/!--RESTART_OUT_BASENAME--/a RESTART_OUT_BASENAME=\"${HISTORY_PATH[$d]}/../anal/mdet/init\","  \
+    -e "/!--TOPOGRAPHY_IN_BASENAME--/a TOPOGRAPHY_IN_BASENAME=\"$OUTDIR/const/topo/topo\"," \
+    -e "/!--FILE_HISTORY_DEFAULT_BASENAME--/a FILE_HISTORY_DEFAULT_BASENAME=\"${HISTORY_PATH[$d]}/mdet/history\"," \
+  >> $conf_file
+
+
   #-------------------
   time=$(datetime $time $LCYCLE s)
   atime=$(datetime $time $LCYCLE s)
+
 done
 
 echo

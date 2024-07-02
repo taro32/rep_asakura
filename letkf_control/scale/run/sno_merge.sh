@@ -16,7 +16,7 @@ SINGLE_VAR=F
 tint=10800 #864000 # [second]
 tstart='2000-01-01 0:00:00'
 #tend=$tstart
-tend='2000-01-10 0:00:00'
+tend='2000-01-01 9:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 
@@ -48,7 +48,7 @@ SNO_MEMBERS=100
 #SNO_MEM_L="mean "$(seq -f %04g ${SNO_MEMBERS})
 SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
 
-SNO_MEM_L="mean"
+SNO_MEM_L="mdet"
 
 
 if [ "$ALLVAR" == "T" ] ; then
@@ -415,15 +415,15 @@ else
 fi
 
 cd ${RUNDIR}
-#pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
-pjsub --bulk --sparam "1-10" job_sno.sh 
-pjsub --bulk --sparam "11-20" job_sno.sh 
-pjsub --bulk --sparam "21-30" job_sno.sh 
-pjsub --bulk --sparam "31-40" job_sno.sh 
-pjsub --bulk --sparam "41-50" job_sno.sh 
-pjsub --bulk --sparam "51-60" job_sno.sh 
-pjsub --bulk --sparam "61-70" job_sno.sh 
-pjsub --bulk --sparam "71-72" job_sno.sh
+pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
+#pjsub --bulk --sparam "1-10" job_sno.sh 
+#pjsub --bulk --sparam "11-20" job_sno.sh 
+#pjsub --bulk --sparam "21-30" job_sno.sh 
+#pjsub --bulk --sparam "31-40" job_sno.sh 
+#pjsub --bulk --sparam "41-50" job_sno.sh 
+#pjsub --bulk --sparam "51-60" job_sno.sh 
+#pjsub --bulk --sparam "61-70" job_sno.sh 
+#pjsub --bulk --sparam "71-72" job_sno.sh
 #sleep 300
 #pjsub --bulk --sparam "81-90" job_sno.sh 
 #pjsub --bulk --sparam "91-100" job_sno.sh 
