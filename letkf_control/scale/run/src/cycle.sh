@@ -273,7 +273,7 @@ while ((time <= ETIME)); do
 
 
       fi
-      if ((s == 4)); then
+      if ((s == 5)); then
         logd=$OUTDIR/$atime/log/letkf
         if ((OBSOPE_RUN == 0)) && ((PAWR_DECODE != 1)) ; then
           logd=$OUTDIR/$atime/log/dec_pawr
@@ -282,7 +282,7 @@ while ((time <= ETIME)); do
           continue
         fi
       fi
-      if ((s == 5)); then
+      if ((s == 6)); then
         logd=$OUTDIR/$atime/log/letkf
         BGDIR=$OUTDIR/$atime
         if ((ANAL_LLIO_TMP==1)) && ((atime <= ETIME)) ;then
@@ -334,7 +334,7 @@ while ((time <= ETIME)); do
           done 
         fi
       fi
-      if (( s == 6 )); then
+      if (( s == 7 )); then
         if ((EFSO_RUN == 0));then
           continue
         fi
@@ -380,13 +380,13 @@ while ((time <= ETIME)); do
       done
 
       if [ "$PRESET" = 'FUGAKU' ] ; then
-        if (( s == 5 && HIST_LLIO_TMP == 1)) ; then
+        if (( s == 6 && HIST_LLIO_TMP == 1)) ; then
           mpiexec rm -rf ${HIST_LLIO_TMPDIR_TOP}
           mpiexec_cnt=$((mpiexec_cnt+1))
-        elif (( s == 5 && ANAL_LLIO_TMP == 1)) ; then
+        elif (( s == 6 && ANAL_LLIO_TMP == 1)) ; then
           mpiexec rm -rf ${ANAL_LLIO_TMPDIR_TOP_OLD}
           mpiexec_cnt=$((mpiexec_cnt+1))
-        elif (( s == 3 && BDY_LLIO_TMP == 1)) ; then
+        elif (( s == 4 && BDY_LLIO_TMP == 1)) ; then
           mpiexec rm -rf ${BDY_LLIO_TMPDIR_TOP}
           mpiexec_cnt=$((mpiexec_cnt+1))
         fi

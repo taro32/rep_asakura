@@ -1378,7 +1378,43 @@ setting () {
 #-------------------------------------------------------------------------------
 # define steps
 
-nsteps=6
+#nsteps=6
+#stepname[1]='Run SCALE pp'
+#stepexecdir[1]="$TMPRUN/scale_pp"
+#stepexecname[1]="scale-rm_pp_ens"
+#stepname[2]='Run SCALE init'
+#stepexecdir[2]="$TMPRUN/scale_init"
+#stepexecname[2]="scale-rm_init_ens"
+#stepname[3]='Run ensemble forecasts'
+#stepexecdir[3]="$TMPRUN/scale"
+#stepexecname[3]="scale-rm_ens"
+#if (( OBSOPE_RUN == 0 )) && (( PAWR_DECODE == 1 )) ; then
+#stepname[4]='Run PAWR decoder'
+#stepexecdir[4]="$TMPRUN/dec_pawr"
+#stepexecname[4]="dec_pawr"
+#elif (( OBSOPE_RUN == 1 )) && (( PAWR_DECODE == 1 )) ; then
+#  echo "OBSOPE=1 and PAWR_DECODE=1 is not supported. "
+#  exit 1 
+#else 
+#stepname[4]='Run observation operator'
+#stepexecdir[4]="$TMPRUN/obsope"
+#stepexecname[4]="obsope"
+#fi 
+
+#stepname[5]='Run LETKF'
+#stepexecdir[5]="$TMPRUN/letkf"
+#stepexecname[5]="letkf"
+
+#stepname[6]='Run EFSO'
+#stepexecdir[6]="$TMPRUN/efso"
+#stepexecname[6]="efso"
+
+
+#
+# YSaw 20240802
+# observation is generated in every cycles for EnKC
+#
+nsteps=7
 stepname[1]='Run SCALE pp'
 stepexecdir[1]="$TMPRUN/scale_pp"
 stepexecname[1]="scale-rm_pp_ens"
@@ -1388,26 +1424,30 @@ stepexecname[2]="scale-rm_init_ens"
 stepname[3]='Run ensemble forecasts'
 stepexecdir[3]="$TMPRUN/scale"
 stepexecname[3]="scale-rm_ens"
+stepexecdir[4]="$TMPRUN/obsope"
+stepexecname[4]="obsmake"
 if (( OBSOPE_RUN == 0 )) && (( PAWR_DECODE == 1 )) ; then
-stepname[4]='Run PAWR decoder'
-stepexecdir[4]="$TMPRUN/dec_pawr"
-stepexecname[4]="dec_pawr"
+stepname[5]='Run PAWR decoder'
+stepexecdir[5]="$TMPRUN/dec_pawr"
+stepexecname[5]="dec_pawr"
 elif (( OBSOPE_RUN == 1 )) && (( PAWR_DECODE == 1 )) ; then
   echo "OBSOPE=1 and PAWR_DECODE=1 is not supported. "
-  exit 1 
-else 
-stepname[4]='Run observation operator'
-stepexecdir[4]="$TMPRUN/obsope"
-stepexecname[4]="obsope"
-fi 
+  exit 1
+else
+stepname[5]='Run observation operator'
+stepexecdir[5]="$TMPRUN/obsope"
+stepexecname[5]="obsope"
+fi
 
-stepname[5]='Run LETKF'
-stepexecdir[5]="$TMPRUN/letkf"
-stepexecname[5]="letkf"
+stepname[6]='Run LETKF'
+stepexecdir[6]="$TMPRUN/letkf"
+stepexecname[6]="letkf"
 
-stepname[6]='Run EFSO'
-stepexecdir[6]="$TMPRUN/efso"
-stepexecname[6]="efso"
+stepname[7]='Run EFSO'
+stepexecdir[7]="$TMPRUN/efso"
+stepexecname[7]="efso"
+
+
 
 if [ PRESET == "FUGAKU" ] && (( USE_LLIO_BIN == 1 )); then
   stepexecbin[1]="$TMP/scale-rm_pp_ens"

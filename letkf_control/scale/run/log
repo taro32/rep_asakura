@@ -1,4 +1,4 @@
-[2024-07-02 11:13:39] Start cycle_run.sh 
+[2024-07-02 12:45:01] Start cycle_run.sh 
 
   DIR                  = /work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale
   DOMAIN               = 
@@ -40,7 +40,7 @@
   THREADS              = 12
   SCALE_NP[1]          = 4
   STIME                = 20000101000000
-  ETIME                = 20000102000000
+  ETIME                = 20000101030000
   ISTEP                = 1
   FSTEP                = 5
   CONF_MODE            = static
@@ -54,37 +54,23 @@
   LOG_OPT              = 2
   LOG_TYPE             = 2
 
-[2024-07-02 11:13:39] Create and clean the temporary directory
-[2024-07-02 11:13:40] Determine the distibution schemes
-[2024-07-02 11:13:40] Determine the staging list
+[2024-07-02 12:45:01] Create and clean the temporary directory
+[2024-07-02 12:45:01] Determine the distibution schemes
+[2024-07-02 12:45:02] Determine the staging list
 
 Generate configration files...
   scale-rm_init_ens_20000101000000.conf
   scale-rm_ens_20000101000000.conf
   scale-rm_init_ens_20000101030000.conf
   scale-rm_ens_20000101030000.conf
-  scale-rm_init_ens_20000101060000.conf
-  scale-rm_ens_20000101060000.conf
-  scale-rm_init_ens_20000101090000.conf
-  scale-rm_ens_20000101090000.conf
-  scale-rm_init_ens_20000101120000.conf
-  scale-rm_ens_20000101120000.conf
-  scale-rm_init_ens_20000101150000.conf
-  scale-rm_ens_20000101150000.conf
-  scale-rm_init_ens_20000101180000.conf
-  scale-rm_ens_20000101180000.conf
-  scale-rm_init_ens_20000101210000.conf
-  scale-rm_ens_20000101210000.conf
-  scale-rm_init_ens_20000102000000.conf
-  scale-rm_ens_20000102000000.conf
 
 backup
 
-[2024-07-02 11:13:48] Create a job script '/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/tmp/tropicalcyclone/cycle_job.sh'
-[2024-07-02 11:13:48] Run cycle job on PJM
+[2024-07-02 12:45:05] Create a job script '/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/tmp/tropicalcyclone/cycle_job.sh'
+[2024-07-02 12:45:05] Run cycle job on PJM
 
-[INFO] PJM 0000 pjsub Job 4593113 submitted.
+[INFO] PJM 0000 pjsub Job 4593417 submitted.
 
-[2024-07-02 12:00:46] Finalization
+[2024-07-02 12:54:52] Finalization
 
-[2024-07-02 12:00:47] Finish cycle_run.sh 
+[2024-07-02 12:54:52] Finish cycle_run.sh 
