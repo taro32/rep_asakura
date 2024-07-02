@@ -1,4 +1,4 @@
-[2024-07-02 16:13:15] Start cycle_run.sh 
+[2024-07-02 16:33:20] Start cycle_run.sh 
 
   DIR                  = /work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale
   DOMAIN               = 
@@ -54,9 +54,9 @@
   LOG_OPT              = 2
   LOG_TYPE             = 2
 
-[2024-07-02 16:13:15] Create and clean the temporary directory
-[2024-07-02 16:13:15] Determine the distibution schemes
-[2024-07-02 16:13:16] Determine the staging list
+[2024-07-02 16:33:20] Create and clean the temporary directory
+[2024-07-02 16:33:21] Determine the distibution schemes
+[2024-07-02 16:33:21] Determine the staging list
 
 Generate configration files...
   scale-rm_init_ens_20000101000000.conf
@@ -66,11 +66,11 @@ Generate configration files...
 
 backup
 
-[2024-07-02 16:13:20] Create a job script '/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/tmp/tropicalcyclone/cycle_job.sh'
-[2024-07-02 16:13:20] Run cycle job on PJM
+[2024-07-02 16:33:24] Create a job script '/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/tmp/tropicalcyclone/cycle_job.sh'
+[2024-07-02 16:33:24] Run cycle job on PJM
 
-[INFO] PJM 0000 pjsub Job 4593893 submitted.
+[INFO] PJM 0000 pjsub Job 4593957 submitted.
 
-[2024-07-02 16:18:50] Finalization
+[2024-07-02 16:40:47] Finalization
 
-[2024-07-02 16:18:50] Finish cycle_run.sh 
+[2024-07-02 16:40:47] Finish cycle_run.sh 
