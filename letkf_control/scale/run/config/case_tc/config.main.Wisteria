@@ -41,7 +41,7 @@ OBS="$OUTDIR/obs"
 DET_RUN=1               # 0: Disable the deterministic run
                         # 1: Enable  the deterministic run
 
-DET_RUN_UPDATE=1        # 0: no update of deterministic run in LETKF
+DET_RUN_UPDATE=0        # 0: no update of deterministic run in LETKF
 			# 1: Updating deterministic run in LETKF
 			# 2: Updating deterministic run only in LETKC
 

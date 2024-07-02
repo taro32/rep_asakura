@@ -453,13 +453,17 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 
         ! analysis update of deterministic run
         if (DET_RUN) then                                                              !GYL
-          anal3d(ij,ilev,mmdet,n) = 0.0d0                                              !GYL
-          DO k=1,MEMBER                                                                !GYL
-            anal3d(ij,ilev,mmdet,n) = anal3d(ij,ilev,mmdet,n) &                        !GYL
-                                    + gues3d(ij,ilev,k,n) * transmd(k,n2nc)            !GYL
-          END DO                                                                       !GYL
-          anal3d(ij,ilev,mmdet,n) = gues3d(ij,ilev,mmdet,n) &                          !GYL
-                                  + anal3d(ij,ilev,mmdet,n) * beta                     !GYL
+          if (DET_RUN_UPDATE) then                                                     !YSaw
+             anal3d(ij,ilev,mmdet,n) = 0.0d0                                              !GYL
+             DO k=1,MEMBER                                                                !GYL
+               anal3d(ij,ilev,mmdet,n) = anal3d(ij,ilev,mmdet,n) &                        !GYL
+                                       + gues3d(ij,ilev,k,n) * transmd(k,n2nc)            !GYL
+             END DO                                                                       !GYL
+             anal3d(ij,ilev,mmdet,n) = gues3d(ij,ilev,mmdet,n) &                          !GYL
+                                     + anal3d(ij,ilev,mmdet,n) * beta                     !GYL
+          else ! no update
+             anal3d(ij,ilev,mmdet,n) = gues3d(ij,ilev,mmdet,n)
+          end if
         end if                                                                         !GYL
 
         ! limit q spread
@@ -587,13 +591,17 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 
           ! analysis update of deterministic run
           if (DET_RUN) then                                                          !GYL
-            anal2d(ij,mmdet,n) = 0.0d0                                               !GYL
-            DO k=1,MEMBER                                                            !GYL
-              anal2d(ij,mmdet,n) = anal2d(ij,mmdet,n) &                              !GYL
-                                 + gues2d(ij,k,n) * transmd(k,n2nc)                  !GYL
-            END DO                                                                   !GYL
-            anal2d(ij,mmdet,n) = gues2d(ij,mmdet,n) &                                !GYL
-                               + anal2d(ij,mmdet,n) * beta                           !GYL
+            if (DET_RUN_UPDATE) then                                                 !YSaw
+              anal2d(ij,mmdet,n) = 0.0d0                                               !GYL
+              DO k=1,MEMBER                                                            !GYL
+                anal2d(ij,mmdet,n) = anal2d(ij,mmdet,n) &                              !GYL
+                                   + gues2d(ij,k,n) * transmd(k,n2nc)                  !GYL
+              END DO                                                                   !GYL
+              anal2d(ij,mmdet,n) = gues2d(ij,mmdet,n) &                                !GYL
+                                 + anal2d(ij,mmdet,n) * beta                           !GYL
+            else ! no update
+              anal2d(ij,mmdet,n) = gues2d(ij,mmdet,n)                                !YSaw
+            end if
           end if                                                                     !GYL
 
         END DO ! [ n=1,nv2d ]
