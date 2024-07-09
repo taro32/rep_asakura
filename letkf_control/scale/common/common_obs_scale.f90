@@ -1220,8 +1220,8 @@ SUBROUTINE phys2ijk(p_full,elem,ri,rj,rlev,rk,qc,typ)
     !
     IF(rk < plev(nlev+KHALO)) THEN
       call itpl_2d(p_full(nlev+KHALO,:,:),ri,rj,ptmp)
-      if (LOG_LEVEL >= 2) then
-        write(6,'(A,F12.1,A,F12.1,A,I5)') '[Warning] observation is too high: ptop=', ptmp, ', lev=', rlev, ', elem=', elem
+      if (LOG_LEVEL >= 2) then ! Cancel by YSaw too noisy
+        !write(6,'(A,F12.1,A,F12.1,A,I5)') '[Warning] observation is too high: ptop=', ptmp, ', lev=', rlev, ', elem=', elem
       end if
       rk = undef
       qc = iqc_out_vhi
@@ -1230,8 +1230,8 @@ SUBROUTINE phys2ijk(p_full,elem,ri,rj,rlev,rk,qc,typ)
     IF(rk > plev(ks)) THEN
       call itpl_2d(p_full(ks,:,:),ri,rj,ptmp)
 !print *, ks, rk, plev(ks)
-      if (LOG_LEVEL >= 2) then
-        write(6,'(A,F12.1,A,F12.1,A,I5)') '[Warning] observation is too low: pbottom=', ptmp, ', lev=', rlev, ', elem=', elem
+      if (LOG_LEVEL >= 2) then ! Cancel by YSaw too noisy
+        !write(6,'(A,F12.1,A,F12.1,A,I5)') '[Warning] observation is too low: pbottom=', ptmp, ', lev=', rlev, ', elem=', elem
       end if
       rk = undef
       qc = iqc_out_vlo
@@ -1347,8 +1347,8 @@ SUBROUTINE phys2ijkz(z_full,ri,rj,rlev,rk,qc)
   !
   IF(rlev > zlev(nlev+KHALO)) THEN
     call itpl_2d(z_full(nlev+KHALO,:,:),ri,rj,ztmp)
-    if (LOG_LEVEL >= 2) then
-      write(6,'(A,F8.1,A,F8.1)') '[Warning] observation is too high: ztop=', ztmp, ', lev=', rlev
+    if (LOG_LEVEL >= 2) then ! Cancel by YSaw too noisy
+      !write(6,'(A,F8.1,A,F8.1)') '[Warning] observation is too high: ztop=', ztmp, ', lev=', rlev
     end if
     rk = undef
     qc = iqc_out_vhi
@@ -1356,8 +1356,8 @@ SUBROUTINE phys2ijkz(z_full,ri,rj,rlev,rk,qc)
   END IF
   IF(rlev < zlev(ks)) THEN
     call itpl_2d(z_full(ks,:,:),ri,rj,ztmp)
-    if (LOG_LEVEL >= 2) then
-      write(6,'(A,F8.1,A,F8.1)') '[Warning] observation is too low: zbottom=', ztmp, ', lev=', rlev
+    if (LOG_LEVEL >= 2) then ! Cancel by YSaw too noisy
+      !write(6,'(A,F8.1,A,F8.1)') '[Warning] observation is too low: zbottom=', ztmp, ', lev=', rlev
     end if
     rk = undef
     qc = iqc_out_vlo

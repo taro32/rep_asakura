@@ -16,7 +16,7 @@ SINGLE_VAR=F
 tint=10800 #864000 # [second]
 tstart='2000-01-01 0:00:00'
 #tend=$tstart
-tend='2000-01-01 9:00:00'
+tend='2000-01-09 21:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 
@@ -48,7 +48,7 @@ SNO_MEMBERS=100
 #SNO_MEM_L="mean "$(seq -f %04g ${SNO_MEMBERS})
 SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
 
-SNO_MEM_L="mdet"
+#SNO_MEM_L="mean"
 
 
 if [ "$ALLVAR" == "T" ] ; then
@@ -247,7 +247,7 @@ cat << EOF >> $jobsh
 #
 #PJM -g "jh220020o" 
 #PJM -L "rscgrp=regular-o"
-#PJM -L "node=$NNODES"
+#PJM -L "node=1"
 #PJM -L "elapse=00:30:00"
 #PJM --mpi "max-proc-per-node=${PPN}"
 #PJM --omp "thread=${THREADS}"
@@ -415,8 +415,16 @@ else
 fi
 
 cd ${RUNDIR}
-pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
-#pjsub --bulk --sparam "1-10" job_sno.sh 
+
+count=1
+while [ $count -le ${cnt} ]; do
+	countend=$((count + 9))
+	pjsub --bulk --sparam "${count}-${countend}" job_sno.sh
+	count=$((countend + 1))
+	sleep 5
+done
+#pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
+#pjsub --bulk --sparam "1-11" job_sno.sh 
 #pjsub --bulk --sparam "11-20" job_sno.sh 
 #pjsub --bulk --sparam "21-30" job_sno.sh 
 #pjsub --bulk --sparam "31-40" job_sno.sh 
