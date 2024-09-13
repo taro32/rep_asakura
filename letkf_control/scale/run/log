@@ -216,3 +216,6 @@ cp: target '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20240904/result
 
 [INFO] PJM 0000 pjsub Job 4796983 submitted.
 
+[2024-09-04 18:54:44] Finalization
+
+[2024-09-04 18:54:51] Finish cycle_run.sh 
