@@ -1,221 +1,154 @@
-[2024-09-04 14:22:34] Start cycle_run.sh 
-
-  DIR                  = /work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale
-  DOMAIN               = 
-  INDIR[1]             = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20240904/result/case_tc
-  OUTDIR[1]            = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20240904/result/case_tc
-  DATA_TOPO[1]         = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20240904/result/case_tc
-  DATA_TOPO_BDY_SCALE  = 
-  DATA_LANDUSE[1]      = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20240904/result/case_tc
-  DATA_BDY_SCALE       = 
-  DATA_BDY_SCALE_PREP  = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20240904/result/case_tc
-  DATA_BDY_WRF         = 
-  DATA_BDY_NICAM       = 
-  OBS                  = /work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20240904/result/case_tc/obs
-  OBSNCEP              = 
-  DET_RUN              = 1
-  TOPO_FORMAT          = none
-  LANDUSE_FORMAT       = none
-  LANDUSE_UPDATE       = 0
-  BDY_FORMAT           = 5
-  BDY_ENS              = 0
-  BDYINT               = 300
-  BDYCYCLE_INT         = 300
-  PARENT_REF_TIME      = 
-  ENABLE_PARAM_USER    = 0
-  OCEAN_INPUT          = 1
-  OCEAN_FORMAT         = 0
-  LAND_INPUT           = 0
-  LAND_FORMAT          = 99
-  OBSNUM               = 1
-  WINDOW_S             = 0
-  WINDOW_E             = 10800
-  LCYCLE               = 10800
-  LTIMESLOT            = 10800
-  MEMBER               = 100
-  NNODES               = 102
-  NNODES_APPAR         = 102
-  PPN                  = 4
-  PPN_APPAR            = 4
-  THREADS              = 12
-  SCALE_NP[1]          = 4
-  STIME                = 20000101000000
-  ETIME                = 20000110000000
-  ISTEP                = 1
-  FSTEP                = 5
-  CONF_MODE            = static
-  FCSTOUT              = 
-  MAKEINIT             = 0
-  OUT_OPT              = 1
-  TOPOOUT_OPT          = 2
-  LANDUSEOUT_OPT       = 2
-  BDYOUT_OPT           = 3
-  OBSOUT_OPT           = 3
-  LOG_OPT              = 2
-  LOG_TYPE             = 2
-
-[2024-09-04 14:22:34] Create and clean the temporary directory
-[2024-09-04 14:22:40] Determine the distibution schemes
-[INFO] distribute_da_cycle: Save 'distr' file cache.
-[INFO] distribute_da_cycle: Save 'proc', 'node' files.
-[2024-09-04 14:22:41] Determine the staging list
-
-Generate configration files...
-  scale-rm_init_ens_20000101000000.conf
-  scale-rm_ens_20000101000000.conf
-  scale-rm_init_ens_20000101030000.conf
-  scale-rm_ens_20000101030000.conf
-  scale-rm_init_ens_20000101060000.conf
-  scale-rm_ens_20000101060000.conf
-  scale-rm_init_ens_20000101090000.conf
-  scale-rm_ens_20000101090000.conf
-  scale-rm_init_ens_20000101120000.conf
-  scale-rm_ens_20000101120000.conf
-  scale-rm_init_ens_20000101150000.conf
-  scale-rm_ens_20000101150000.conf
-  scale-rm_init_ens_20000101180000.conf
-  scale-rm_ens_20000101180000.conf
-  scale-rm_init_ens_20000101210000.conf
-  scale-rm_ens_20000101210000.conf
-  scale-rm_init_ens_20000102000000.conf
-  scale-rm_ens_20000102000000.conf
-  scale-rm_init_ens_20000102030000.conf
-  scale-rm_ens_20000102030000.conf
-  scale-rm_init_ens_20000102060000.conf
-  scale-rm_ens_20000102060000.conf
-  scale-rm_init_ens_20000102090000.conf
-  scale-rm_ens_20000102090000.conf
-  scale-rm_init_ens_20000102120000.conf
-  scale-rm_ens_20000102120000.conf
-  scale-rm_init_ens_20000102150000.conf
-  scale-rm_ens_20000102150000.conf
-  scale-rm_init_ens_20000102180000.conf
-  scale-rm_ens_20000102180000.conf
-  scale-rm_init_ens_20000102210000.conf
-  scale-rm_ens_20000102210000.conf
-  scale-rm_init_ens_20000103000000.conf
-  scale-rm_ens_20000103000000.conf
-  scale-rm_init_ens_20000103030000.conf
-  scale-rm_ens_20000103030000.conf
-  scale-rm_init_ens_20000103060000.conf
-  scale-rm_ens_20000103060000.conf
-  scale-rm_init_ens_20000103090000.conf
-  scale-rm_ens_20000103090000.conf
-  scale-rm_init_ens_20000103120000.conf
-  scale-rm_ens_20000103120000.conf
-  scale-rm_init_ens_20000103150000.conf
-  scale-rm_ens_20000103150000.conf
-  scale-rm_init_ens_20000103180000.conf
-  scale-rm_ens_20000103180000.conf
-  scale-rm_init_ens_20000103210000.conf
-  scale-rm_ens_20000103210000.conf
-  scale-rm_init_ens_20000104000000.conf
-  scale-rm_ens_20000104000000.conf
-  scale-rm_init_ens_20000104030000.conf
-  scale-rm_ens_20000104030000.conf
-  scale-rm_init_ens_20000104060000.conf
-  scale-rm_ens_20000104060000.conf
-  scale-rm_init_ens_20000104090000.conf
-  scale-rm_ens_20000104090000.conf
-  scale-rm_init_ens_20000104120000.conf
-  scale-rm_ens_20000104120000.conf
-  scale-rm_init_ens_20000104150000.conf
-  scale-rm_ens_20000104150000.conf
-  scale-rm_init_ens_20000104180000.conf
-  scale-rm_ens_20000104180000.conf
-  scale-rm_init_ens_20000104210000.conf
-  scale-rm_ens_20000104210000.conf
-  scale-rm_init_ens_20000105000000.conf
-  scale-rm_ens_20000105000000.conf
-  scale-rm_init_ens_20000105030000.conf
-  scale-rm_ens_20000105030000.conf
-  scale-rm_init_ens_20000105060000.conf
-  scale-rm_ens_20000105060000.conf
-  scale-rm_init_ens_20000105090000.conf
-  scale-rm_ens_20000105090000.conf
-  scale-rm_init_ens_20000105120000.conf
-  scale-rm_ens_20000105120000.conf
-  scale-rm_init_ens_20000105150000.conf
-  scale-rm_ens_20000105150000.conf
-  scale-rm_init_ens_20000105180000.conf
-  scale-rm_ens_20000105180000.conf
-  scale-rm_init_ens_20000105210000.conf
-  scale-rm_ens_20000105210000.conf
-  scale-rm_init_ens_20000106000000.conf
-  scale-rm_ens_20000106000000.conf
-  scale-rm_init_ens_20000106030000.conf
-  scale-rm_ens_20000106030000.conf
-  scale-rm_init_ens_20000106060000.conf
-  scale-rm_ens_20000106060000.conf
-  scale-rm_init_ens_20000106090000.conf
-  scale-rm_ens_20000106090000.conf
-  scale-rm_init_ens_20000106120000.conf
-  scale-rm_ens_20000106120000.conf
-  scale-rm_init_ens_20000106150000.conf
-  scale-rm_ens_20000106150000.conf
-  scale-rm_init_ens_20000106180000.conf
-  scale-rm_ens_20000106180000.conf
-  scale-rm_init_ens_20000106210000.conf
-  scale-rm_ens_20000106210000.conf
-  scale-rm_init_ens_20000107000000.conf
-  scale-rm_ens_20000107000000.conf
-  scale-rm_init_ens_20000107030000.conf
-  scale-rm_ens_20000107030000.conf
-  scale-rm_init_ens_20000107060000.conf
-  scale-rm_ens_20000107060000.conf
-  scale-rm_init_ens_20000107090000.conf
-  scale-rm_ens_20000107090000.conf
-  scale-rm_init_ens_20000107120000.conf
-  scale-rm_ens_20000107120000.conf
-  scale-rm_init_ens_20000107150000.conf
-  scale-rm_ens_20000107150000.conf
-  scale-rm_init_ens_20000107180000.conf
-  scale-rm_ens_20000107180000.conf
-  scale-rm_init_ens_20000107210000.conf
-  scale-rm_ens_20000107210000.conf
-  scale-rm_init_ens_20000108000000.conf
-  scale-rm_ens_20000108000000.conf
-  scale-rm_init_ens_20000108030000.conf
-  scale-rm_ens_20000108030000.conf
-  scale-rm_init_ens_20000108060000.conf
-  scale-rm_ens_20000108060000.conf
-  scale-rm_init_ens_20000108090000.conf
-  scale-rm_ens_20000108090000.conf
-  scale-rm_init_ens_20000108120000.conf
-  scale-rm_ens_20000108120000.conf
-  scale-rm_init_ens_20000108150000.conf
-  scale-rm_ens_20000108150000.conf
-  scale-rm_init_ens_20000108180000.conf
-  scale-rm_ens_20000108180000.conf
-  scale-rm_init_ens_20000108210000.conf
-  scale-rm_ens_20000108210000.conf
-  scale-rm_init_ens_20000109000000.conf
-  scale-rm_ens_20000109000000.conf
-  scale-rm_init_ens_20000109030000.conf
-  scale-rm_ens_20000109030000.conf
-  scale-rm_init_ens_20000109060000.conf
-  scale-rm_ens_20000109060000.conf
-  scale-rm_init_ens_20000109090000.conf
-  scale-rm_ens_20000109090000.conf
-  scale-rm_init_ens_20000109120000.conf
-  scale-rm_ens_20000109120000.conf
-  scale-rm_init_ens_20000109150000.conf
-  scale-rm_ens_20000109150000.conf
-  scale-rm_init_ens_20000109180000.conf
-  scale-rm_ens_20000109180000.conf
-  scale-rm_init_ens_20000109210000.conf
-  scale-rm_ens_20000109210000.conf
-  scale-rm_init_ens_20000110000000.conf
-  scale-rm_ens_20000110000000.conf
-
-backup
-cp: target '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20240904/result/case_tc/config/' is not a directory
-
-[2024-09-04 14:23:33] Create a job script '/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/tmp/tropicalcyclone/cycle_job.sh'
-[2024-09-04 14:23:33] Run cycle job on PJM
-
-[INFO] PJM 0000 pjsub Job 4796983 submitted.
-
-[2024-09-04 18:54:44] Finalization
-
-[2024-09-04 18:54:51] Finish cycle_run.sh 
+20000101000000
+sprd
+20000101030000
+sprd
+20000101060000
+sprd
+20000101090000
+sprd
+20000101120000
+sprd
+20000101150000
+sprd
+20000101180000
+sprd
+20000101210000
+sprd
+20000102000000
+sprd
+20000102030000
+sprd
+20000102060000
+sprd
+20000102090000
+sprd
+20000102120000
+sprd
+20000102150000
+sprd
+20000102180000
+sprd
+20000102210000
+sprd
+20000103000000
+sprd
+20000103030000
+sprd
+20000103060000
+sprd
+20000103090000
+sprd
+20000103120000
+sprd
+20000103150000
+sprd
+20000103180000
+sprd
+20000103210000
+sprd
+20000104000000
+sprd
+20000104030000
+sprd
+20000104060000
+sprd
+20000104090000
+sprd
+20000104120000
+sprd
+20000104150000
+sprd
+20000104180000
+sprd
+20000104210000
+sprd
+20000105000000
+sprd
+20000105030000
+sprd
+20000105060000
+sprd
+20000105090000
+sprd
+20000105120000
+sprd
+20000105150000
+sprd
+20000105180000
+sprd
+20000105210000
+sprd
+20000106000000
+sprd
+20000106030000
+sprd
+20000106060000
+sprd
+20000106090000
+sprd
+20000106120000
+sprd
+20000106150000
+sprd
+20000106180000
+sprd
+20000106210000
+sprd
+20000107000000
+sprd
+20000107030000
+sprd
+20000107060000
+sprd
+20000107090000
+sprd
+20000107120000
+sprd
+20000107150000
+sprd
+20000107180000
+sprd
+20000107210000
+sprd
+20000108000000
+sprd
+20000108030000
+sprd
+20000108060000
+sprd
+20000108090000
+sprd
+20000108120000
+sprd
+20000108150000
+sprd
+20000108180000
+sprd
+20000108210000
+sprd
+20000109000000
+sprd
+20000109030000
+sprd
+20000109060000
+sprd
+20000109090000
+sprd
+20000109120000
+sprd
+20000109150000
+sprd
+20000109180000
+sprd
+20000109210000
+sprd
+Total number of nodes: 72
+[INFO] PJM 0000 pjsub Job 4990873 submitted.
+[INFO] PJM 0000 pjsub Job 4990874 submitted.
+[INFO] PJM 0000 pjsub Job 4990876 submitted.
+[INFO] PJM 0000 pjsub Job 4990880 submitted.
+[INFO] PJM 0000 pjsub Job 4990889 submitted.
+[INFO] PJM 0000 pjsub Job 4990890 submitted.
+[INFO] PJM 0000 pjsub Job 4990891 submitted.
+[INFO] PJM 0000 pjsub Job 4990892 submitted.
+[ERR.] PJM 0073 pjsub Option value is out of range: --sparam (subjob number).

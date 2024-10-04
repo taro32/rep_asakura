@@ -24,9 +24,9 @@ RUNDIR="${TMP}_sno"
 SCALEDIR="$(cd "$(pwd)/../../.." && pwd)"  
 
 #TYPE=fcst
-#TYPE=anal
+TYPE=anal
 #TYPE=gues
-TYPE=hist
+#TYPE=hist
 
 ## Which domain do you want to convert?
 #DOM=2 
@@ -46,9 +46,9 @@ NP_OFILE=$((${NP_OFILE_X} * ${NP_OFILE_Y})) # Output file (process number) for e
 # Specify members that will be processed
 SNO_MEMBERS=100
 #SNO_MEM_L="mean "$(seq -f %04g ${SNO_MEMBERS})
-SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
+#SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
 
-#SNO_MEM_L="mean"
+SNO_MEM_L="sprd"
 
 
 if [ "$ALLVAR" == "T" ] ; then
@@ -423,7 +423,7 @@ while [ $count -le ${cnt} ]; do
 	count=$((countend + 1))
 	sleep 5
 done
-#pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
+pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
 #pjsub --bulk --sparam "1-11" job_sno.sh 
 #pjsub --bulk --sparam "11-20" job_sno.sh 
 #pjsub --bulk --sparam "21-30" job_sno.sh 
