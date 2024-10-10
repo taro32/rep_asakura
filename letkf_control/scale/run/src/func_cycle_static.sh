@@ -1094,7 +1094,7 @@ while ((time <= ETIME)); do
         OBS_IN_NAME_LIST="${OBS_IN_NAME_LIST}'${TMPROOT_OBS}/obs/controltarget', "
         OBS_IN_NAME_LIST_EFSO="${OBS_IN_NAME_LIST_EFSO}'${TMPROOT_OBS}/obs/${OBSNAME[$iobs]}_${time_efso}.${OBSFOOT[$iobs]}', "
       else
-        OBS_IN_NAME_LIST="${OBS_IN_NAME_LIST}'${OBS}/${OBSNAME[$iobs]}_${atime}.${OBSFOOT[$iobs]}', "
+        OBS_IN_NAME_LIST="${OBS_IN_NAME_LIST}'${OBS}/controltarget', "
         OBS_IN_NAME_LIST_EFSO="${OBS_IN_NAME_LIST_EFSO}'${OBS}/${OBSNAME[$iobs]}_${time_efso}.${OBSFOOT[$iobs]}', "
       fi
     fi
