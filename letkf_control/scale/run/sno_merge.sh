@@ -24,9 +24,9 @@ RUNDIR="${TMP}_sno"
 SCALEDIR="$(cd "$(pwd)/../../.." && pwd)"  
 
 #TYPE=fcst
-TYPE=anal
+#TYPE=anal
 #TYPE=gues
-#TYPE=hist
+TYPE=hist
 
 ## Which domain do you want to convert?
 #DOM=2 
@@ -48,7 +48,7 @@ SNO_MEMBERS=100
 #SNO_MEM_L="mean "$(seq -f %04g ${SNO_MEMBERS})
 #SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
 
-SNO_MEM_L="sprd"
+SNO_MEM_L="mdet"
 
 
 if [ "$ALLVAR" == "T" ] ; then

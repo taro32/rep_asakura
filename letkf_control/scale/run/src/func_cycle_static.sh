@@ -1083,6 +1083,241 @@ while ((time <= ETIME)); do
    done # [ d in $(seq $DOMNUM) ]
 
    #------------------------------------------------------------------------------------------------
+   # letkc by Y.Saw 20241010
+   #------------------------------------------------------------------------------------------------
+  OBS_IN_NAME_LIST=
+  OBS_IN_NAME_LIST_EFSO=
+  for iobs in $(seq $OBSNUM); do
+    if [ "${OBSNAME[$iobs]}" != '' ]; then
+      OBSFOOT[$iobs]=${OBSFOOT[$iobs]:-dat}
+      if ((DISK_MODE_OBS >= 1)); then
+        OBS_IN_NAME_LIST="${OBS_IN_NAME_LIST}'${TMPROOT_OBS}/obs/controltarget', "
+        OBS_IN_NAME_LIST_EFSO="${OBS_IN_NAME_LIST_EFSO}'${TMPROOT_OBS}/obs/${OBSNAME[$iobs]}_${time_efso}.${OBSFOOT[$iobs]}', "
+      else
+        OBS_IN_NAME_LIST="${OBS_IN_NAME_LIST}'${OBS}/${OBSNAME[$iobs]}_${atime}.${OBSFOOT[$iobs]}', "
+        OBS_IN_NAME_LIST_EFSO="${OBS_IN_NAME_LIST_EFSO}'${OBS}/${OBSNAME[$iobs]}_${time_efso}.${OBSFOOT[$iobs]}', "
+      fi
+    fi
+  done
+
+  OBSDA_RUN_LIST=
+  for iobs in $(seq $OBSNUM); do
+    if [ -n "${OBSOPE_SEPARATE[$iobs]}" ] && ((${OBSOPE_SEPARATE[$iobs]} == 1)); then
+      OBSDA_RUN_LIST="${OBSDA_RUN_LIST}.false., "
+    else
+      OBSDA_RUN_LIST="${OBSDA_RUN_LIST}.true., "
+    fi
+  done
+
+  DET_RUN_TF='.false.'
+  if ((DET_RUN == 1)); then
+    DET_RUN_TF='.true.'
+  fi
+
+# YSaw 20241010
+
+    DET_RUN_UPDATE_TF='.false.'
+  if ((DET_RUN_UPDATE == 2 && DET_RUN == 1)); then
+    DET_RUN_UPDATE_TF='.true.'
+  fi
+
+  EFSO_RUN_TF='.false.'
+  if (( EFSO_RUN == 1 )); then
+    EFSO_RUN_TF='.true.'
+  fi
+
+  OBSDA_OUT='.false.'
+  if ((OBSOUT_OPT <= 2)); then
+    OBSDA_OUT='.true.'
+  fi
+  SPRD_OUT_TF='.true.'
+  if ((SPRD_OUT == 0)); then
+    SPRD_OUT_TF='.false.'
+  fi
+  RTPS_INFL_OUT_TF='.false.'
+  if ((RTPS_INFL_OUT == 1)); then
+    RTPS_INFL_OUT_TF='.true.'
+  fi
+  NOBS_OUT_TF='.false.'
+  if ((NOBS_OUT == 1)); then
+    NOBS_OUT_TF='.true.'
+  fi
+  INFL_MUL_ADAPTIVE='.false.'
+  if ((ADAPTINFL == 1)); then
+    INFL_MUL_ADAPTIVE='.true.'
+  fi
+  INFL_ADD=0.0
+  if ((ADDINFL == 1)); then
+    INFL_ADD=$INFL_ADD_FACT
+  fi
+
+  for d in $(seq $DOMNUM); do
+    dfmt=$(printf $DOMAIN_FMT $d)
+
+    if ((ISTEP > 3)) ;then
+      for m in $mtot ; do
+        if [ "${name_m[$m]}" == 'mgue' ] ; then
+          continue
+        fi
+        cp ${OUTDIR[$d]}/$time/gues/${name_m[$m]}/* ${OUTDIR[$d]}/$time/anal/${name_m[$m]}
+      done
+      cp ${OUTDIR[$d]}/$time/gues/mean/* ${OUTDIR[$d]}/$time/gues/sprd
+      cp ${OUTDIR[$d]}/$time/gues/mean/* ${OUTDIR[$d]}/$time/anal/sprd
+    fi
+
+    if ((d == 1)); then
+      conf_file_src=$TMP/config.nml.letkc
+#      conf_file_src2=$SCRP_DIR/config.nml.scale
+      conf_file="$TMP/config/letkc_${time}.conf"
+      conf_file_efso="$TMP/config/efso_${atime}.conf"
+    else
+      conf_file_src=$TMP/config.nml.letkc.d$d
+      #conf_file_src2=$SCRP_DIR/config.nml.scale.d$d
+      conf_file="$TMP/config/letkc.d${dfmt}_${time}.conf"
+      conf_file_efso="$TMP/config/efso.d${dfmt}_${atime}.conf"
+    fi
+
+    conf_file_src2="$TMP/${name_m[$mmean]}/run.d${dfmt}_${time}.conf"
+
+    rm -rf ${OUTDIR[$d]}/$time/log/letkc
+    rm -rf ${OUTDIR[$d]}/$time/log/efso
+    mkdir -p ${OUTDIR[$d]}/$time/log/letkc
+    mkdir -p ${OUTDIR[$d]}/$time/log/efso
+
+    OBSDEP_OUT_TF=".false."
+    OBSDEP_OUT_NC_TF=".false."
+    OBSANAL_OUT_TF=".false."
+    if (( OBSOUT_OPT < 4 )) ; then
+      OBSDEP_OUT_TF=".true."
+      OBSDEP_OUT_BASENAME="${OUTDIR[$d]}/obsdep/obsdepcont_${time}"
+    fi
+    OBSDEP_IN_BASENAME="${OUTDIR[$d]}/obsdep/obs/obsdep_${time}" # EFSO
+    DEPARTURE_STAT_OUT_BASENAME="${OUTDIR[$d]}/score/scorecont_${time}"
+    OBSNUM_OUT_NC_BASENAME="${OUTDIR[$d]}/score/obsnumcont_${time}"
+    OBSANAL_IN_BASENAME="${OUTDIR[$d]}/${time}/obs"
+    OBSANAL_OUT_BASENAME="${OUTDIR[$d]}/${time}/obs"
+    if ((EFSO_RUN==1));then
+      OBSDEP_OUT_NC_TF=".true."
+      OBSANAL_OUT_TF=".true."
+    fi
+    if ((DISK_MODE >= 1)) ;then
+#      GUES_IN_BASENAME="${RESTART_OUT_PATH[$d]}/<member>/gues_$(datetime_scale $atime)"
+      GUES_IN_BASENAME="${RESTART_OUT_PATH[$d]}/<member>/anal_$(datetime_scale $atime)"
+      GUES_MEAN_INOUT_BASENAME="${RESTART_OUT_PATH[$d]}/mean/gues_$(datetime_scale $atime)"
+      GUES_SPRD_OUT_BASENAME="${RESTART_OUT_PATH[$d]}/sprd/gues_$(datetime_scale $atime)"
+      ANAL_OUT_BASENAME="${RESTART_OUT_PATH[$d]}/<member>/anal_$(datetime_scale $atime)"
+      EFSO_ANAL_IN_BASENAME="${RESTART_OUT_PATH[$d]}/mean/anal_$(datetime_scale $atime)"
+      RESTART_IN_BASENAME_SCALE="${RESTART_OUT_PATH[$d]}/<member>/gues"
+#      EFSO_FCST_FROM_GUES_BASENAME="${HISTORY_EFSO_PATH}/mgue/init_$(datetime_scale $atime)"
+#      EFSO_FCST_FROM_ANAL_BASENAME="${HISTORY_EFSO_PATH}/mean/init_$(datetime_scale $atime)"
+    else
+#      GUES_IN_BASENAME="${RESTART_OUT_PATH[$d]}/../gues/<member>/init_$(datetime_scale $atime)"
+      GUES_IN_BASENAME="${RESTART_OUT_PATH[$d]}/../anal/<member>/init_$(datetime_scale $time)"
+      GUES_MEAN_INOUT_BASENAME="${RESTART_OUT_PATH[$d]}/../gues/mean/init_$(datetime_scale $time)"
+      GUES_SPRD_OUT_BASENAME="${RESTART_OUT_PATH[$d]}/../gues/sprd/init_$(datetime_scale $time)"
+      ANAL_OUT_BASENAME="${RESTART_OUT_PATH[$d]}/<member>/init_$(datetime_scale $time)"
+      EFSO_ANAL_IN_BASENAME="${RESTART_OUT_PATH[$d]}/mean/init_$(datetime_scale $time)"
+      EFSO_FCST_FROM_GUES_BASENAME="${HISTORY_EFSO_PATH}/mgue/init_$(datetime_scale $time)"
+      EFSO_FCST_FROM_ANAL_BASENAME="${HISTORY_EFSO_PATH}/mean/init_$(datetime_scale $time)"
+      EFSO_EFCST_FROM_ANAL_BASENAME="${HISTORY_EFSO_PATH}/<member>/init_$(datetime_scale $time)"
+      RESTART_IN_BASENAME_SCALE="${RESTART_OUT_PATH[$d]}/../gues/<member>/init"
+    fi
+
+    cat $TMP/config.nml.ensmodel | \
+        sed -e "/!--MEMBER--/a MEMBER = $MEMBER," \
+            -e "/!--CONF_FILES--/a CONF_FILES = \"letkc.d<domain>_${time}.conf\"," \
+            -e "/!--DET_RUN--/a DET_RUN = ${DET_RUN_TF}," \
+            -e "/!--DET_RUN_UPDATE--/a DET_RUN_UPDATE = ${DET_RUN_UPDATE_TF}," \
+            -e "/!--EFSO_RUN--/a EFSO_RUN = ${EFSO_RUN_TF}," \
+            -e "/!--PPN--/a PPN = $PPN_APPAR," \
+            -e "/!--MEM_NODES--/a MEM_NODES = $mem_nodes," \
+            -e "/!--NUM_DOMAIN--/a NUM_DOMAIN = $DOMNUM," \
+            -e "/!--PRC_DOMAINS--/a PRC_DOMAINS = $PRC_DOMAINS_LIST" \
+        > ${conf_file}
+
+    cat $conf_file_src | \
+        sed -e "/!--OBS_IN_NUM--/a OBS_IN_NUM = $OBSNUM," \
+            -e "/!--OBS_IN_NAME--/a OBS_IN_NAME = $OBS_IN_NAME_LIST" \
+            -e "/!--OBSDA_RUN--/a OBSDA_RUN = $OBSDA_RUN_LIST" \
+            -e "/!--OBSDA_OUT--/a OBSDA_OUT = $OBSDA_OUT" \
+            -e "/!--OBSDA_OUT_BASENAME--/a OBSDA_OUT_BASENAME = \"<member>/obsgues.d${dfmt}_${time}\"," \
+            -e "/!--HISTORY_IN_BASENAME--/a HISTORY_IN_BASENAME = \"${HISTORY_PATH[$d]}/<member>/history\"," \
+            -e "/!--SLOT_START--/a SLOT_START = $slot_s," \
+            -e "/!--SLOT_END--/a SLOT_END = $slot_e," \
+            -e "/!--SLOT_BASE--/a SLOT_BASE = $slot_b," \
+            -e "/!--SLOT_TINTERVAL--/a SLOT_TINTERVAL = ${LTIMESLOT}.D0," \
+            -e "/!--OBSDA_IN--/a OBSDA_IN = .false.," \
+            -e "/!--GUES_IN_BASENAME--/a GUES_IN_BASENAME = \"${GUES_IN_BASENAME}\"," \
+            -e "/!--GUES_MEAN_INOUT_BASENAME--/a GUES_MEAN_INOUT_BASENAME = \"${GUES_MEAN_INOUT_BASENAME}\"," \
+            -e "/!--GUES_SPRD_OUT_BASENAME--/a GUES_SPRD_OUT_BASENAME = \"${GUES_SPRD_OUT_BASENAME}\"," \
+            -e "/!--GUES_SPRD_OUT--/a GUES_SPRD_OUT = ${SPRD_OUT_TF}," \
+            -e "/!--ANAL_OUT_BASENAME--/a ANAL_OUT_BASENAME = \"${ANAL_OUT_BASENAME}\"," \
+            -e "/!--ANAL_SPRD_OUT--/a ANAL_SPRD_OUT = ${SPRD_OUT_TF}," \
+            -e "/!--LETKF_TOPOGRAPHY_IN_BASENAME--/a LETKF_TOPOGRAPHY_IN_BASENAME = \"${TOPO_PATH}/topo/topo\"," \
+            -e "/!--EFSO_ANAL_IN_BASENAME--/a EFSO_ANAL_IN_BASENAME = \"${EFSO_ANAL_IN_BASENAME}\"," \
+            -e "/!--EFSO_FCST_FROM_GUES_BASENAME--/a EFSO_FCST_FROM_GUES_BASENAME = \"${EFSO_FCST_FROM_GUES_BASENAME}\"," \
+            -e "/!--EFSO_FCST_FROM_ANAL_BASENAME--/a EFSO_FCST_FROM_ANAL_BASENAME = \"${EFSO_FCST_FROM_ANAL_BASENAME}\"," \
+            -e "/!--EFSO_EFCST_FROM_ANAL_BASENAME--/a EFSO_EFCST_FROM_ANAL_BASENAME = \"${EFSO_EFCST_FROM_ANAL_BASENAME}\"," \
+            -e "/!--INFL_ADD--/a INFL_ADD = ${INFL_ADD}," \
+            -e "/!--INFL_ADD_IN_BASENAME--/a INFL_ADD_IN_BASENAME = \"${DATA_ADDINFL[$d]}/<member>${CONNECTOR}init${sfx}\"," \
+            -e "/!--INFL_MUL_ADAPTIVE--/a INFL_MUL_ADAPTIVE = ${INFL_MUL_ADAPTIVE}," \
+            -e "/!--INFL_MUL_OUT_BASENAME--/a INFL_MUL_OUT_BASENAME = \"infl.d${dfmt}_$(datetime_scale $atime)\"," \
+            -e "/!--RELAX_SPREAD_OUT--/a RELAX_SPREAD_OUT = ${RTPS_INFL_OUT_TF}," \
+            -e "/!--RELAX_SPREAD_OUT_BASENAME--/a RELAX_SPREAD_OUT_BASENAME = \"rtpsinfl.d${dfmt}_$(datetime_scale $atime)\"," \
+            -e "/!--NOBS_OUT--/a NOBS_OUT = ${NOBS_OUT_TF}," \
+            -e "/!--NOBS_OUT_BASENAME--/a NOBS_OUT_BASENAME = \"nobs.d${dfmt}_$(datetime_scale $time)\"," \
+            -e "/!--IO_LOG_BASENAME--/a IO_LOG_BASENAME =  \"${OUTDIR[$d]}/$time/log/letkc/${name_m[$m]}_LOG\"," \
+            -e "/!--DEPARTURE_STAT_OUT_BASENAME--/a DEPARTURE_STAT_OUT_BASENAME = \"${DEPARTURE_STAT_OUT_BASENAME}\"," \
+            -e "/!--OBSDEP_OUT--/a OBSDEP_OUT = ${OBSDEP_OUT_TF}," \
+            -e "/!--OBSDEP_OUT_NC--/a OBSDEP_OUT_NC = ${OBSDEP_OUT_NC_TF}," \
+            -e "/!--OBSANAL_OUT--/a OBSANAL_OUT = ${OBSANAL_OUT_TF}," \
+            -e "/!--OBSANAL_IN_BASENAME--/a OBSANAL_IN_BASENAME = \"${OBSANAL_IN_BASENAME}\"," \
+            -e "/!--OBSANAL_OUT_BASENAME--/a OBSANAL_OUT_BASENAME = \"${OBSANAL_OUT_BASENAME}\"," \
+            -e "/!--OBSDEP_IN_BASENAME--/a OBSDEP_IN_BASENAME = \"${OBSDEP_IN_BASENAME}\"," \
+            -e "/!--OBSDEP_OUT_BASENAME--/a OBSDEP_OUT_BASENAME = \"${OBSDEP_OUT_BASENAME}\"," \
+            -e "/!--OBSNUM_OUT_NC_BASENAME--/a OBSNUM_OUT_NC_BASENAME = \"${OBSNUM_OUT_NC_BASENAME}\"," \
+        >> ${conf_file}
+
+        # Most of these parameters are not important for letkf
+    cat $conf_file_src2 | \
+        sed -e "s#^RESTART_IN_BASENAME.*#RESTART_IN_BASENAME = \"${RESTART_IN_BASENAME_SCALE}\", #g " \
+            -e "s#^TIME_STARTDATE\ =.*#TIME_STARTDATE\ =\ ${atime:0:4},\ ${atime:4:2},\ ${atime:6:2},\ ${atime:8:2},\ ${atime:10:2},\ ${atime:12:2}, #g" \
+        >> ${conf_file}
+
+
+    cat ${conf_file} | \
+        sed -e '/^OBS_IN_NAME/d' \
+            -e "/!--OBS_IN_NAME--/a OBS_IN_NAME = $OBS_IN_NAME_LIST_EFSO" \
+    >> ${conf_file_efso}
+
+#    if ((stage_config == 1)); then
+#      echo "$CONFIG_DIR/${conf_file}|${conf_file}" >> ${STAGING_DIR}/${STGINLIST}
+#    fi
+    if (( PAWR_DECODE == 1 )) ; then
+      conf_file_dec_pawr="$TMP/config/dec_pawr_${atime}.conf"
+      PAWR_IN_PATH="${PAWR_RAW}/${FNAME_PAWR_RAW}"
+      if (( DISK_MODE_OBS >= 1)) ;then
+        OUT_PAWR_SUPEROB_PATH="${TMPROOT_OBS}/obs/${OBSNAME[$iobs]}"
+        mkdir -p ${TMPROOT_OBS}/obs
+      else
+        OUT_PAWR_SUPEROB_PATH="${OBS}/${OBSNAME[$iobs]}"
+        mkdir -p $OBS
+      fi
+      cat ${conf_file} | \
+      sed -e "/!--PAWR_IN_PATH--/a PAWR_IN_PATH = \"${PAWR_IN_PATH}\"," \
+          -e "/!--OUT_PAWR_SUPEROB_PATH--/a OUT_PAWR_SUPEROB_PATH = \"${OUT_PAWR_SUPEROB_PATH}\", " \
+          -e "/!--MEMBER_RUN--/a MEMBER_RUN = 1, " \
+          -e "s#^MEMBER\ =.*#MEMBER\ =\ 1,#g" \
+          -e "s#^CONF_FILES\ =.*#CONF_FILES\ =\ ${conf_file_dec_pawr},#g" \
+          -e "s#^TIME_STARTDATE\ =.*#TIME_STARTDATE\ =\ ${atime:0:4},\ ${atime:4:2},\ ${atime:6:2},\ ${atime:8:2},\ ${atime:10:2},\ ${atime:12:2}, #g" \
+      >> ${conf_file_dec_pawr}
+    fi
+
+   done # [ d in $(seq $DOMNUM) ] # End of LETKC
+
+
+
+   #------------------------------------------------------------------------------------------------
    # obsmake by Y.Saw
    #------------------------------------------------------------------------------------------------
   conf_file=$TMP/config/obsmake_${time}.conf
