@@ -1281,7 +1281,7 @@ while ((time <= ETIME)); do
         # Most of these parameters are not important for letkf
     cat $conf_file_src2 | \
         sed -e "s#^RESTART_IN_BASENAME.*#RESTART_IN_BASENAME = \"${RESTART_IN_BASENAME_SCALE}\", #g " \
-            -e "s#^TIME_STARTDATE\ =.*#TIME_STARTDATE\ =\ ${atime:0:4},\ ${atime:4:2},\ ${atime:6:2},\ ${atime:8:2},\ ${atime:10:2},\ ${atime:12:2}, #g" \
+            -e "s#^TIME_STARTDATE\ =.*#TIME_STARTDATE\ =\ ${time:0:4},\ ${time:4:2},\ ${time:6:2},\ ${time:8:2},\ ${time:10:2},\ ${time:12:2}, #g" \
         >> ${conf_file}
 
 
