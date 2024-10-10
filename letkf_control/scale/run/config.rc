@@ -230,6 +230,7 @@ fi
 SCRP_DIR="$DIR/run"              # Job script directory
 COMMON_DIR="$DIR/common"         # Common program directory
 LETKF_DIR="$DIR/letkf"           # LETKF program directory
+LETKC_DIR="$DIR/letkc"           # LETKC program directory
 OBSUTIL_DIR="$DIR/obs"           # Observation program directory
 VERIFY_DIR="$DIR/verify"         # Verification program directory
 UTIL_DIR="$DIR/util"             # Other utility program directory

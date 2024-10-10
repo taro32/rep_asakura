@@ -202,7 +202,7 @@ while ((time <= ETIME)); do
     if (((s_flag == 0 || s >= ISTEP) && (e_flag == 0 || s <= FSTEP))); then
 
       ######
-      if ((s == 1)); then
+      if ((s == 1 || s == 5)); then
         logd=$OUTDIR/$time/log/scale_pp
         if [[ "$TOPO_FORMAT" == 'prep' || "$TOPO_FORMAT" == 'none' ]] &&  [[  "$LANDUSE_FORMAT" == 'prep' || "$LANDUSE_FORMAT" == 'none' ]]  ; then
           echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (use prepared topo and landuse files)" >&2
@@ -215,7 +215,7 @@ while ((time <= ETIME)); do
           continue
         fi
       fi
-      if ((s == 2)); then
+      if ((s == 2 || s == 6)); then
         logd=$OUTDIR/$time/log/scale_init
         if ((BDY_FORMAT == 0)); then
           echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (use prepared boundary files)" >&2
@@ -247,7 +247,7 @@ while ((time <= ETIME)); do
 
       fi
 
-      if ((s == 3)); then
+      if ((s == 3 || s == 7)); then
         logd=$OUTDIR/$time/log/scale
 
         if [ "$PRESET" = 'FUGAKU' ] && (( HIST_LLIO_TMP == 1 )) ; then
@@ -273,6 +273,7 @@ while ((time <= ETIME)); do
 
 
       fi
+      if (( DET_RUN_UPDATE /= 2)) ; then #no letkc
       if ((s == 5)); then
         logd=$OUTDIR/$atime/log/letkf
         if ((OBSOPE_RUN == 0)) && ((PAWR_DECODE != 1)) ; then
@@ -340,6 +341,132 @@ while ((time <= ETIME)); do
         fi
         logd=$OUTDIR/$atime/log/efso
       fi
+      fi # no letkc
+
+
+      if (( DET_RUN_UPDATE == 2)) ; then # letkc
+      if ((s == 9)); then
+        logd=$OUTDIR/$atime/log/letkf
+        if ((OBSOPE_RUN == 0)) && ((PAWR_DECODE != 1)) ; then
+          logd=$OUTDIR/$atime/log/dec_pawr
+          mkdir -p $logd
+          echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (only use integrated observation operators and decoded data)" >&2
+          continue
+        fi
+      fi
+      if ((s == 4)); then
+        logd=$OUTDIR/$time/log/letkc
+        BGDIR=$OUTDIR/$time
+        if ((ANAL_LLIO_TMP==1)) && ((atime <= ETIME)) ;then
+          BGDIR=/local/$time
+          mkdir -p $OUTDIR/$time/anal/mean
+          cp -r $BGDIR/anal/mean/* $OUTDIR/$time/anal/mean/
+          if ((OUT_OPT <= 4)) ;then
+            for mem in $(seq -f %04g $MEMBER) ; do
+              mkdir -p $OUTDIR/$time/anal/$mem
+              cp -r $BGDIR/anal/$mem/* $OUTDIR/$time/anal/$mem/
+            done
+          fi
+        fi
+        if ((SPRD_OUT==1)); then
+            mkdir -p $OUTDIR/$atime/anal/sprd
+            cp -r $BGDIR/anal/mean/* $OUTDIR/$time/anal/sprd/
+            mnsp="mean sprd"
+        else
+            mnsp="mean"
+        fi
+        if ((EFSO_RUN == 1)) ;then
+          for mem in $(seq -f %04g $MEMBER) $mnsp ; do
+            mkdir -p $BGDIR/gues/$mem
+            cp -r $BGDIR/anal/$mem/* $BGDIR/gues/$mem/
+          done
+        fi
+        if ((OUT_OPT <= 3)) ;then
+          for mem in $(seq -f %04g $MEMBER) $mnsp ; do
+            mkdir -p $OUTDIR/$time/gues/$mem
+            cp -r $BGDIR/anal/$mem/* $OUTDIR/$time/gues/$mem/
+          done
+        elif ((OUT_OPT <= 6)) ;then
+          for mem in $mnsp ;do
+            mkdir -p $OUTDIR/$time/gues/$mem
+            cp -r $BGDIR/anal/$mem/* $OUTDIR/$time/gues/$mem/
+          done
+        fi
+        if ((NOBS_OUT==1)); then
+          for pe in $(seq -f %06g 0 $((SCALE_NP-1)) ) ;do
+            cp -r $BGDIR/anal/mean/init_$(datetime_scale $time).pe${pe}.nc $TMP/nobs.d01_$(datetime_scale $atime).pe${pe}.nc
+          done
+        elif ((RTPS_INFL_OUT==1)); then
+          for pe in $(seq -f %06g 0 $((SCALE_NP-1)) ) ;do
+            cp -r $BGDIR/anal/mean/init_$(datetime_scale $time).pe${pe}.nc $TMP/rtpsinfl.d01_$(datetime_scale $atime).pe${pe}.nc
+          done
+        elif ((ADAPTINFL==1)); then
+          for pe in $(seq -f %06g 0 $((SCALE_NP-1)) ) ;do
+            cp -r $BGDIR/anal/mean/init_$(datetime_scale $time).pe${pe}.nc $TMP/infl.d01_$(datetime_scale $atime).pe${pe}.nc
+          done
+        fi
+      fi
+
+      if ((s == 10)); then
+        logd=$OUTDIR/$atime/log/letkf
+        BGDIR=$OUTDIR/$atime
+        if ((ANAL_LLIO_TMP==1)) && ((atime <= ETIME)) ;then
+          BGDIR=/local/$atime
+          mkdir -p $OUTDIR/$atime/anal/mean
+          cp -r $BGDIR/anal/mean/* $OUTDIR/$atime/anal/mean/
+          if ((OUT_OPT <= 4)) ;then
+            for mem in $(seq -f %04g $MEMBER) ; do
+              mkdir -p $OUTDIR/$atime/anal/$mem
+              cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/anal/$mem/
+            done
+          fi
+        fi
+        if ((SPRD_OUT==1)); then
+            mkdir -p $OUTDIR/$atime/anal/sprd
+            cp -r $BGDIR/anal/mean/* $OUTDIR/$atime/anal/sprd/
+            mnsp="mean sprd"
+        else
+            mnsp="mean"
+        fi
+        if ((EFSO_RUN == 1)) ;then
+          for mem in $(seq -f %04g $MEMBER) $mnsp ; do
+            mkdir -p $BGDIR/gues/$mem
+            cp -r $BGDIR/anal/$mem/* $BGDIR/gues/$mem/
+          done
+        fi
+        if ((OUT_OPT <= 3)) ;then
+          for mem in $(seq -f %04g $MEMBER) $mnsp ; do
+            mkdir -p $OUTDIR/$atime/gues/$mem
+            cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/
+          done
+        elif ((OUT_OPT <= 6)) ;then
+          for mem in $mnsp ;do
+            mkdir -p $OUTDIR/$atime/gues/$mem
+            cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/
+          done
+        fi
+        if ((NOBS_OUT==1)); then
+          for pe in $(seq -f %06g 0 $((SCALE_NP-1)) ) ;do
+            cp -r $BGDIR/anal/mean/init_$(datetime_scale $atime).pe${pe}.nc $TMP/nobs.d01_$(datetime_scale $atime).pe${pe}.nc
+          done
+        elif ((RTPS_INFL_OUT==1)); then
+          for pe in $(seq -f %06g 0 $((SCALE_NP-1)) ) ;do
+            cp -r $BGDIR/anal/mean/init_$(datetime_scale $atime).pe${pe}.nc $TMP/rtpsinfl.d01_$(datetime_scale $atime).pe${pe}.nc
+          done
+        elif ((ADAPTINFL==1)); then
+          for pe in $(seq -f %06g 0 $((SCALE_NP-1)) ) ;do
+            cp -r $BGDIR/anal/mean/init_$(datetime_scale $atime).pe${pe}.nc $TMP/infl.d01_$(datetime_scale $atime).pe${pe}.nc
+          done
+        fi
+      fi
+      if (( s == 11 )); then
+        if ((EFSO_RUN == 0));then
+          continue
+        fi
+        logd=$OUTDIR/$atime/log/efso
+      fi
+      fi # letkc
+
       ######
 
       echo "[$(datetime_now)] ${time}: ${stepname[$s]}" >&2

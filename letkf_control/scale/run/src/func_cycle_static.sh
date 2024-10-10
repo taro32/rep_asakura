@@ -128,6 +128,9 @@ fi
 cp ${LETKF_DIR}/letkf ${TMPROOT}/letkf
 cp ${LETKF_DIR}/efso ${TMPROOT}/efso
 
+# YSaw 20241010 for letkc
+cp ${LETKC_DIR}/letkc ${TMPROOT}/letkc 
+
 #-------------------------------------------------------------------------------
 # database
 
@@ -1650,6 +1653,7 @@ setting () {
 # YSaw 20240802
 # observation is generated in every cycles for EnKC
 #
+if (( DET_RUN_UPDATE /= 2 )) ; then #no letkc
 nsteps=7
 stepname[1]='Run SCALE pp'
 stepexecdir[1]="$TMPRUN/scale_pp"
@@ -1683,6 +1687,58 @@ stepexecname[6]="letkf"
 stepname[7]='Run EFSO'
 stepexecdir[7]="$TMPRUN/efso"
 stepexecname[7]="efso"
+fi #end no letkc
+
+if (( DET_RUN_UPDATE == 2 )) ; then #letkc
+nsteps=11
+stepname[1]='Run SCALE pp'
+stepexecdir[1]="$TMPRUN/scale_pp"
+stepexecname[1]="scale-rm_pp_ens"
+stepname[2]='Run SCALE init'
+stepexecdir[2]="$TMPRUN/scale_init"
+stepexecname[2]="scale-rm_init_ens"
+stepname[3]='Run ensemble forecasts'
+stepexecdir[3]="$TMPRUN/scale"
+stepexecname[3]="scale-rm_ens"
+stepname[4]='Run LETKC'
+stepexecdir[4]="$TMPRUN/letkc"
+stepexecname[4]="letkc"
+
+stepname[5]='Run SCALE pp'
+stepexecdir[5]="$TMPRUN/scale_pp"
+stepexecname[5]="scale-rm_pp_ens"
+stepname[6]='Run SCALE init'
+stepexecdir[6]="$TMPRUN/scale_init"
+stepexecname[6]="scale-rm_init_ens"
+stepname[7]='Run ensemble forecasts'
+stepexecdir[7]="$TMPRUN/scale"
+stepexecname[7]="scale-rm_ens"
+
+stepname[8]='Run obsmake'
+stepexecdir[8]="$TMPRUN/obsmake"
+stepexecname[8]="obsmake"
+if (( OBSOPE_RUN == 0 )) && (( PAWR_DECODE == 1 )) ; then
+stepname[9]='Run PAWR decoder'
+stepexecdir[9]="$TMPRUN/dec_pawr"
+stepexecname[9]="dec_pawr"
+elif (( OBSOPE_RUN == 1 )) && (( PAWR_DECODE == 1 )) ; then
+  echo "OBSOPE=1 and PAWR_DECODE=1 is not supported. "
+  exit 1
+else
+stepname[9]='Run observation operator'
+stepexecdir[9]="$TMPRUN/obsope"
+stepexecname[9]="obsope"
+fi
+
+stepname[10]='Run LETKF'
+stepexecdir[10]="$TMPRUN/letkf"
+stepexecname[10]="letkf"
+
+stepname[11]='Run EFSO'
+stepexecdir[11]="$TMPRUN/efso"
+stepexecname[11]="efso"
+fi #end letkc
+
 
 
 
