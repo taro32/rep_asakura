@@ -1,4 +1,4 @@
-include ./configure
+include ../configure
 
 PROGS   = cntltargetmakein_p
 

@@ -14,7 +14,7 @@ integer,parameter::intv_z=2 !not used
 
 real(4)::wk(8)
 character(len=200)::cfile
-character(len=200)::ncfile_in='history.pe000000.nc'
+character(len=200)::ncfile_in='../history.pe000000.nc'
 
 integer::ncid, vidlon, vidlat,vidz
 
