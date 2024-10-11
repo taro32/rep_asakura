@@ -883,7 +883,7 @@ while ((time <= ETIME)); do
   fi
 
 # YSaw 20240702
-
+  echo "DET_RUN_UPDATE "$DET_RUN_UPDATE
     DET_RUN_UPDATE_TF='.false.'
   if ((DET_RUN_UPDATE == 1 && DET_RUN == 1)); then
     DET_RUN_UPDATE_TF='.true.'

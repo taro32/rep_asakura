@@ -112,6 +112,11 @@ OBS="${OBS[1]}"                                 #
 
 DET_RUN="${DET_RUN:-0}"
 
+# YSaw 20241011 -------------------------------------
+DET_RUN_UPDATE="${DET_RUN_UPDATE:-0}"
+#----------------------------------------------------
+
+
 EFSO_RUN="${EFSO_RUN:-0}"
 EFSO_FCST_LENGTH=${EFSO_FCST_LENGTH:-$LCYCLE}
 
