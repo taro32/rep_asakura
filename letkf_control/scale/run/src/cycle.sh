@@ -273,7 +273,7 @@ while ((time <= ETIME)); do
 
 
       fi
-      if (( DET_RUN_UPDATE /= 2)) ; then #no letkc
+      if (( DET_RUN_UPDATE != 2)) ; then #no letkc
       if ((s == 5)); then
         logd=$OUTDIR/$atime/log/letkf
         if ((OBSOPE_RUN == 0)) && ((PAWR_DECODE != 1)) ; then

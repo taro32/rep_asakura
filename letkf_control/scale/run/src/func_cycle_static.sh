@@ -1653,7 +1653,7 @@ setting () {
 # YSaw 20240802
 # observation is generated in every cycles for EnKC
 #
-if (( DET_RUN_UPDATE /= 2 )) ; then #no letkc
+if (( DET_RUN_UPDATE != 2 )) ; then #no letkc
 nsteps=7
 stepname[1]='Run SCALE pp'
 stepexecdir[1]="$TMPRUN/scale_pp"
@@ -1738,8 +1738,6 @@ stepname[11]='Run EFSO'
 stepexecdir[11]="$TMPRUN/efso"
 stepexecname[11]="efso"
 fi #end letkc
-
-
 
 
 if [ PRESET == "FUGAKU" ] && (( USE_LLIO_BIN == 1 )); then
@@ -1922,8 +1920,9 @@ fi
 print_setting () {
 #-------------------------------------------------------------------------------
 
+# YSaw add DET_RUN_UPDATE 20241011
 for vname in DIR DOMAIN @INDIR @OUTDIR @DATA_TOPO DATA_TOPO_BDY_SCALE @DATA_LANDUSE DATA_BDY_SCALE \
-             DATA_BDY_SCALE_PREP DATA_BDY_WRF DATA_BDY_NICAM OBS OBSNCEP DET_RUN TOPO_FORMAT \
+             DATA_BDY_SCALE_PREP DATA_BDY_WRF DATA_BDY_NICAM OBS OBSNCEP DET_RUN DET_RUN_UPDATE TOPO_FORMAT \
              LANDUSE_FORMAT LANDUSE_UPDATE BDY_FORMAT BDY_ENS BDYINT BDYCYCLE_INT PARENT_REF_TIME \
              ENABLE_PARAM_USER OCEAN_INPUT OCEAN_FORMAT LAND_INPUT LAND_FORMAT OBSNUM WINDOW_S WINDOW_E \
              LCYCLE LTIMESLOT MEMBER NNODES NNODES_APPAR PPN PPN_APPAR THREADS @SCALE_NP \
