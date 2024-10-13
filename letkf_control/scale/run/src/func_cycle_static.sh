@@ -809,7 +809,7 @@ while ((time <= ETIME)); do
       else
         RESTART_IN_PATH[$d]=${OUTDIR[$d]}/$time/anal
       fi 
-      RESTART_OUT_PATH[$d]=${OUTDIR[$d]}/${atime}/anali
+      RESTART_OUT_PATH[$d]=${OUTDIR[$d]}/${atime}/anal
       RESTART_OUT_PATH_letkc[$d]=${OUTDIR[$d]}/${time}/anal  #YSaw 20241013
 
       if [ $PRESET == 'FUGAKU' ] && (( ANAL_LLIO_TMP == 1 )) ; then
