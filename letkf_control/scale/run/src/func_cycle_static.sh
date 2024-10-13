@@ -809,7 +809,8 @@ while ((time <= ETIME)); do
       else
         RESTART_IN_PATH[$d]=${OUTDIR[$d]}/$time/anal
       fi 
-      RESTART_OUT_PATH[$d]=${OUTDIR[$d]}/${atime}/anal
+      RESTART_OUT_PATH[$d]=${OUTDIR[$d]}/${atime}/anali
+      RESTART_OUT_PATH_letkc[$d]=${OUTDIR[$d]}/${time}/anal  #YSaw 20241013
 
       if [ $PRESET == 'FUGAKU' ] && (( ANAL_LLIO_TMP == 1 )) ; then
          if (( loop_prev % ANAL_LLIO_TMP_SKIP != 0 )); then
@@ -1215,15 +1216,15 @@ while ((time <= ETIME)); do
 #      EFSO_FCST_FROM_ANAL_BASENAME="${HISTORY_EFSO_PATH}/mean/init_$(datetime_scale $atime)"
     else
 #      GUES_IN_BASENAME="${RESTART_OUT_PATH[$d]}/../gues/<member>/init_$(datetime_scale $atime)"
-      GUES_IN_BASENAME="${RESTART_OUT_PATH[$d]}/../anal/<member>/init_$(datetime_scale $time)"
-      GUES_MEAN_INOUT_BASENAME="${RESTART_OUT_PATH[$d]}/../gues/mean/init_$(datetime_scale $time)"
-      GUES_SPRD_OUT_BASENAME="${RESTART_OUT_PATH[$d]}/../gues/sprd/init_$(datetime_scale $time)"
-      ANAL_OUT_BASENAME="${RESTART_OUT_PATH[$d]}/<member>/init_$(datetime_scale $time)"
-      EFSO_ANAL_IN_BASENAME="${RESTART_OUT_PATH[$d]}/mean/init_$(datetime_scale $time)"
+      GUES_IN_BASENAME="${RESTART_OUT_PATH_letkc[$d]}/../anal/<member>/init_$(datetime_scale $time)"
+      GUES_MEAN_INOUT_BASENAME="${RESTART_OUT_PATH_letkc[$d]}/../gues/mean/init_$(datetime_scale $time)"
+      GUES_SPRD_OUT_BASENAME="${RESTART_OUT_PATH_letkc[$d]}/../gues/sprd/init_$(datetime_scale $time)"
+      ANAL_OUT_BASENAME="${RESTART_OUT_PATH_letkc[$d]}/<member>/init_$(datetime_scale $time)"
+      EFSO_ANAL_IN_BASENAME="${RESTART_OUT_PATH_letkc[$d]}/mean/init_$(datetime_scale $time)"
       EFSO_FCST_FROM_GUES_BASENAME="${HISTORY_EFSO_PATH}/mgue/init_$(datetime_scale $time)"
       EFSO_FCST_FROM_ANAL_BASENAME="${HISTORY_EFSO_PATH}/mean/init_$(datetime_scale $time)"
       EFSO_EFCST_FROM_ANAL_BASENAME="${HISTORY_EFSO_PATH}/<member>/init_$(datetime_scale $time)"
-      RESTART_IN_BASENAME_SCALE="${RESTART_OUT_PATH[$d]}/../gues/<member>/init"
+      RESTART_IN_BASENAME_SCALE="${RESTART_OUT_PATH_letkc[$d]}/../gues/<member>/init"
     fi
 
     cat $TMP/config.nml.ensmodel | \
