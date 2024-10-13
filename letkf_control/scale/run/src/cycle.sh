@@ -483,7 +483,7 @@ while ((time <= ETIME)); do
       nodestr=proc
 
       #if ((s <= 3)); then
-      if ((s <= 4)); then
+      if ((s <= 7)); then  #YSaw until extended forecast
         conf_time=$time
       else
         conf_time=$atime
