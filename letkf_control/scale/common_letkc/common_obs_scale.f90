@@ -332,7 +332,7 @@ SUBROUTINE Trans_XtoY(elm,ri,rj,rk,lon,lat,v3d,v2d,yobs,qc,stggrd,typ)
       if (LOG_LEVEL >= 2) then
         write (6,'(A,F6.1)') '[Warning] PS observation height adjustment exceeds the threshold. dz=', abs(rk-topo)
       end if
-      qc = iqc_ps_ter
+    !  qc = iqc_ps_ter  ! cancelled by YSaw
     end if
 !  CASE(id_rain_obs) ! RAIN                        ############# (not finished)
 !    CALL itpl_2d(v2d(:,:,iv2dd_rain),ri,rj,yobs) !#############

@@ -48,7 +48,7 @@ SNO_MEMBERS=100
 #SNO_MEM_L="mean "$(seq -f %04g ${SNO_MEMBERS})
 #SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
 
-SNO_MEM_L="mdet"
+SNO_MEM_L="mean"
 
 
 if [ "$ALLVAR" == "T" ] ; then
