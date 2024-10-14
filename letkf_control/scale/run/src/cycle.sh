@@ -271,7 +271,8 @@ while ((time <= ETIME)); do
            mpiexec_cnt=$((mpiexec_cnt+1))
         fi
 	if (( s == 7 )); then #YSaw 20241014
-           mv $OUTDIR/$atime/hist $OUTDIR/$atime/hist_bg
+           mv $OUTDIR/$time/hist $OUTDIR/$time/hist_bg
+	   mkdir $OUTDIR/$time/hist
 	fi
 
 
