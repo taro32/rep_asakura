@@ -270,6 +270,9 @@ while ((time <= ETIME)); do
            mpiexec mkdir -p ${ANAL_LLIO_TMPDIRS}
            mpiexec_cnt=$((mpiexec_cnt+1))
         fi
+	if (( s == 7 )); then #YSaw 20241014
+           mv $OUTDIR/$atime/hist $OUTDIR/$atime/hist_bg
+	fi
 
 
       fi
