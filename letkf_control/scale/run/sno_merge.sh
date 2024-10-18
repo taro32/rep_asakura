@@ -16,7 +16,7 @@ SINGLE_VAR=F
 tint=10800 #864000 # [second]
 tstart='2000-01-01 12:00:00'
 #tend=$tstart
-tend='2000-01-02 12:00:00'
+tend='2000-01-01 12:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 
@@ -26,7 +26,7 @@ SCALEDIR="$(cd "$(pwd)/../../.." && pwd)"
 #TYPE=fcst
 #TYPE=anal
 #TYPE=gues
-TYPE=hist
+TYPE=hist_bg
 
 ## Which domain do you want to convert?
 #DOM=2 
@@ -48,7 +48,8 @@ SNO_MEMBERS=100
 #SNO_MEM_L="mean "$(seq -f %04g ${SNO_MEMBERS})
 #SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
 
-SNO_MEM_L="mdet"
+SNO_MEM_L="mdet mean"
+#SNO_MEM_L="0001"
 
 
 if [ "$ALLVAR" == "T" ] ; then
@@ -133,7 +134,7 @@ while (($(date -ud "$time" '+%s') <= $(date -ud "$tend" '+%s'))); do # time loop
   
     SNO_BASENAME_OUT="history"
   
-    if [ "$TYPE" != "fcst" ] && [ "$TYPE" != "hist" ]  ; then
+    if [ "$TYPE" != "fcst" ] && [ "$TYPE" != "hist" ] && [  "$TYPE" != "hist_bg" ]  ; then
       SNO_BASENAME_OUT="$TYPE"
       SNO_BASENAME_IN="${OUTDIR}/${DTIME}/${TYPE}/${mem}/init_${SCALE_TIME}"
     fi
@@ -245,9 +246,9 @@ if [ "$PRESET" = 'Wisteria' ]; then
 cat << EOF >> $jobsh
 #!/bin/bash 
 #
-#PJM -g "jh220020o" 
+#PJM -g "gv42" 
 #PJM -L "rscgrp=regular-o"
-#PJM -L "node=1"
+#PJM -L "node=${SNO_NODE}"
 #PJM -L "elapse=00:30:00"
 #PJM --mpi "max-proc-per-node=${PPN}"
 #PJM --omp "thread=${THREADS}"
@@ -423,6 +424,7 @@ while [ $count -le ${cnt} ]; do
 	count=$((countend + 1))
 	sleep 5
 done
+#echo "cnt = ", ${cnt}
 pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
 #pjsub --bulk --sparam "1-11" job_sno.sh 
 #pjsub --bulk --sparam "11-20" job_sno.sh 
