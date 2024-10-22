@@ -50,8 +50,9 @@ ie = 1
   wk(1)=real(elms(ie))  
   wk(2)=axlon(ilon,ilat)
   wk(3)=axlat(ilon,ilat)
-!  wk(4)=axz(iz)
-  wk(4)=pres(ilon,ilat,ilev) * 0.01 !!! hPa
+  wk(4)=axz(iz)
+!  wk(4)=pres(ilon,ilat,ilev) * 0.01 !!! hPa
+  print*, wk(4)
   wk(5)=98000 * 0.01  !!! dat [hPa]
   wk(6)=errs(ie)   !!! err 
   wk(7)=1.0  !!! typ ADPUPA
