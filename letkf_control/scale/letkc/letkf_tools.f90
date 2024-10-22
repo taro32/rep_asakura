@@ -453,7 +453,9 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 
         ! analysis update of deterministic run
         if (DET_RUN) then                                                              !GYL
+            write(6,*) "DET_RUN_UPDATE = ", DET_RUN_UPDATE
           if (DET_RUN_UPDATE) then                                                     !YSaw
+            write(6,*) "DET_RUN_UPDATE = ", DET_RUN_UPDATE
              anal3d(ij,ilev,mmdet,n) = 0.0d0                                              !GYL
              DO k=1,MEMBER                                                                !GYL
                anal3d(ij,ilev,mmdet,n) = anal3d(ij,ilev,mmdet,n) &                        !GYL
@@ -591,7 +593,9 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 
           ! analysis update of deterministic run
           if (DET_RUN) then                                                          !GYL
+            write(6,*) "DET_RUN_UPDATE = ", DET_RUN_UPDATE
             if (DET_RUN_UPDATE) then                                                 !YSaw
+            write(6,*) "DET_RUN_UPDATE = ", DET_RUN_UPDATE
               anal2d(ij,mmdet,n) = 0.0d0                                               !GYL
               DO k=1,MEMBER                                                            !GYL
                 anal2d(ij,mmdet,n) = anal2d(ij,mmdet,n) &                              !GYL

@@ -14,9 +14,9 @@ ALLVAR=T
 SINGLE_VAR=F
 
 tint=10800 #864000 # [second]
-tstart='2000-01-01 12:00:00'
+tstart='2000-01-01 00:00:00'
 #tend=$tstart
-tend='2000-01-01 12:00:00'
+tend='2000-01-08 12:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 
@@ -26,7 +26,7 @@ SCALEDIR="$(cd "$(pwd)/../../.." && pwd)"
 #TYPE=fcst
 #TYPE=anal
 #TYPE=gues
-TYPE=hist_bg
+TYPE=hist
 
 ## Which domain do you want to convert?
 #DOM=2 
