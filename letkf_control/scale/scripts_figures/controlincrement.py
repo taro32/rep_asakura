@@ -2,7 +2,6 @@
 # Analyzing ensemble predictions
 # created by Y.Sawada
 #
-# BIAS & RMSE
 #
 from pylab import *
 import numpy as np
@@ -42,6 +41,17 @@ workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241024/result/ca
 day = 1
 hour = 0
 i = 0
+
+# your target
+zlevel = 0
+valuename="QR"
+
+# figure setting
+vvmin=-0.0001
+vvmax=0.0001
+#vvmin=-1.0
+#vvmax=1.0
+
 minpres_letkf = np.zeros((72))
 minpres_mdet = np.zeros((72))
 print(minpres_letkf)
@@ -56,23 +66,26 @@ for day in range(1,7):
         else:
             strhour = str(hour)
         print('reading..... ', day, hour)
-        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
-        #pres = data.variables['PRES']
-        #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        pres = data.variables['MSLP']
-        minpres_letkf[i] = np.min(pres[1,:,:],axis=(0,1))/100
         data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
         #pres = data.variables['PRES']
-        #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        pres = data.variables['MSLP']
-        minpres_mdet[i] = np.min(pres[1,:,:],axis=(0,1))/100
-        i = i + 1
+        #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        if i != 0:
+            valueold = valuenew
 
-plt.plot(minpres_letkf[:],color='blue')
-plt.plot(minpres_mdet[:],color='green')
-plt.ylim(940,1000)
-plt.savefig('TCpres.png')
-plt.show()
+        valuenew = data.variables[valuename]
+        #minpres_letkf[i] = np.min(pres[1,:,:],axis=(0,1))/100
+        #pres = data.variables['PRES']
+        #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        if i != 0:
+            increment = valuenew[0,zlevel,:,:] - valueold[1,zlevel,:,:]
+            plt.imshow(increment, vmin=vvmin, vmax=vvmax)
+            plt.colorbar()
+            figname = "cntlincrement"+valuename+strday+strhour
+            plt.savefig(figname)
+            plt.clf()
+        i = i + 1
+        #show()
+
 
 
 
