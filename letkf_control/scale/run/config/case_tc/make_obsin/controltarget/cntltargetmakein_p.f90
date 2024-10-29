@@ -6,7 +6,7 @@ real(4),allocatable::axlon(:,:),axlat(:,:),axz(:),pres(:,:,:)
 
 integer,parameter::nelm=1 !3
 integer,parameter::elms(nelm)=(/14593/) !! Pres
-real(4),parameter::errs(nelm)=(/5.0/)    !! Pres 
+real(4),parameter::errs(nelm)=(/1.0/)    !! Pres 
 
 integer,parameter::intv_x=4 !not used
 integer,parameter::intv_y=4 !not used
@@ -53,7 +53,7 @@ ie = 1
   wk(4)=axz(iz)
 !  wk(4)=pres(ilon,ilat,ilev) * 0.01 !!! hPa
   print*, wk(4)
-  wk(5)=98000 * 0.01  !!! dat [hPa]
+  wk(5)=100000 * 0.01  !!! dat [hPa]
   wk(6)=errs(ie)   !!! err 
   wk(7)=1.0  !!! typ ADPUPA
   wk(8)=0.0   !!! dif
