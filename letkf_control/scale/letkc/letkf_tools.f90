@@ -130,7 +130,13 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   var_local(:,1) = VAR_LOCAL_UV(:)
   var_local(:,2) = VAR_LOCAL_T(:)
   var_local(:,3) = VAR_LOCAL_Q(:)
-  var_local(:,4) = VAR_LOCAL_PS(:)
+  !var_local(:,4) = VAR_LOCAL_PS(:)
+
+  ! control variable localization by Y.Saw 20241030
+  var_local(:,4) = 0.0d0
+  var_local(6,4) = 1.0d0 !QV only
+  ! end control variable localization
+
   var_local(:,5) = VAR_LOCAL_RAIN(:)
   var_local(:,6) = VAR_LOCAL_TC(:)
   var_local(:,7) = VAR_LOCAL_RADAR_REF(:)

@@ -38,7 +38,7 @@ import netCDF4 as nc
 
 # LETKF mean
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
-workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241024/result/case_tc/200001'
+workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 day = 1
 hour = 0
 i = 0
