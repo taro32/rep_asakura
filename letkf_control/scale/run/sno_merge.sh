@@ -14,9 +14,9 @@ ALLVAR=T
 SINGLE_VAR=F
 
 tint=10800 #864000 # [second]
-tstart='2000-01-06 00:00:00'
+tstart='2000-01-05 00:00:00'
 #tend=$tstart
-tend='2000-01-09 00:00:00'
+tend='2000-01-10 00:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 

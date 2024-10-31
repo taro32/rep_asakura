@@ -37,25 +37,25 @@ import netCDF4 as nc
 
 # LETKF mean
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
-workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
+workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241030_qvonly/result/case_tc/200001'
 day = 1
 hour = 0
 i = 0
 
 # your target
 zlevel = 1
-valuename="U"
+valuename="QV"
 
 # figure setting
-#vvmin=-0.0001
-#vvmax=0.0001
-vvmin=-1.0
-vvmax=1.0
+vvmin=-0.0005
+vvmax=0.0005
+#vvmin=-1.0
+#vvmax=1.0
 
 minpres_letkf = np.zeros((72))
 minpres_mdet = np.zeros((72))
 print(minpres_letkf)
-for day in range(1,7):
+for day in range(1,10):
     if day < 10:
         strday = '0'+str(day)
     else:
