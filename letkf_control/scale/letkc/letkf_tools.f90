@@ -648,6 +648,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
                anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) ! neglecting small perturbation and reduce gues
             ENDDO
             anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
+            anal3d(ij,ilev,mmean,iv3d_q) = gues3d(ij,ilev,mmean,iv3d_q) ! is it necessary?
     ENDIF
    ENDDO ![ij=1,nij1]
   ENDDO ![ilev=1,nlev]

@@ -37,20 +37,20 @@ import netCDF4 as nc
 
 # LETKF mean
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
-workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241031_qvonly_noqc/result/case_tc/200001'
+workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241101_qvonly_noqc_local08/result/case_tc/200001'
 day = 1
 hour = 0
 i = 0
 
 # your target
 zlevel = 1
-valuename="U"
+valuename="QV"
 
 # figure setting
-#vvmin=-0.0010
-#vvmax=0.0010
-vvmin=-1.0
-vvmax=1.0
+vvmin=-0.0010
+vvmax=0.0010
+#vvmin=-1.0
+#vvmax=1.0
 
 minpres_letkf = np.zeros((72))
 minpres_mdet = np.zeros((72))
@@ -66,7 +66,7 @@ for day in range(1,10):
         else:
             strhour = str(hour)
         print('reading..... ', day, hour)
-        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
+        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
         #pres = data.variables['PRES']
         #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         if i != 0:
@@ -80,7 +80,7 @@ for day in range(1,10):
             increment = valuenew[0,zlevel,:,:] - valueold[1,zlevel,:,:]
             plt.imshow(increment, vmin=vvmin, vmax=vvmax, cmap='seismic')
             plt.colorbar()
-            figname = "cntlincrement"+valuename+strday+strhour
+            figname = "mean_cntlincrement"+valuename+strday+strhour
             plt.savefig(figname)
             plt.clf()
         i = i + 1
