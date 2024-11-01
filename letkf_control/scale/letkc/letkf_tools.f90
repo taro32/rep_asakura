@@ -56,6 +56,11 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size),INTENT(INOUT) :: gues2d(nij1,nens,nv2d)      !  output: destroyed
   REAL(r_size),INTENT(OUT) :: anal3d(nij1,nlev,nens,nv3d)   ! analysis ensemble
   REAL(r_size),INTENT(OUT) :: anal2d(nij1,nens,nv2d)
+  REAL(r_size) :: control_std3d(nij1,nlev,nv3d) ! standard deviation for evaluating control perturbation
+  REAL(r_size) :: control_relativenorm3d(nij1,nlev,nv3d) ! control norm/std for evaluating control perturbation
+  REAL(r_size) :: controlperthreshold ! YSaw 20241101
+  REAL(r_size),PARAMETER :: control_lamda = 0.8 ! YSaw 20241101
+
 
 !  REAL(r_size) :: mean3d(nij1,nlev,nv3d)
 !  REAL(r_size) :: mean2d(nij1,nv2d)
@@ -448,7 +453,6 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
           transrlx(m,m) = transrlx(m,m) + (1.0d0-beta)                                 !GYL
         END DO                                                                         !GYL
 
-        ! analysis update of members
         DO m=1,MEMBER
           anal3d(ij,ilev,m,n) = gues3d(ij,ilev,mmean,n)                                !GYL
           DO k=1,MEMBER
@@ -456,6 +460,12 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
                                 + gues3d(ij,ilev,k,n) * transrlx(k,m)                  !GYL
           END DO  
         END DO
+
+
+        ! analysis update of members
+        IF (n == iv3d_q) THEN ! variance
+          CALL com_stdev(MEMBER, gues3d(ij,ilev,:,n), control_std3d(ij,ilev,n))
+        ENDIF
 
         ! analysis update of deterministic run
         if (DET_RUN) then                                                              !GYL
@@ -472,6 +482,9 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
           else ! no update
              anal3d(ij,ilev,mmdet,n) = gues3d(ij,ilev,mmdet,n)
           end if
+          if (n == iv3d_q) THEN
+             control_relativenorm3d(ij,ilev,n) = abs(anal3d(ij,ilev,mmdet,n)-gues3d(ij,ilev,mmdet,n))/control_std3d(ij,ilev,n)
+          endif
         end if                                                                         !GYL
 
         ! limit q spread
@@ -622,6 +635,24 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   END DO ! [ ilev=1,nlev ]
 !$OMP END DO
 
+!
+! Enforcing control perturbation local
+! picking up perturbations with large S/N ratio
+! by Y.Saw 20241101
+!
+  controlperthreshold = maxval(control_relativenorm3d(:,:,iv3d_q)) * control_lamda
+  DO ilev = 1, nlev
+   DO ij = 1, nij1
+    IF (control_relativenorm3d(ij,ilev,iv3d_q) < controlperthreshold) THEN
+            DO k = 1, MEMBER
+               anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) ! neglecting small perturbation and reduce gues
+            ENDDO
+            anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
+    ENDIF
+   ENDDO ![ij=1,nij1]
+  ENDDO ![ilev=1,nlev]
+! end localizating of control perturbation
+!
 
   deallocate (hdxf,rdiag,rloc,dep)
   if (DET_RUN) then

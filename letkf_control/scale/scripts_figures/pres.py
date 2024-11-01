@@ -38,15 +38,15 @@ import netCDF4 as nc
 
 # LETKF mean
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
-#workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241030_qvonly/result/case_tc/200001'
-workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
+workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241031_qvonly_noqc/result/case_tc/200001'
+#workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 day = 1
 hour = 0
 i = 0
 minpres_letkf = np.zeros((72))
 minpres_mdet = np.zeros((72))
 print(minpres_letkf)
-for day in range(1,9):
+for day in range(1,10):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -72,7 +72,7 @@ for day in range(1,9):
 plt.plot(minpres_letkf[:],color='blue')
 plt.plot(minpres_mdet[:],color='green')
 plt.ylim(940,1000)
-plt.savefig('TCpres_allcntl.png')
+plt.savefig('TCpres_qvonly.png')
 plt.show()
 
 
