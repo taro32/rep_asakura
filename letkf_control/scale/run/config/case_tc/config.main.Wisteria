@@ -13,7 +13,7 @@ DIR="$(cd "$(pwd)/.." && pwd)"    # Root directory of the SCALE-LETKF
 
 DATADIR=${SCALE_DB}          # Directory of the SCALE database
 
-OUTDIR=/work/jh220020o/f00019/scale_enkc/test_letkc_20241102_qvonly_noqc_local08/result/case_tc ### EDIT HERE ### 
+OUTDIR=/work/jh220020o/f00019/scale_enkc/test_letkc_20241103_qvonly_noqc_local001/result/case_tc ### EDIT HERE ### 
 INDIR="$OUTDIR"
 
 #===============================================================================
