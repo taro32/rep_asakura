@@ -37,13 +37,13 @@ import netCDF4 as nc
 
 # LETKF mean
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
-workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241103_qvonly_noqc_local08/result/case_tc/200001'
+workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241104_qvonly_noqc_local08/result/case_tc/200001'
 day = 1
 hour = 0
 i = 0
 
 # your target
-zlevel = 3
+zlevel = 2
 valuename="QV"
 
 # figure setting
@@ -55,7 +55,7 @@ vvmax=0.0010
 minpres_letkf = np.zeros((72))
 minpres_mdet = np.zeros((72))
 print(minpres_letkf)
-for day in range(1,8):
+for day in range(2,7):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -80,7 +80,7 @@ for day in range(1,8):
             increment = valuenew[0,zlevel,:,:] - valueold[1,zlevel,:,:]
             plt.imshow(increment, vmin=vvmin, vmax=vvmax, cmap='seismic')
             plt.colorbar()
-            figname = "cntlincrement"+valuename+strday+strhour
+            figname = "cntlincrement"+valuename+str(zlevel)+'_'+strday+strhour
             plt.savefig(figname)
             plt.clf()
         i = i + 1
