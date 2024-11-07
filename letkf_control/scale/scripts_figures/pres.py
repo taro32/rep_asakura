@@ -40,7 +40,7 @@ import netCDF4 as nc
 workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/20241105_letkc_qvonly_noqc_local001/result/case_tc/200001'
 #workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241104_qvonly_noqc_local08/result/case_tc/200001'
-workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/20241106_letkc_qvonly_noqc_local07_obserr01/result/case_tc/200001'
+workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241031_qvonly_noqc/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 day = 1
@@ -76,8 +76,8 @@ for day in range(2,10):
 plt.plot(minpres_letkf[:],color='blue')
 plt.plot(minpres_mdet[:],color='green')
 plt.ylim(940,1000)
-#plt.savefig('TCpres_nocntlvscntl_local07.png')
-plt.savefig('TCpres_local06.png')
+plt.savefig('TCpres_nocntlvscntl_local09.png')
+#plt.savefig('TCpres_local08.png')
 plt.show()
 
 
