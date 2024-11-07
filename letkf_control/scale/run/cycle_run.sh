@@ -15,7 +15,7 @@ myname="$(basename "$0")"
 job='cycle'
 
 #GROUP=${GROUP:-$(id -ng)}
-GROUP='jh220020o'
+GROUP='gv42'
 if [ "$GROUP" == "fugaku" ] ; then
   echo 'specify group name $GROUP in which you want to submit the job'
   exit 1
