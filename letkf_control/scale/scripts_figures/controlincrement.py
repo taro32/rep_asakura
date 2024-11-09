@@ -37,13 +37,14 @@ import netCDF4 as nc
 
 # LETKF mean
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
-workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241108_letkc_qvonly_noqc_local095_obserr01/result/case_tc/200001'
+#workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241108_letkc_qvonly_noqc_local095_obserr01/result/case_tc/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241109_letkc_qvonly_noqc_local095_obserr01_withQ/result/case_tc/200001'
 day = 1
 hour = 0
 i = 0
 
 # your target
-zlevel = 1
+zlevel = 2
 valuename="QV"
 
 # figure setting
