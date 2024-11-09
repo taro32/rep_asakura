@@ -37,10 +37,10 @@ import netCDF4 as nc
 #show()
 
 # LETKF mean
-workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
+#workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/20241105_letkc_qvonly_noqc_local001/result/case_tc/200001'
 #workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241104_qvonly_noqc_local08/result/case_tc/200001'
-workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
+workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/20241108_letkc_qvonly_noqc_local095_obserr01/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241031_qvonly_noqc/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 day = 1
@@ -60,8 +60,8 @@ for day in range(2,10):
         else:
             strhour = str(hour)
         print('reading..... ', day, hour)
-        data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
-        #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
+        #data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
+        data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
         #pres = data.variables['PRES']
         #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         pres = data.variables['MSLP']
@@ -76,8 +76,8 @@ for day in range(2,10):
 plt.plot(minpres_letkf[:],color='blue')
 plt.plot(minpres_mdet[:],color='green')
 plt.ylim(940,1000)
-plt.savefig('TCpres_nocntlvscntl_local09.png')
-#plt.savefig('TCpres_local08.png')
+#plt.savefig('TCpres_nocntlvscntl_local09.png')
+plt.savefig('TCpres_local095.png')
 plt.show()
 
 
