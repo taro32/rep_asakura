@@ -13,7 +13,7 @@ DIR="$(cd "$(pwd)/.." && pwd)"    # Root directory of the SCALE-LETKF
 
 DATADIR=${SCALE_DB}          # Directory of the SCALE database
 
-OUTDIR=/work/gv42/f00019/enkc_with_TC/20241111_letkc_qvonly_noqc_local09_obserr01_withQ_infl145_denseob/result/case_tc  ### EDIT HERE ### 
+OUTDIR=/work/gv42/f00019/enkc_with_TC/20241111_letkc_qvonly_noqc_local095_obserr01_withQ_infl145_denseob/result/case_tc  ### EDIT HERE ### 
 INDIR="$OUTDIR"
 
 #===============================================================================
@@ -137,7 +137,7 @@ DISK_MODE=0      # Disk I/O mode
                  # 2: staging -- copy files to/from $TMP 
                  # 3: staging -- copy files to/from $TMPL for each node (effective only on Fugaku)
  
-TMPSUBDIR="tropicalcyclone_local09"  # (used to identify multiple runs in the same time)
+TMPSUBDIR="tropicalcyclone_local095"  # (used to identify multiple runs in the same time)
 
 TMP="$DIR/tmp/$TMPSUBDIR" # Temporary directory shared among all nodes
 TMPS="$TMP"  # Temporary directory only on the server node
