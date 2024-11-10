@@ -38,7 +38,7 @@ import netCDF4 as nc
 # LETKF mean
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241108_letkc_qvonly_noqc_local095_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241109_letkc_qvonly_noqc_local095_obserr01_withQ/result/case_tc/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241110_letkc_qvonly_noqc_local09_obserr01_withQ_infl145/result/case_tc/200001'
 day = 1
 hour = 0
 i = 0
@@ -81,7 +81,7 @@ for day in range(2,10):
             increment = valuenew[0,zlevel,:,:] - valueold[1,zlevel,:,:]
             plt.imshow(increment, vmin=vvmin, vmax=vvmax, cmap='seismic')
             plt.colorbar()
-            figname = "cntlincrement"+valuename+str(zlevel)+'_'+strday+strhour+'local095'
+            figname = "cntlincrement"+valuename+str(zlevel)+'_'+strday+strhour+'local09'
             plt.savefig(figname)
             plt.clf()
         i = i + 1
