@@ -603,9 +603,18 @@ while ((time <= ETIME)); do
           grep 'finished successfully' ${logd_org}/0/NOUT_${conf_time}.${mpiexec_cnt}.0 >/dev/null || exit 1 
         fi
 	#if ((s == 4)); then
+        if (( DET_RUN_UPDATE == 2)) ; then # letkc
 	if ((s == 8)); then #letkc
 	  cp $TMP/obsin/obsin.dat.out $OBS/${OBSNAME[1]}_${atime}.dat
-        fi	  
+        fi
+        fi
+
+        if (( DET_RUN_UPDATE != 2)) ; then # letkc
+        if ((s == 4)); then #letkc
+          cp $TMP/obsin/obsin.dat.out $OBS/${OBSNAME[1]}_${atime}.dat
+        fi
+        fi
+	
         echo "[$(datetime_now)] ${time}: ${stepname[$s]}: $it: end" >&2
       done
 
