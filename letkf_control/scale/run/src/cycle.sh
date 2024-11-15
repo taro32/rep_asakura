@@ -202,6 +202,7 @@ while ((time <= ETIME)); do
     if (((s_flag == 0 || s >= ISTEP) && (e_flag == 0 || s <= FSTEP))); then
 
       ######
+      if (( DET_RUN_UPDATE == 2)) ; then #letkc
       if ((s == 1 || s == 5)); then
         logd=$OUTDIR/$time/log/scale_pp
         if [[ "$TOPO_FORMAT" == 'prep' || "$TOPO_FORMAT" == 'none' ]] &&  [[  "$LANDUSE_FORMAT" == 'prep' || "$LANDUSE_FORMAT" == 'none' ]]  ; then
@@ -274,9 +275,90 @@ while ((time <= ETIME)); do
         #   mv $OUTDIR/$time/hist $OUTDIR/$time/hist_bg
 	#   mkdir $OUTDIR/$time/hist
 	#fi
+      fi
+      fi # letkc vs no letkc
 
+      ######
+      if (( DET_RUN_UPDATE != 2)) ; then #no letkc
+      if ((s == 1)); then
+        logd=$OUTDIR/$time/log/scale_pp
+        if [[ "$TOPO_FORMAT" == 'prep' || "$TOPO_FORMAT" == 'none' ]] &&  [[  "$LANDUSE_FORMAT" == 'prep' || "$LANDUSE_FORMAT" == 'none' ]]  ; then
+          echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (use prepared topo and landuse files)" >&2
+          continue
+        elif ((BDY_FORMAT == 0)); then
+          echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (use prepared boundary files)" >&2
+          continue
+        elif ((LANDUSE_UPDATE != 1 && loop > 1)); then
+          echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (already done in the first cycle)" >&2
+          continue
+        fi
+      fi
+      if ((s == 2)); then
+        logd=$OUTDIR/$time/log/scale_init
+        if ((BDY_FORMAT == 0)); then
+          echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (use prepared boundary files)" >&2
+          continue
+        elif ((BDY_FORMAT == 5)); then
+          echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (use prepared init files)" >&2
+          continue
+        fi
+        if ((SKIP_BDYINIT == 1 && $(datetime $time -$BDYINT s) < btime && time != btime)); then
+          echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (use boundary files produced in a previous cycle)" >&2
+          continue
+        else
+          btime=$(datetime $btime $BDYINT s)
+        fi
+
+        if [ "$PRESET" == 'FUGAKU' ] && (( BDY_LLIO_TMP == 1 )) ; then
+           if ((BDY_ENS ==1));then
+             BDY_LLIO_TMPDIR_TOP=/local/$time/bdy
+           else
+             BDY_LLIO_TMPDIR_TOP=/share/$time/bdy
+           fi
+           BDY_LLIO_TMPDIRS=
+           for mmmm in 'mean' 'mdet' 'mgue' `seq -f %04g 1 ${MEMBER}` ; do
+             BDY_LLIO_TMPDIRS=${BDY_LLIO_TMPDIRS}" "$BDY_LLIO_TMPDIR_TOP/${mmmm}
+           done
+           mpiexec mkdir -p ${BDY_LLIO_TMPDIRS}
+           mpiexec_cnt=$((mpiexec_cnt+1))
+        fi
 
       fi
+
+      if ((s == 3)); then
+        logd=$OUTDIR/$time/log/scale
+
+        if [ "$PRESET" = 'FUGAKU' ] && (( HIST_LLIO_TMP == 1 )) ; then
+           HIST_LLIO_TMPDIR_TOP=/local/$time/hist
+           HIST_LLIO_TMPDIRS=
+           for mmmm in 'mean' 'mdet' 'mgue' `seq -f %04g 1 ${MEMBER}` ; do
+             HIST_LLIO_TMPDIRS=${HIST_LLIO_TMPDIRS}" "$HIST_LLIO_TMPDIR_TOP/${mmmm}
+           done
+           mpiexec mkdir -p ${HIST_LLIO_TMPDIRS}
+           mpiexec_cnt=$((mpiexec_cnt+1))
+        fi
+
+        if [ "$PRESET" = 'FUGAKU' ] && (( ANAL_LLIO_TMP == 1 )) ; then
+           ANAL_LLIO_TMPDIR_TOP_OLD=/local/$time/anal" "/local/$time/gues
+           ANAL_LLIO_TMPDIR_TOP=/local/$atime/anal
+           ANAL_LLIO_TMPDIRS=
+           for mmmm in 'mean' 'mdet' 'sprd' '../gues/mean' '../gues/mdet' '../gues/sprd' `seq -f %04g 1 ${MEMBER}` ; do
+             ANAL_LLIO_TMPDIRS=${ANAL_LLIO_TMPDIRS}" "$ANAL_LLIO_TMPDIR_TOP/${mmmm}
+           done
+           mpiexec mkdir -p ${ANAL_LLIO_TMPDIRS}
+           mpiexec_cnt=$((mpiexec_cnt+1))
+        fi
+        #if (( s == 7 )); then #YSaw 20241014
+        #   mv $OUTDIR/$time/hist $OUTDIR/$time/hist_bg
+        #   mkdir $OUTDIR/$time/hist
+        #fi
+      fi
+      fi # letkc vs no letkc
+
+
+
+
+
       if (( DET_RUN_UPDATE != 2)) ; then #no letkc
       if ((s == 5)); then
         logd=$OUTDIR/$atime/log/letkf
@@ -497,7 +579,7 @@ while ((time <= ETIME)); do
       fi
       fi
 
-      if (( DET_RUN_UPDATE != 2)) ; then # letkc
+      if (( DET_RUN_UPDATE != 2)) ; then # letkf
       if ((s <= 3)); then  #YSaw until extended forecast 7--> 8 on 2024/10/23
         conf_time=$time
       else
