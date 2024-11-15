@@ -486,12 +486,25 @@ while ((time <= ETIME)); do
 
       nodestr=proc
 
+
+
       #if ((s <= 3)); then
+      if (( DET_RUN_UPDATE == 2)) ; then # letkc
       if ((s <= 8)); then  #YSaw until extended forecast 7--> 8 on 2024/10/23
         conf_time=$time
       else
         conf_time=$atime
       fi
+      fi
+
+      if (( DET_RUN_UPDATE != 2)) ; then # letkc
+      if ((s <= 3)); then  #YSaw until extended forecast 7--> 8 on 2024/10/23
+        conf_time=$time
+      else
+        conf_time=$atime
+      fi
+      fi
+
 
       logd_org=${logd}
       if [ "$PRESET" = 'FUGAKU' ] ; then

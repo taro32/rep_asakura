@@ -37,11 +37,12 @@ import netCDF4 as nc
 #show()
 
 # LETKF mean
-#workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
+workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/20241105_letkc_qvonly_noqc_local001/result/case_tc/200001'
 #workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241104_qvonly_noqc_local08/result/case_tc/200001'
-workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241109_letkc_qvonly_noqc_local09_obserr01_withQ/result/case_tc/200001'
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241110_letkc_qvonly_noqc_local09_obserr01_withQ_infl145/result/case_tc/200001'
+#workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241109_letkc_qvonly_noqc_local095_obserr01_withQ/result/case_tc/200001'
+#workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241110_letkc_qvonly_noqc_local07_obserr01_withQ_infl145/result/case_tc/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241109_letkc_qvonly_noqc_local095_obserr01_withQ/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241031_qvonly_noqc/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 day = 1

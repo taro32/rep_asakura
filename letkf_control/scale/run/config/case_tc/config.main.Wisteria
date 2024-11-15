@@ -13,7 +13,7 @@ DIR="$(cd "$(pwd)/.." && pwd)"    # Root directory of the SCALE-LETKF
 
 DATADIR=${SCALE_DB}          # Directory of the SCALE database
 
-OUTDIR=/work/gv42/f00019/enkc_with_TC/20241111_letkc_qvonly_noqc_local07_obserr01_withQ_infl145_denseob/result/case_tc  ### EDIT HERE ### 
+OUTDIR=/work/gv42/f00019/enkc_with_TC/20241115_nocontrol_obserr01_denseob/result/case_tc  ### EDIT HERE ### 
 INDIR="$OUTDIR"
 
 #===============================================================================
@@ -44,7 +44,7 @@ OBS_IN_FORMAT="PREPBUFR" # YSaw 20240702
 DET_RUN=1               # 0: Disable the deterministic run
                         # 1: Enable  the deterministic run
 
-DET_RUN_UPDATE=2        # 0: no update of deterministic run in LETKF
+DET_RUN_UPDATE=0        # 0: no update of deterministic run in LETKF
 			# 1: Updating deterministic run in LETKF
 			# 2: Updating deterministic run only in LETKC
 
@@ -137,7 +137,7 @@ DISK_MODE=0      # Disk I/O mode
                  # 2: staging -- copy files to/from $TMP 
                  # 3: staging -- copy files to/from $TMPL for each node (effective only on Fugaku)
  
-TMPSUBDIR="tropicalcyclone_local07"  # (used to identify multiple runs in the same time)
+TMPSUBDIR="tropicalcyclone"  # (used to identify multiple runs in the same time)
 
 TMP="$DIR/tmp/$TMPSUBDIR" # Temporary directory shared among all nodes
 TMPS="$TMP"  # Temporary directory only on the server node
