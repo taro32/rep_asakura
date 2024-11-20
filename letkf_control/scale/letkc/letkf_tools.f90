@@ -1994,7 +1994,8 @@ subroutine obs_local_cal(ri, rj, rlev, rz, nvar, iob, ic, ndist, nrloc, nrdiag)
   !
   ! Calculate observational localization
   !
-  nrloc = nrloc * EXP(-0.5d0 * ndist)
+  !nrloc = nrloc * EXP(-0.5d0 * ndist) ! No relaxing the impact based on distance in LETKC
+   nrloc = nrloc * 1.0d0  ! No relaxing the impact based on distance in LETKC  YSaw 20241120
   !
   ! Calculate (observation variance / localization)
   !
