@@ -510,6 +510,9 @@ SUBROUTINE set_letkf_obs
       IF(ABS(obsda%val(n)) > GROSS_ERROR * obs(iof)%err(iidx)) THEN
         obsda%qc(n) = iqc_gross_err
       END IF
+      IF(obsda%val(n) < 0) THEN ! LETKC When pres is larger than our target, no control Y.Saw 20241126
+        obsda%qc(n) = iqc_gross_err
+      END IF
     end select
 
     if ( LOG_LEVEL >= 3 .and. LOG_OUT ) then
