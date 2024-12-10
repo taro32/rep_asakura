@@ -38,7 +38,7 @@ import netCDF4 as nc
 # LETKF mdet
 baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241209_letkc_qvlevel1only_noqc_local09anddist_target990/result/case_tc/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241126_letkc_qvonly_noqc_local09anddist_target990/result/case_tc/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -117,28 +117,29 @@ for day in range(2,10):
         #pres = data.variables['PRES']
         #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         if i != 0:
-            fig = plt.figure(figsize=(20,10))
-            ax1 = fig.add_subplot(2,3,1)
-            ax1.set_title("QV [g/kg]",fontsize=16)
-            ax1.tick_params(labelsize=8)
-            plt.imshow(valuenew[0,0,:,:]*1000, vmin=0, vmax=20.0)
-            plt.colorbar(shrink=0.3)
-            plt.gca().invert_yaxis()
-            ax2 = fig.add_subplot(2,3,2)
-            ax2.set_title("perturbation [g/kg] at lev 1",fontsize=16)
+            plt.rcParams["font.size"] = 18
+            fig = plt.figure(figsize=(10,20))
+            #ax1 = fig.add_subplot(2,1,1)
+            #ax1.set_title("QV [g/kg]",fontsize=16)
+            #ax1.tick_params(labelsize=8)
+            #plt.imshow(valuenew[0,0,:,:]*1000, vmin=0, vmax=20.0)
+            #plt.colorbar(shrink=0.3)
+            #plt.gca().invert_yaxis()
+            ax2 = fig.add_subplot(2,1,1)
+            ax2.set_title("perturbation [g/kg] at lev 1",fontsize=18)
             increment = valuenew[0,0,:,:] - valueold[1,0,:,:]
             plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap='seismic')
-            ax2.tick_params(labelsize=8)
+            #ax2.tick_params(labelsize=8)
             plt.colorbar(shrink=0.3)
             plt.gca().invert_yaxis()
-            ax3 = fig.add_subplot(2,3,3)
-            ax3.set_title("perturbation [g/kg] at lev 2",fontsize=16)
-            increment = valuenew[0,1,:,:] - valueold[1,1,:,:]
-            plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap='seismic')
-            ax3.tick_params(labelsize=8)
-            plt.colorbar(shrink=0.3)
-            plt.gca().invert_yaxis()
-            ax4 = fig.add_subplot(2,3,4)
+            #ax3 = fig.add_subplot(2,3,3)
+            #ax3.set_title("perturbation [g/kg] at lev 2",fontsize=16)
+            #increment = valuenew[0,1,:,:] - valueold[1,1,:,:]
+            #plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap='seismic')
+            #ax3.tick_params(labelsize=8)
+            #plt.colorbar(shrink=0.3)
+            #plt.gca().invert_yaxis()
+            ax4 = fig.add_subplot(2,1,2)
             ax4.set_title('central pressure [hPa]',fontsize=16)
             plt.plot(minpres_baseline[:],color='black')
             plt.plot(minpres_mdet[:],color='green')
@@ -147,8 +148,8 @@ for day in range(2,10):
             plt.ylim(940,1000)
             plt.xlim(0,72)
 
-            figname = "demo"+valuename+'_'+strday+strhour+'local07'
-            plt.savefig('./20241209_letkc_qvlevel1only_noqc_local09anddist_target990//'+figname)
+            figname = "newdemo"+valuename+'_'+strday+strhour+'local07'
+            plt.savefig('./newdemo20241127/'+figname)
             plt.clf()
         i = i + 1
         #show()
