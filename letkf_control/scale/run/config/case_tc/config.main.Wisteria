@@ -137,7 +137,7 @@ DISK_MODE=0      # Disk I/O mode
                  # 2: staging -- copy files to/from $TMP 
                  # 3: staging -- copy files to/from $TMPL for each node (effective only on Fugaku)
  
-TMPSUBDIR="tropicalcyclone_Tlocal07"  # (used to identify multiple runs in the same time)
+TMPSUBDIR="tropicalcyclone_windlocal07"  # (used to identify multiple runs in the same time)
 
 TMP="$DIR/tmp/$TMPSUBDIR" # Temporary directory shared among all nodes
 TMPS="$TMP"  # Temporary directory only on the server node
