@@ -43,7 +43,7 @@ workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241115_nocontrol_obserr01_den
 #workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241104_qvonly_noqc_local08/result/case_tc/200001'
 #workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241109_letkc_qvonly_noqc_local095_obserr01_withQ/result/case_tc/200001'
 #workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241110_letkc_qvonly_noqc_local07_obserr01_withQ_infl145/result/case_tc/200001'
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241209_letkc_qvlevel1only_noqc_local09anddist_target990/result/case_tc/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241211_letkc_windonly_noqc_local07anddist_target990/result/case_tc/200001'
 #workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241115_nocontrol_obserr01_denseob/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241031_qvonly_noqc/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
@@ -53,7 +53,7 @@ i = 0
 minpres_letkf = np.zeros((72))
 minpres_mdet = np.zeros((72))
 print(minpres_letkf)
-for day in range(2,10):
+for day in range(2,7):
     if day < 10:
         strday = '0'+str(day)
     else:
