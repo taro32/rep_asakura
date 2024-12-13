@@ -38,7 +38,7 @@ import netCDF4 as nc
 # LETKF mdet
 baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241126_letkc_qvonly_noqc_local09anddist_target990/result/case_tc/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241212_letkc_windonly_noqc_local07anddist_target990/result/case_tc/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -84,7 +84,7 @@ i = 0
 
 # your target
 #zlevel = 2
-valuename="QV"
+valuename="U"
 
 # figure setting
 vvmin=-1.0

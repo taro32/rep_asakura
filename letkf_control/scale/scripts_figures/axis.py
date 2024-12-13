@@ -36,53 +36,19 @@ import netCDF4 as nc
 #show()
 
 # LETKF mdet
-baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
+#baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
 workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241212_letkc_qvonly_noqc_local07anddist_target990/result/case_tc/200001'
 
-minpres_baseline = np.zeros((64))
-minpres_mdet = np.zeros((64))
-day = 1
-hour = 0
-i = 0
 
-
-for day in range(2,10):
-    if day < 10:
-        strday = '0'+str(day)
-    else:
-        strday = str(day)
-    for hour in range(0,24,3):
-        if hour < 10:
-            strhour = '0'+str(hour)
-        else:
-            strhour = str(hour)
-        print('reading..... ', day, hour)
-        data = nc.Dataset(baseline+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
-        #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
-        #pres = data.variables['PRES']
-        #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        pres = data.variables['MSLP']
-        minpres_baseline[i] = np.min(pres[1,:,:],axis=(0,1))/100
-        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
-        #pres = data.variables['PRES']
-        #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        pres = data.variables['MSLP']
-        minpres_mdet[i] = np.min(pres[1,:,:],axis=(0,1))/100
-        i = i + 1
-
-#plt.plot(minpres_baseline[:],color='black')
-#plt.plot(minpres_mdet[:],color='green')
-#plt.axvline(10, color='red',linestyle='--')
-#plt.ylim(940,1000)
-#plt.show()
+distance = np.zeros((120,120))
+for i in range(0,120):
+    for j in range(0,120):
+        distance[i,j] =  np.sqrt((i-60)**2 + (j-60)**2)
+plt.imshow(distance,cmap='seismic')
+plt.show()
 #sys.exit()
-day = 1
-hour = 0
-i = 0
 
-
-# your target
 #zlevel = 2
 valuename="QV"
 
@@ -91,6 +57,22 @@ vvmin=-1.0
 vvmax=1.0
 #vvmin=-1.0
 #vvmax=1.0
+
+data = nc.Dataset(workdir_letkf+'04'+'12'+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
+value = data.variables[valuename]
+valueaxis = np.zeros((30,90))
+valueaxiscount = np.zeros((30,90))
+
+for i in range(0,120):
+    for j in range(0,120):
+        for k in range(0,20):
+            valueaxis[k,int(distance[i,j])]+=value[0,k,i,j]
+            valueaxiscount[k,int(distance[i,j])]+=1
+
+#valueaxis = valueaxis/valueaxiscount
+plt.imshow(valueaxis,cmap='seismic',origin='lower')
+plt.show()
+sys.exit()
 
 #minpres_letkf = np.zeros((72))
 #minpres_mdet = np.zeros((72))
