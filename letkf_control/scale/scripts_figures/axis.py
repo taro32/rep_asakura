@@ -13,27 +13,6 @@ import struct
 import netCDF4 as nc
 
 
-#workdir = '/work/jh220020o/f00019/scale_enkc/test_fcst/result_exp20240624/case_tc/20000101000000/fcst_sno_np00004/'
-#minpres = np.zeros((81,nens))
-#for i in range(1,nens+1):
-#    if i < 10:
-#        stri = '000'+str(i)
-#    elif i < 100:
-#        stri = '00'+str(i)
-#    elif i < 1000:
-#        stri = '0'+str(i)
-#    else:
-#        stri = str(i)
-#    data = nc.Dataset(workdir+stri+'/history.pe000000.nc','r')
-#    pres = data.variables['PRES']
-#    minpres[:,i-1] = np.min(pres[:,0,:,:],axis=(1,2))/100.0
-
-#for i in range(0,nens):
-#    if i == 95:
-#        plt.plot(minpres[:,i],color='r')
-#    else:
-#        plt.plot(minpres[:,i],color='k')
-#show()
 
 # LETKF mdet
 #baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
@@ -45,12 +24,12 @@ distance = np.zeros((120,120))
 for i in range(0,120):
     for j in range(0,120):
         distance[i,j] =  np.sqrt((i-60)**2 + (j-60)**2)
-plt.imshow(distance,cmap='seismic')
-plt.show()
+#plt.imshow(distance,cmap='seismic')
+#plt.show()
 #sys.exit()
 
 #zlevel = 2
-valuename="QV"
+valuename="U"
 
 # figure setting
 vvmin=-1.0
@@ -58,26 +37,12 @@ vvmax=1.0
 #vvmin=-1.0
 #vvmax=1.0
 
-data = nc.Dataset(workdir_letkf+'04'+'12'+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
-value = data.variables[valuename]
-valueaxis = np.zeros((30,90))
-valueaxiscount = np.zeros((30,90))
 
-for i in range(0,120):
-    for j in range(0,120):
-        for k in range(0,20):
-            valueaxis[k,int(distance[i,j])]+=value[0,k,i,j]
-            valueaxiscount[k,int(distance[i,j])]+=1
-
-#valueaxis = valueaxis/valueaxiscount
-plt.imshow(valueaxis,cmap='seismic',origin='lower')
-plt.show()
-sys.exit()
-
-#minpres_letkf = np.zeros((72))
 #minpres_mdet = np.zeros((72))
 #print(minpres_letkf)
-for day in range(2,10):
+interventioncount = np.zeros((20,120,120))
+i = 0
+for day in range(2,8):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -98,45 +63,24 @@ for day in range(2,10):
         #minpres_letkf[i] = np.min(pres[1,:,:],axis=(0,1))/100
         #pres = data.variables['PRES']
         #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        
         if i != 0:
-            fig = plt.figure(figsize=(20,10))
-            ax1 = fig.add_subplot(2,3,1)
-            ax1.set_title("QV [g/kg]",fontsize=16)
-            ax1.tick_params(labelsize=8)
-            plt.imshow(valuenew[0,0,:,:]*1000, vmin=0, vmax=20.0)
-            plt.colorbar(shrink=0.3)
-            plt.gca().invert_yaxis()
-            ax2 = fig.add_subplot(2,3,2)
-            ax2.set_title("perturbation [g/kg] at lev 1",fontsize=16)
-            increment = valuenew[0,3,:,:] - valueold[1,3,:,:]
-            plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap='seismic')
-            ax2.tick_params(labelsize=8)
-            plt.colorbar(shrink=0.3)
-            plt.gca().invert_yaxis()
-            ax3 = fig.add_subplot(2,3,3)
-            ax3.set_title("perturbation [g/kg] at lev 2",fontsize=16)
-            increment = valuenew[0,4,:,:] - valueold[1,4,:,:]
-            plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap='seismic')
-            ax3.tick_params(labelsize=8)
-            plt.colorbar(shrink=0.3)
-            plt.gca().invert_yaxis()
-            ax4 = fig.add_subplot(2,3,4)
-            ax4.set_title('central pressure [hPa]',fontsize=16)
-            plt.plot(minpres_baseline[:],color='black')
-            plt.plot(minpres_mdet[:],color='green')
-            
-            plt.axvline(i, color='red',linestyle='--')
-            plt.ylim(940,1000)
-            plt.xlim(0,72)
+            diff = valuenew[0,:,:,:] - valueold[1,:,:,:]
+            diff[diff !=0.0] = 1
+            interventioncount += diff
+        i += 1
 
-            figname = "demo"+valuename+'_'+strday+strhour+'U_3_4'
-            plt.savefig('./20241212_letkc_qvonly_noqc_local07anddist_target990/'+figname)
-            plt.clf()
-        i = i + 1
-        #show()
-
-
-
-
+valueaxis = np.zeros((20,120))
+valueaxiscount = np.zeros((20,120))
+for i in range(0,120):
+    for j in range(0,120):
+        for k in range(0,20):
+            valueaxis[k,int(distance[i,j])]+=interventioncount[k,i,j]
+            valueaxiscount[k,int(distance[i,j])]+=1
+valueaxiscount [valueaxiscount == 0] = 1
+#valueaxis = valueaxis/valueaxiscount
+plt.imshow(valueaxis[:,0:50],cmap='seismic', origin='lower')
+plt.colorbar()
+plt.show()
 
 

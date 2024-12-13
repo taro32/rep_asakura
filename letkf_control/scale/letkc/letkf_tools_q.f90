@@ -59,7 +59,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size) :: control_std3d(nij1,nlev,nv3d) ! standard deviation for evaluating control perturbation
   REAL(r_size) :: control_relativenorm3d(nij1,nlev,nv3d) ! control norm/std for evaluating control perturbation
   REAL(r_size) :: controlperthreshold ! YSaw 20241101
-  REAL(r_size),PARAMETER :: control_lamda = 0.95 ! YSaw 20241101
+  REAL(r_size),PARAMETER :: control_lamda = 0.7 ! YSaw 20241101
 
 
 !  REAL(r_size) :: mean3d(nij1,nlev,nv3d)
@@ -639,11 +639,12 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 ! Enforcing control perturbation local
 ! picking up perturbations with large S/N ratio
 ! by Y.Saw 20241101
+! only first 3-layer
 !
-  controlperthreshold = maxval(control_relativenorm3d(:,:,iv3d_q)) * control_lamda
+  controlperthreshold = maxval(control_relativenorm3d(:,1:3,iv3d_q)) * control_lamda
   DO ilev = 1, nlev
    DO ij = 1, nij1
-!    IF (ilev == 1)THEN
+    IF (ilev <=  3)THEN
      IF (control_relativenorm3d(ij,ilev,iv3d_q) < controlperthreshold) THEN
             DO k = 1, MEMBER
                anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) + gues3d(ij,ilev,mmean,iv3d_q) ! neglecting small perturbation and reduce gues
@@ -651,13 +652,13 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
             anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
             anal3d(ij,ilev,mmean,iv3d_q) = gues3d(ij,ilev,mmean,iv3d_q) ! is it necessary?
      ENDIF
-!    ELSE  ! only 1st layer can be controlled by YSaw
-!            DO k = 1, MEMBER
-!               anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) + gues3d(ij,ilev,mmean,iv3d_q) ! neglecting small perturbation and reduce gues
-!            ENDDO
-!            anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
-!            anal3d(ij,ilev,mmean,iv3d_q) = gues3d(ij,ilev,mmean,iv3d_q) ! is it necessary?
-!    ENDIF
+    ELSE  ! only 1-3 layer can be controlled by YSaw
+            DO k = 1, MEMBER
+               anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) + gues3d(ij,ilev,mmean,iv3d_q) ! neglecting small perturbation and reduce gues
+            ENDDO
+            anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
+            anal3d(ij,ilev,mmean,iv3d_q) = gues3d(ij,ilev,mmean,iv3d_q) ! is it necessary?
+    ENDIF
    ENDDO ![ij=1,nij1]
   ENDDO ![ilev=1,nlev]
 ! end localizating of control perturbation
