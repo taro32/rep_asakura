@@ -29,7 +29,7 @@ for i in range(0,120):
 #sys.exit()
 
 #zlevel = 2
-valuename="U"
+valuename="QV"
 
 # figure setting
 vvmin=-1.0

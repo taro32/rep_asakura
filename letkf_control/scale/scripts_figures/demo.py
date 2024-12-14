@@ -38,7 +38,7 @@ import netCDF4 as nc
 # LETKF mdet
 baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241212_letkc_qvonly_noqc_local07anddist_target990/result/case_tc/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241213_letkc_qvonly_noqc_local09anddist_hv_target990/result/case_tc/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -126,14 +126,14 @@ for day in range(2,10):
             plt.gca().invert_yaxis()
             ax2 = fig.add_subplot(2,3,2)
             ax2.set_title("perturbation [g/kg] at lev 1",fontsize=16)
-            increment = valuenew[0,12,:,:] - valueold[1,12,:,:]
+            increment = valuenew[0,2,:,:] - valueold[1,2,:,:]
             plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap='seismic')
             ax2.tick_params(labelsize=8)
             plt.colorbar(shrink=0.3)
             plt.gca().invert_yaxis()
             ax3 = fig.add_subplot(2,3,3)
             ax3.set_title("perturbation [g/kg] at lev 2",fontsize=16)
-            increment = valuenew[0,13,:,:] - valueold[1,13,:,:]
+            increment = valuenew[0,3,:,:] - valueold[1,3,:,:]
             plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap='seismic')
             ax3.tick_params(labelsize=8)
             plt.colorbar(shrink=0.3)
@@ -147,8 +147,8 @@ for day in range(2,10):
             plt.ylim(940,1000)
             plt.xlim(0,72)
 
-            figname = "demo"+valuename+'_'+strday+strhour+'U_12_13'
-            plt.savefig('./20241212_letkc_qvonly_noqc_local07anddist_target990/'+figname)
+            figname = "demo"+valuename+'_'+strday+strhour+'U_2_3'
+            plt.savefig('./20241213_letkc_qvonly_noqc_local09anddist_hv_target990/'+figname)
             plt.clf()
         i = i + 1
         #show()
