@@ -37,13 +37,13 @@ import netCDF4 as nc
 #show()
 
 # LETKF mean
-#workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
-workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241115_nocontrol_obserr01_denseob/result/case_tc/200001'
+workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
+#workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241115_nocontrol_obserr01_denseob/result/case_tc/200001'
 #workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/20241105_letkc_qvonly_noqc_local001/result/case_tc/200001'
 #workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241104_qvonly_noqc_local08/result/case_tc/200001'
 #workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241109_letkc_qvonly_noqc_local095_obserr01_withQ/result/case_tc/200001'
 #workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241110_letkc_qvonly_noqc_local07_obserr01_withQ_infl145/result/case_tc/200001'
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241216_letkc_qvonly_noqc_local07anddist_hv_target990_weight0001/result/case_tc/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241217_letkc_qvonly_noqc_local07anddist_hv_target980_weight0001/result/case_tc/200001'
 #workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241115_nocontrol_obserr01_denseob/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241031_qvonly_noqc/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
@@ -70,7 +70,8 @@ for day in range(2,10):
         #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         pres = data.variables['MSLP']
         minpres_letkf[i] = np.min(pres[1,:,:],axis=(0,1))/100
-        data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
+        #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
+        data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
         #pres = data.variables['PRES']
         #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         pres = data.variables['MSLP']
