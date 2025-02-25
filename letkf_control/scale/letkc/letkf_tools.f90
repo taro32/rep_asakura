@@ -94,6 +94,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   logical :: trans_done(nv3d+nv2d)
 
   INTEGER :: ij,ilev,n,m,i,k,nobsl
+  INTEGER :: clev                                !YSaw maxlevel for control
   INTEGER :: nobsl_t(nid_obs,nobtype)            !GYL
   REAL(r_size) :: cutd_t(nid_obs,nobtype)        !GYL
   REAL(r_size) :: beta                           !GYL
@@ -641,10 +642,11 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 ! by Y.Saw 20241101
 ! only first 3-layer
 !
-  controlperthreshold = maxval(control_relativenorm3d(:,1:3,iv3d_q)) * control_lamda
+  clev = 20
+  controlperthreshold = maxval(control_relativenorm3d(:,1:clev,iv3d_q)) * control_lamda
   DO ilev = 1, nlev
    DO ij = 1, nij1
-    IF (ilev <=  3)THEN
+    IF (ilev <=  clev)THEN
      IF (control_relativenorm3d(ij,ilev,iv3d_q) < controlperthreshold) THEN
             DO k = 1, MEMBER
                anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) + gues3d(ij,ilev,mmean,iv3d_q) ! neglecting small perturbation and reduce gues
