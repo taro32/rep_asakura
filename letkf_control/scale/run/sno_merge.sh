@@ -249,7 +249,7 @@ cat << EOF >> $jobsh
 #PJM -g "gv42" 
 #PJM -L "rscgrp=regular-o"
 #PJM -L "node=${SNO_NODE}"
-#PJM -L "elapse=00:30:00"
+#PJM -L "elapse=00:05:00"
 #PJM --mpi "max-proc-per-node=${PPN}"
 #PJM --omp "thread=${THREADS}"
 #PJM -j

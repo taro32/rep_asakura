@@ -17,7 +17,7 @@ import netCDF4 as nc
 # LETKF mdet
 #baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241212_letkc_qvonly_noqc_local07anddist_target990/result/case_tc/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241212_letkc_windonly_noqc_local07anddist_target990/result/case_tc/200001'
 
 
 distance = np.zeros((120,120))
@@ -29,7 +29,7 @@ for i in range(0,120):
 #sys.exit()
 
 #zlevel = 2
-valuename="QV"
+valuename="U"
 
 # figure setting
 vvmin=-1.0
@@ -42,7 +42,7 @@ vvmax=1.0
 #print(minpres_letkf)
 interventioncount = np.zeros((20,120,120))
 i = 0
-for day in range(2,8):
+for day in range(7,10):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -78,9 +78,12 @@ for i in range(0,120):
             valueaxis[k,int(distance[i,j])]+=interventioncount[k,i,j]
             valueaxiscount[k,int(distance[i,j])]+=1
 valueaxiscount [valueaxiscount == 0] = 1
-#valueaxis = valueaxis/valueaxiscount
-plt.imshow(valueaxis[:,0:50],cmap='seismic', origin='lower')
+valueaxis = valueaxis/valueaxiscount
+figure(figsize=(10,10))
+#plt.imshow(valueaxis[:,0:50],cmap='seismic', vmin=0,vmax=1200,origin='lower')
+plt.imshow(valueaxis[:,0:50],cmap='seismic',vmin=0, vmax=10,origin='lower')
 plt.colorbar()
+plt.savefig('Uloclate.png')
 plt.show()
 
 
