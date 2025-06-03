@@ -5,7 +5,7 @@
 #PJM --mpi "proc=32"
 #PJM --omp "thread=12"
 #PJM -L "elapse=0:30:00"
-#PJM -g "jh220020o"
+#PJM -g "gv42"
 #PJM -j
 #--------------------------------------------
 export SCALE_SYS="FX700"
