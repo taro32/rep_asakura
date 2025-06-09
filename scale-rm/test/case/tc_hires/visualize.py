@@ -18,12 +18,12 @@ filename = 'history/merged_history1.pe000000.nc'
 print('reading...', filename)
 data = nc.Dataset(filename,'r')
 
-
+print(data)
 
 # your target
 zlevel = 0 # height
-time = 400 #timestamp
-valuename="QV" # variables QV = water vapor
+time = 1 #timestamp
+valuename='QV' # variables QV = water vapor
 
 
 # visualization
