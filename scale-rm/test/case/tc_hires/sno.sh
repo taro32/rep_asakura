@@ -1,8 +1,8 @@
 #!/bin/sh
 #--------------pjsub option-------------------
 #PJM -L "rscgrp=regular-o"
-#PJM -L "node=12"
-#PJM --mpi "proc=48"
+#PJM -L "node=24"
+#PJM --mpi "proc=96"
 #PJM --omp "thread=12"
 #PJM -L "elapse=48:00:00"
 #PJM -g "gv42"

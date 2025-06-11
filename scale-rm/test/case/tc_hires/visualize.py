@@ -14,16 +14,16 @@ import netCDF4 as nc
 
 
 # SNO output
-filename = 'history/merged_history1_p.pe000000.nc'
+filename = 'history_smalloutput/merged_history1.pe000000.nc'
 print('reading...', filename)
 data = nc.Dataset(filename,'r')
 
 print(data)
 
 # your target
-zlevel = 2 # height
-time = 40 #timestamp
-valuename='PRES' # variables QV = water vapor
+zlevel = 0 # height
+time = 3 #timestamp
+valuename='QV' # variables QV = water vapor
 
 
 # visualization
@@ -34,12 +34,27 @@ plt.rcParams['axes.labelsize'] = 24
 plt.rcParams['font.size'] = 24
 ax1.set_title("QV [g/kg]",fontsize=24)
 ax1.tick_params(labelsize=24)
-plt.imshow(value[time,zlevel,150:450,150:450]*1000)
+plt.imshow(value[time,zlevel,:,:]*1000)
+#plt.imshow(value[time,:,:]) # PRES
 plt.colorbar(shrink=0.3)
 plt.savefig('./test_tc.png')
 
+sys.exit()
 
+cpres = []
+for t in range(41):
+    cpres.append(value[t, 300, 300])
 
+print(cpres)
 
-
+# plot cpres time series
+time = np.arange(0, len(cpres))
+plt.figure(figsize=(10,6))
+plt.plot(time, cpres)
+plt.xlabel("Time")
+plt.ylabel("PRES [at (300,300)]")
+plt.title("Time series of PRES at (300,300)")
+plt.grid(True)
+plt.savefig('./cpres_timeseries.png')
+plt.show()
 
