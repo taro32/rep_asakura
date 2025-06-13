@@ -7,7 +7,7 @@
 
 STIME='20000101000000'
 ETIME=$STIME
-TIME_LIMIT='01:30:00'
+TIME_LIMIT='10:00:00'
 #MEMBERS='mean'
 MEMBERS='mems'
 CYCLE=1
@@ -19,7 +19,7 @@ CONF_MODE="static"
 #===============================================================================
 # Forecast settings
 
-FCSTLEN=10800 #864000      # SCALE forecast length in the forecast mode (second)
+FCSTLEN=864000 #10800     # SCALE forecast length in the forecast mode (second)
 FCSTOUT=10800
 RESTARTOUT=$FCSTLEN
 
