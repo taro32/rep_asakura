@@ -1,11 +1,11 @@
 #!/bin/sh
 #--------------pjsub option-------------------
 #PJM -L "rscgrp=regular-o"
-#PJM -L "node=24"
-#PJM --mpi "proc=96"
+#PJM -L "node=16"
+#PJM --mpi "proc=64"
 #PJM --omp "thread=12"
-#PJM -L "elapse=48:00:00"
-#PJM -g "gv42"
+#PJM -L "elapse=5:00:00"
+#PJM -g "jh250035o"
 #PJM -j
 #--------------------------------------------
 export SCALE_SYS="FX700"

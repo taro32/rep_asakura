@@ -14,7 +14,7 @@ import netCDF4 as nc
 
 
 # SNO output
-filename = 'history_smalloutput/merged_history1.pe000000.nc'
+filename = 'history/merged_history1.pe000000.nc'
 print('reading...', filename)
 data = nc.Dataset(filename,'r')
 
@@ -22,8 +22,8 @@ print(data)
 
 # your target
 zlevel = 0 # height
-time = 3 #timestamp
-valuename='QV' # variables QV = water vapor
+time = 25 #timestamp
+valuename='PRES' # variables QV = water vapor
 
 
 # visualization
@@ -39,11 +39,11 @@ plt.imshow(value[time,zlevel,:,:]*1000)
 plt.colorbar(shrink=0.3)
 plt.savefig('./test_tc.png')
 
-sys.exit()
+#sys.exit()
 
 cpres = []
 for t in range(41):
-    cpres.append(value[t, 300, 300])
+    cpres.append(value[t, 0, 200, 200])
 
 print(cpres)
 
