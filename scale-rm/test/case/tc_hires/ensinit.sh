@@ -7,7 +7,7 @@
 #=============================================
 
 #ensemble size
-MEMBER=100 
+MEMBER=101 
 
 m=1
 while [ "$m" -le "$MEMBER" ]; do

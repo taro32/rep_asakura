@@ -17,6 +17,7 @@ import netCDF4 as nc
 workdir = '/work/jh250035o/f00019/enkc_with_TC/20250613_fcst/result/tc_hires/20000101000000/fcst_sno_np00064/'
 nens = 10 # ensemble size
 minpres = np.zeros((81,nens))
+print(workdir)
 for i in range(1,nens+1):
     if i < 10:
         stri = '000'+str(i)

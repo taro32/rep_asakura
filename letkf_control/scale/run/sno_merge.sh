@@ -13,7 +13,7 @@ INPUT_SNOW_NP=16
 ALLVAR=T
 SINGLE_VAR=F
 
-tint=10800 #864000 # [second]
+tint=864000 #10800 #864000 # [second]
 tstart='2000-01-01 00:00:00'
 tend=$tstart
 #tend='2000-01-06 00:00:00'
@@ -171,7 +171,7 @@ cat << EOF >> $conf
 &PARAM_IO
  IO_LOG_BASENAME = "log/LOG_${mem}_${DTIME}",
  IO_LOG_ALLNODE = .false.,
- IO_LOG_SUPPRESS = .true.,
+ IO_LOG_SUPPRESS = .false.,
  IO_LOG_NML_SUPPRESS = .true.,
 /
 &PARAM_SNO
@@ -249,7 +249,7 @@ cat << EOF >> $jobsh
 #PJM -g "jh250035o" 
 #PJM -L "rscgrp=regular-o"
 #PJM -L "node=${SNO_NODE}"
-#PJM -L "elapse=00:05:00"
+#PJM -L "elapse=48:00:00"
 #PJM --mpi "max-proc-per-node=${PPN}"
 #PJM --omp "thread=${THREADS}"
 #PJM -j
@@ -418,12 +418,12 @@ fi
 cd ${RUNDIR}
 
 count=1
-while [ $count -le ${cnt} ]; do
-	countend=$((count + 9))
-	pjsub --bulk --sparam "${count}-${countend}" job_sno.sh
-	count=$((countend + 1))
-	sleep 5
-done
+#while [ $count -le ${cnt} ]; do
+#	countend=$((count + 9))
+#	pjsub --bulk --sparam "${count}-${countend}" job_sno.sh
+#	count=$((countend + 1))
+#	sleep 5
+#done
 #echo "cnt = ", ${cnt}
 pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
 #pjsub --bulk --sparam "1-11" job_sno.sh 

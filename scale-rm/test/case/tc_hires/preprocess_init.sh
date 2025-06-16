@@ -21,7 +21,7 @@ do
   member[${m}]="${m}"
  fi
  echo ${member[${m}]}
- cp -R ${m} letkfinput/${member[${m}]}
+ cp -R ${m} letkfinput101/${member[${m}]}
  m=`expr ${m} + 1`
 done
 
