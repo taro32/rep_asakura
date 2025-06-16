@@ -14,26 +14,26 @@ ALLVAR=T
 SINGLE_VAR=F
 
 tint=10800 #864000 # [second]
-tstart='2000-01-06 00:00:00'
-#tend=$tstart
-tend='2000-01-10 00:00:00'
+tstart='2000-01-01 00:00:00'
+tend=$tstart
+#tend='2000-01-06 00:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 
 
 SCALEDIR="$(cd "$(pwd)/../../.." && pwd)"  
 
-#TYPE=fcst
+TYPE=fcst
 #TYPE=anal
 #TYPE=gues
-TYPE=hist
+#TYPE=hist
 
 ## Which domain do you want to convert?
 #DOM=2 
 
 # Output file (X & Y process number) for each member
-NP_OFILE_X=2
-NP_OFILE_Y=2
+NP_OFILE_X=8
+NP_OFILE_Y=8
 
 if [ "$INPUT_FROM_SNOW" == "T" ] ; then
   NP_OFILE_X=1
@@ -44,11 +44,11 @@ fi
 NP_OFILE=$((${NP_OFILE_X} * ${NP_OFILE_Y})) # Output file (process number) for each member
 
 # Specify members that will be processed
-SNO_MEMBERS=100
+SNO_MEMBERS=10
 #SNO_MEM_L="mean "$(seq -f %04g ${SNO_MEMBERS})
-#SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
+SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
 
-SNO_MEM_L="mdet mean"
+#SNO_MEM_L="mdet mean"
 #SNO_MEM_L="0001"
 
 
@@ -246,7 +246,7 @@ if [ "$PRESET" = 'Wisteria' ]; then
 cat << EOF >> $jobsh
 #!/bin/bash 
 #
-#PJM -g "gv42" 
+#PJM -g "jh250035o" 
 #PJM -L "rscgrp=regular-o"
 #PJM -L "node=${SNO_NODE}"
 #PJM -L "elapse=00:05:00"
