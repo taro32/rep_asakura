@@ -14,28 +14,30 @@ import struct
 import netCDF4 as nc
 
 
-#workdir = '/work/jh220020o/f00019/scale_enkc/test_fcst/result_exp20240624/case_tc/20000101000000/fcst_sno_np00004/'
-nens = 100 # ensemble size
-#minpres = np.zeros((81,nens))
-#for i in range(1,nens+1):
-#    if i < 10:
-#        stri = '000'+str(i)
-#    elif i < 100:
-#        stri = '00'+str(i)
-#    elif i < 1000:
-#        stri = '0'+str(i)
-#    else:
-#        stri = str(i)
-#    data = nc.Dataset(workdir+stri+'/history.pe000000.nc','r')
-#    pres = data.variables['PRES']
-#    minpres[:,i-1] = np.min(pres[:,0,:,:],axis=(1,2))/100.0
+workdir = '/work/jh250035o/f00019/enkc_with_TC/20250613_fcst/result/tc_hires/20000101000000/fcst_sno_np00064/'
+nens = 10 # ensemble size
+minpres = np.zeros((81,nens))
+for i in range(1,nens+1):
+    if i < 10:
+        stri = '000'+str(i)
+    elif i < 100:
+        stri = '00'+str(i)
+    elif i < 1000:
+        stri = '0'+str(i)
+    else:
+        stri = str(i)
+    data = nc.Dataset(workdir+stri+'/history.pe000000.nc','r')
+    pres = data.variables['PRES']
+    minpres[:,i-1] = np.min(pres[:,0,:,:],axis=(1,2))/100.0
 
-#for i in range(0,nens):
+for i in range(0,nens):
 #    if i == 95:
 #        plt.plot(minpres[:,i],color='r')
 #    else:
-#        plt.plot(minpres[:,i],color='k')
+        plt.plot(minpres[:,i],color='k')
+plt.savefig("fcst_20250616")
 #show()
+sys.exit()
 
 # LETKF mean
 workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake/result/case_tc/200001'
