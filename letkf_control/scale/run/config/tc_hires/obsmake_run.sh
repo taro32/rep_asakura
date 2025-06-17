@@ -175,7 +175,7 @@ if [ "$PRESET" = 'Wisteria' ]; then
 cat > $jobscrp << EOF
 #!/bin/bash 
 #
-#PJM -g "jh220020o"
+#PJM -g "jh250035o"
 #PJM -L "rscgrp=regular-o"
 #PJM -L "node=$NNODES"
 #PJM -L "elapse=${TIME_LIMIT}"

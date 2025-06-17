@@ -1,4 +1,4 @@
-TOPDIR    = /work/jh220020o/f00019/scale_enkc/scale
+TOPDIR    = /work/jh250035o/f00019/scale/scale-letkc/
 include $(TOPDIR)/sysdep/Makedef.$(SCALE_SYS)
 include $(TOPDIR)/Mkinclude
 
@@ -10,7 +10,7 @@ SCALE_RM_OBJS = $(shell ls $(SCALE_RM_OBJDIR)/*.o | grep -v "scale-rm.o\|scale-r
 
 #------
 
-include /work/jh220020o/f00019/scale_enkc/scale/letkf/scale/arch/configure.user.$(SCALE_SYS)
+include /work/jh250035o/f00019/scale/scale-letkc/letkf_control/scale/arch/configure.user.$(SCALE_SYS)
 
 NETCDF_INC = $(SCALE_NETCDF_INCLUDE)
 NETCDF_LIB = $(SCALE_NETCDF_LIBS)

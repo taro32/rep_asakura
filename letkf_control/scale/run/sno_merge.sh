@@ -44,7 +44,7 @@ fi
 NP_OFILE=$((${NP_OFILE_X} * ${NP_OFILE_Y})) # Output file (process number) for each member
 
 # Specify members that will be processed
-SNO_MEMBERS=10
+SNO_MEMBERS=101
 #SNO_MEM_L="mean "$(seq -f %04g ${SNO_MEMBERS})
 SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
 
@@ -425,14 +425,17 @@ count=1
 #	sleep 5
 #done
 #echo "cnt = ", ${cnt}
-pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
-#pjsub --bulk --sparam "1-11" job_sno.sh 
+#pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
+#pjsub --bulk --sparam "1-10" job_sno.sh 
 #pjsub --bulk --sparam "11-20" job_sno.sh 
 #pjsub --bulk --sparam "21-30" job_sno.sh 
 #pjsub --bulk --sparam "31-40" job_sno.sh 
 #pjsub --bulk --sparam "41-50" job_sno.sh 
 #pjsub --bulk --sparam "51-60" job_sno.sh 
 #pjsub --bulk --sparam "61-70" job_sno.sh 
+#pjsub --bulk --sparam "71-80" job_sno.sh 
+#pjsub --bulk --sparam "81-90" job_sno.sh 
+pjsub --bulk --sparam "101-101" job_sno.sh 
 #pjsub --bulk --sparam "71-72" job_sno.sh
 #sleep 300
 #pjsub --bulk --sparam "81-90" job_sno.sh 

@@ -2,8 +2,8 @@
 
 ist=1
 #ied=1
-ied=100
-totalmem=100
+ied=101
+totalmem=101
 #totalmem=1
 mem_ist=`printf "%03d" ${ist}`
 mem_ied=`printf "%03d" ${ied}`

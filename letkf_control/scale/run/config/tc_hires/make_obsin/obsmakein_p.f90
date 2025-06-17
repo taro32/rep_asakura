@@ -6,7 +6,7 @@ real(4),allocatable::axlon(:,:),axlat(:,:),axz(:),pres(:,:,:)
 
 integer,parameter::nelm=4 !3
 integer,parameter::elms(nelm)=(/2819,2820,3073,3330/) !! U,V,T,Qv
-real(4),parameter::errs(nelm)=(/1.0,1.0,1.0,0.001/)    !! U,V,T,Qv 
+real(4),parameter::errs(nelm)=(/1.0,1.0,1.0,0.01/)    !! U,V,T,Qv 
 
 integer,parameter::intv_x=2 !4
 integer,parameter::intv_y=2 !4
