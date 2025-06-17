@@ -45,7 +45,7 @@ OBS_IN_FORMAT="PREPBUFR" # YSaw 20240702
 DET_RUN=1               # 0: Disable the deterministic run
                         # 1: Enable  the deterministic run
 
-DET_RUN_UPDATE=2        # 0: no update of deterministic run in LETKF
+DET_RUN_UPDATE=1        # 0: no update of deterministic run in LETKF
 			# 1: Updating deterministic run in LETKF
 			# 2: Updating deterministic run only in LETKC
 
@@ -105,13 +105,13 @@ OBSNAME[1]=obs
 
 WINDOW_S=0 #864000     # SCALE forecast time when the assimilation window starts (second)
 WINDOW_E=10800 #864000     # SCALE forecast time when the assimilation window ends (second)
-LCYCLE=864000 #10800 #864000       # Length of a DA cycle (second)
-LTIMESLOT=864000 #10800 #864000     # Timeslot interval for 4D-LETKF (second)
+LCYCLE=10800 #864000       # Length of a DA cycle (second)
+LTIMESLOT=10800 #864000     # Timeslot interval for 4D-LETKF (second)
 
 #===============================================================================
 # Parallelization settings
 
-MEMBER=101           # Ensemble size
+MEMBER=100           # Ensemble size
 
 PPN=4               # Number of processes per node
 
@@ -138,7 +138,7 @@ DISK_MODE=0      # Disk I/O mode
                  # 2: staging -- copy files to/from $TMP 
                  # 3: staging -- copy files to/from $TMPL for each node (effective only on Fugaku)
  
-TMPSUBDIR="tropicalcyclone_fcst101"  # (used to identify multiple runs in the same time)
+TMPSUBDIR="tropicalcyclone"  # (used to identify multiple runs in the same time)
 
 TMP="$DIR/tmp/$TMPSUBDIR" # Temporary directory shared among all nodes
 TMPS="$TMP"  # Temporary directory only on the server node

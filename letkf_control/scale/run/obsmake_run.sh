@@ -1,1 +1,1 @@
-config/case_tc/obsmake_run.sh
+config/tc_hires/obsmake_run.sh

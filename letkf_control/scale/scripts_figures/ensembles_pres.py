@@ -14,8 +14,8 @@ import struct
 import netCDF4 as nc
 
 
-workdir = '/work/jh250035o/f00019/enkc_with_TC/20250613_fcst/result/tc_hires/20000101000000/fcst_sno_np00064/'
-nens = 10 # ensemble size
+workdir = '/work/jh250035o/f00019/enkc_with_TC/20250616_fcst/result/tc_hires/20000101000000/fcst_sno_np00064/'
+nens = 101 # ensemble size
 minpres = np.zeros((81,nens))
 print(workdir)
 for i in range(1,nens+1):
@@ -27,16 +27,26 @@ for i in range(1,nens+1):
         stri = '0'+str(i)
     else:
         stri = str(i)
+    #if i == 89:
     data = nc.Dataset(workdir+stri+'/history.pe000000.nc','r')
+    #print("reading...", i)
     pres = data.variables['PRES']
     minpres[:,i-1] = np.min(pres[:,0,:,:],axis=(1,2))/100.0
+    #minpres[60,i-1] = np.min(pres[60,0,:,:],axis=(0,1))/100.0
+
+#print(minpres[60,80:100])
+#plt.plot(minpres[60,80:100],color="k")
+#plt.savefig("fcst_finalstate.png")
+#plt.plot(minpres[:,88],color="r")
+#plt.savefig("fcst_member0089")
+#sys.exit()
 
 for i in range(0,nens):
-#    if i == 95:
-#        plt.plot(minpres[:,i],color='r')
-#    else:
+    if i == 88:
+        plt.plot(minpres[:,i],color='r')
+    else:
         plt.plot(minpres[:,i],color='k')
-plt.savefig("fcst_20250616")
+plt.savefig("fcst_20250616_member0089")
 #show()
 sys.exit()
 
