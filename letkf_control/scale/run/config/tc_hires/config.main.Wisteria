@@ -104,9 +104,9 @@ OBSNAME[1]=obs
 # Cycling settings
 
 WINDOW_S=0 #864000     # SCALE forecast time when the assimilation window starts (second)
-WINDOW_E=10800 #864000     # SCALE forecast time when the assimilation window ends (second)
-LCYCLE=10800 #864000       # Length of a DA cycle (second)
-LTIMESLOT=10800 #864000     # Timeslot interval for 4D-LETKF (second)
+WINDOW_E=21600 #10800 #864000     # SCALE forecast time when the assimilation window ends (second)
+LCYCLE=21600 #10800 #864000       # Length of a DA cycle (second)
+LTIMESLOT=21600 #10800 #864000     # Timeslot interval for 4D-LETKF (second)
 
 #===============================================================================
 # Parallelization settings

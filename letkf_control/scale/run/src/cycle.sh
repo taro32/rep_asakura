@@ -572,7 +572,7 @@ while ((time <= ETIME)); do
 
       #if ((s <= 3)); then
       if (( DET_RUN_UPDATE == 2)) ; then # letkc
-      if ((s <= 8)); then  #YSaw until extended forecast 7--> 8 on 2024/10/23
+      if ((s <= 8)); then  #YSaw until obsmake 7--> 8 on 2024/10/23
         conf_time=$time
       else
         conf_time=$atime
@@ -580,7 +580,8 @@ while ((time <= ETIME)); do
       fi
 
       if (( DET_RUN_UPDATE != 2)) ; then # letkf
-      if ((s <= 3)); then  #YSaw until extended forecast 7--> 8 on 2024/10/23
+      #if ((s <= 3)); then  #YSaw until extended forecast 7--> 8 on 2024/10/23 This is a bug!! 20250619
+      if ((s <= 4)); then  #YSaw until obsmake
         conf_time=$time
       else
         conf_time=$atime
