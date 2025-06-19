@@ -36,7 +36,7 @@ DATA_BDY_GRADS=""
 
 OBS="$OUTDIR/obs"
 #OBSIN=/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/run/config/case_tc/make_obsin/test_obs_3d_xyp.dat  #YSaw 20240702
-OBSIN=/work/jh250035o/f00019/scale/scale-letkc/letkf_control/scale/run/config/tc_hires/make_obsin/test_obs_3d_intv2_xyp.dat  #YSaw 20241111 dense network
+OBSIN=/work/jh250035o/f00019/scale/scale-letkc/letkf_control/scale/run/config/tc_hires/make_obsin/test_obs_3d_intv8_xyp.dat  #YSaw 20241111 dense network
 OBS_IN_FORMAT="PREPBUFR" # YSaw 20240702
 
 #===============================================================================
