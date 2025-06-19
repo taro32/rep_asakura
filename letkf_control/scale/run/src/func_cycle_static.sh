@@ -1327,6 +1327,7 @@ while ((time <= ETIME)); do
   conf_file=$TMP/config/obsmake_${time}.conf
   cat $SCRP_DIR/config.nml.obsmake | sed \
     -e "/!--PPN--/a PPN=$PPN,"  \
+    -e "/!--MEM_NODES--/a MEM_NODES = $mem_nodes," \
     -e "/!--PRC_DOMAINS--/a PRC_DOMAINS=$SCALE_NP,"  \
     -e "/!--OBS_IN_NAME--/a OBS_IN_NAME=\"$TMP/obsin/obsin.dat\","  \
     -e "/!--OBS_IN_FORMAT--/a OBS_IN_FORMAT=\"${OBS_IN_FORMAT}\","  \

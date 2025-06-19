@@ -9,7 +9,7 @@ DET_RUN = .false.,
 
 &PARAM_PROCESS
 !--PPN--
-MEM_NODES = ,
+!--MEM_NODES--
 NUM_DOMAIN = 1,
 !--PRC_DOMAINS--
 /
