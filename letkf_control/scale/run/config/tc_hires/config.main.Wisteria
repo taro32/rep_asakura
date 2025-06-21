@@ -14,7 +14,7 @@ DIR="$(cd "$(pwd)/.." && pwd)"    # Root directory of the SCALE-LETKF
 DATADIR=${SCALE_DB}          # Directory of the SCALE database
 
 #OUTDIR=/work/gv42/f00019/enkc_with_TC/20241216_letkc_qvonly_noqc_local07anddist_hv_target990_weight0001/result/case_tc  ### EDIT HERE ### 
-OUTDIR=/work/jh250035o/f00019/enkc_with_TC/20250618_tchires_letkf/result/tc_hires  ### EDIT HERE ### 
+OUTDIR=/work/jh250035o/f00019/enkc_with_TC/20250622_tchires_letkf/result/tc_hires  ### EDIT HERE ### 
 INDIR="$OUTDIR"
 
 #===============================================================================
@@ -97,7 +97,7 @@ LAND_INPUT=0            # 0: No land input (use cycling land variables)
 LAND_FORMAT=99          # 0: SCALE init files (with exactly same domain settings; do not need additional preprocessing)
                         # 99: From the same file as used in generating the boundary conditions ($BDY_FORMAT)
 
-OBSNUM=3200000 #1
+OBSNUM=1 #3200000 #1
 OBSNAME[1]=obs
 
 #===============================================================================
@@ -111,14 +111,14 @@ LTIMESLOT=10800 #864000     # Timeslot interval for 4D-LETKF (second)
 #===============================================================================
 # Parallelization settings
 
-MEMBER=10           # Ensemble size
+MEMBER=100           # Ensemble size
 
 PPN=4               # Number of processes per node
 
 THREADS=12          # Number of threads per process
 
-SCALE_NP_X=8        # = PRC_NUM_X
-SCALE_NP_Y=8        # = PRC_NUM_Y
+SCALE_NP_X=2        # = PRC_NUM_X
+SCALE_NP_Y=2        # = PRC_NUM_Y
 SCALE_NP=$(( SCALE_NP_X  * SCALE_NP_Y )) # Number of processes to run SCALE
 
 if (( DET_RUN == 1 && EFSO_RUN == 1));then
