@@ -8,8 +8,8 @@ integer,parameter::nelm=4 !3
 integer,parameter::elms(nelm)=(/2819,2820,3073,3330/) !! U,V,T,Qv
 real(4),parameter::errs(nelm)=(/1.0,1.0,1.0,0.01/)    !! U,V,T,Qv 
 
-integer,parameter::intv_x=8 !4
-integer,parameter::intv_y=8 !4
+integer,parameter::intv_x=100 !4
+integer,parameter::intv_y=100 !4
 integer,parameter::intv_z=2
 
 real(4)::wk(8)
@@ -34,7 +34,7 @@ integer::ncid, vidlon, vidlat,vidz
   call ncio_read(ncid,"PRES",nlon,nlat,nlev,1,pres)
   call ncio_close( ncid ) 
 
-cfile="test_obs_3d_intv8_xyp.dat"
+cfile="test_obs_3d_intv100_xyp.dat"
 
 open (21, file=trim(cfile), form='unformatted', access='sequential') !, convert='big_endian')
 

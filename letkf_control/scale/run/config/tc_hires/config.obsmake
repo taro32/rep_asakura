@@ -14,7 +14,7 @@ BASETIME='20000101000000' ### nature/hist/history.pe000000.nc
 FCSTOUT=10800
 
 
-OBSIN=$SCRP_DIR/config/tc_hires/make_obsin/test_obs_3d_intv2_xyp.dat
+OBSIN=$SCRP_DIR/config/tc_hires/make_obsin/test_obs_3d_intv100_xyp.dat
 OBS_IN_FORMAT="PREPBUFR"
 
 #===============================================================================
