@@ -40,7 +40,8 @@ PROGRAM obsmake
 
 !-----------------------------------------------------------------------
 
-  call set_mem_node_proc(1)
+  !call set_mem_node_proc(1)
+  call set_mem_node_proc(MEMBER+2) ! YSaw 20250625
   call set_scalelib('OBSMAKE')
 
   if (myrank_use) then

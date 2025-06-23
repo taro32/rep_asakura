@@ -19,8 +19,8 @@ CONF_MODE="static"
 #===============================================================================
 # Forecast settings
 
-FCSTLEN=864000 #10800     # SCALE forecast length in the forecast mode (second)
-FCSTOUT=864000 #10800
+FCSTLEN=10800     # SCALE forecast length in the forecast mode (second)
+FCSTOUT=10800
 RESTARTOUT=$FCSTLEN
 
 #===============================================================================
