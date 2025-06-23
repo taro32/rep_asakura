@@ -13,27 +13,27 @@ INPUT_SNOW_NP=16
 ALLVAR=T
 SINGLE_VAR=F
 
-tint=864000 #10800 #864000 # [second]
-tstart='2000-01-01 00:00:00'
-tend=$tstart
-#tend='2000-01-06 00:00:00'
+tint=10800 #864000 # [second]
+tstart='2000-01-06 00:00:00'
+#tend=$tstart
+tend='2000-01-10 00:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 
 
 SCALEDIR="$(cd "$(pwd)/../../.." && pwd)"  
 
-TYPE=fcst
+#TYPE=fcst
 #TYPE=anal
 #TYPE=gues
-#TYPE=hist
+TYPE=hist
 
 ## Which domain do you want to convert?
 #DOM=2 
 
 # Output file (X & Y process number) for each member
-NP_OFILE_X=8
-NP_OFILE_Y=8
+NP_OFILE_X=2
+NP_OFILE_Y=2
 
 if [ "$INPUT_FROM_SNOW" == "T" ] ; then
   NP_OFILE_X=1
@@ -44,11 +44,11 @@ fi
 NP_OFILE=$((${NP_OFILE_X} * ${NP_OFILE_Y})) # Output file (process number) for each member
 
 # Specify members that will be processed
-SNO_MEMBERS=101
+#SNO_MEMBERS=101
 #SNO_MEM_L="mean "$(seq -f %04g ${SNO_MEMBERS})
-SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
+#SNO_MEM_L=$(seq -f %04g ${SNO_MEMBERS})
 
-#SNO_MEM_L="mdet mean"
+SNO_MEM_L="mdet mean"
 #SNO_MEM_L="0001"
 
 
@@ -418,12 +418,12 @@ fi
 cd ${RUNDIR}
 
 count=1
-#while [ $count -le ${cnt} ]; do
-#	countend=$((count + 9))
-#	pjsub --bulk --sparam "${count}-${countend}" job_sno.sh
-#	count=$((countend + 1))
-#	sleep 5
-#done
+while [ $count -le ${cnt} ]; do
+	countend=$((count + 9))
+	pjsub --bulk --sparam "${count}-${countend}" job_sno.sh
+	count=$((countend + 1))
+	sleep 5
+done
 #echo "cnt = ", ${cnt}
 #pjsub --bulk --sparam "1-${cnt}" job_sno.sh 
 #pjsub --bulk --sparam "1-10" job_sno.sh 
@@ -435,7 +435,7 @@ count=1
 #pjsub --bulk --sparam "61-70" job_sno.sh 
 #pjsub --bulk --sparam "71-80" job_sno.sh 
 #pjsub --bulk --sparam "81-90" job_sno.sh 
-pjsub --bulk --sparam "101-101" job_sno.sh 
+#pjsub --bulk --sparam "101-101" job_sno.sh 
 #pjsub --bulk --sparam "71-72" job_sno.sh
 #sleep 300
 #pjsub --bulk --sparam "81-90" job_sno.sh 

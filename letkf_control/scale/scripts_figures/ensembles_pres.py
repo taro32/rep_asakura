@@ -30,8 +30,9 @@ for i in range(1,nens+1):
     #if i == 89:
     data = nc.Dataset(workdir+stri+'/history.pe000000.nc','r')
     #print("reading...", i)
-    pres = data.variables['PRES']
-    minpres[:,i-1] = np.min(pres[:,0,:,:],axis=(1,2))/100.0
+    pres = data.variables['MSLP']
+    #minpres[:,i-1] = np.min(pres[:,0,:,:],axis=(1,2))/100.0
+    minpres[:,i-1] = np.min(pres[:,:,:],axis=(1,2))/100.0
     #minpres[60,i-1] = np.min(pres[60,0,:,:],axis=(0,1))/100.0
 
 #print(minpres[60,80:100])
@@ -46,7 +47,7 @@ for i in range(0,nens):
         plt.plot(minpres[:,i],color='r')
     else:
         plt.plot(minpres[:,i],color='k')
-plt.savefig("fcst_20250616_member0089")
+plt.savefig("fcst_20250616_mslp")
 #show()
 sys.exit()
 
