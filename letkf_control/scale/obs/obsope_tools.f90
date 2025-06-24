@@ -669,9 +669,11 @@ SUBROUTINE obsmake_cal(obs)
   end if
 
   do iof = 1, OBS_IN_NUM
-
-    !call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_d,ierr)
-    call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_a,ierr) ! YSaw 20250624
+    if ( LOG_OUT ) then
+        write(6,*) "MYRANK=", myrank, "MYRANK_D=", myrank_d, "iof=", iof, "obs(iof)%nobs=", obs(iof)%nobs
+    end if
+    call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_d,ierr)
+    !call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_a,ierr) ! YSaw 20250624
     if (myrank_d == 0) then
       obs(iof)%dat = bufr(1:obs(iof)%nobs)
 
@@ -722,6 +724,12 @@ SUBROUTINE obsmake_cal(obs)
     deallocate ( error )
 
     call write_obs_all(obs, missing=.false., file_suffix='.out') ! only at the head node
+  else
+    !{{change 2}}
+    if ( LOG_OUT ) then
+      !{{change 2}}
+      write(6,*) "MYRANK=", myrank, "MYRANK_D=", myrank_d, "is waiting at end of MPI_REDUCE"
+    end if
   end if
 
 end subroutine obsmake_cal
