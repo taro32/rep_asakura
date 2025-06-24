@@ -64,8 +64,9 @@ PROGRAM obsmake
 !-----------------------------------------------------------------------
 ! Generate observations
 !-----------------------------------------------------------------------
-
-    call obsmake_cal(obs)
+    if (myrank < 64) then ! YSaw debugging
+      call obsmake_cal(obs)
+    endif
 
     call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_a)
 
