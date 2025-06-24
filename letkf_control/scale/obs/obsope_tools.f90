@@ -670,8 +670,8 @@ SUBROUTINE obsmake_cal(obs)
 
   do iof = 1, OBS_IN_NUM
 
-    call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_d,ierr)
-
+    !call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_d,ierr)
+    call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_a,ierr) ! YSaw 20250624
     if (myrank_d == 0) then
       obs(iof)%dat = bufr(1:obs(iof)%nobs)
 
