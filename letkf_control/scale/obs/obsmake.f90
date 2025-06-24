@@ -20,6 +20,7 @@ PROGRAM obsmake
 
   character(len=7) :: stdoutf = '-000000'
   character(len=6400) :: icmd
+  integer tmp1, tmp2, ierr
 
 !-----------------------------------------------------------------------
 ! Initial settings
@@ -40,18 +41,29 @@ PROGRAM obsmake
 
 !-----------------------------------------------------------------------
 
-  !call set_mem_node_proc(1)
-  call set_mem_node_proc(MEMBER+2) ! YSaw 20250625
+  call set_mem_node_proc(1)
+  !call set_mem_node_proc(MEMBER+2) ! YSaw 20250625
   call set_scalelib('OBSMAKE')
-
+  if (myrank > 64) then
+    myrank_use = .false.
+  endif
+  write(6,*) "starting ... ", myrank, myrank_use
   if (myrank_use) then
 
     call set_common_scale
     call set_common_mpi_scale
     call set_common_obs_scale
+  
+    !call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_a)
+    call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_d) ! YSaw 20250624
+    !call MPI_COMM_RANK(MPI_COMM_a, tmp1, ierr)
+    !call MPI_COMM_SIZE(MPI_COMM_a, tmp2, ierr)
+    !write(6,*) 'MPI_COMM_a = ', myrank, tmp1, tmp2
+    !call MPI_COMM_RANK(MPI_COMM_d, tmp1, ierr)
+    !call MPI_COMM_SIZE(MPI_COMM_d, tmp2, ierr)
+    !write(6,*) 'MPI_COMM_d = ', myrank, tmp1, tmp2
 
-    call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_a)
-
+ 
 !-----------------------------------------------------------------------
 ! Read observations
 !-----------------------------------------------------------------------
@@ -59,7 +71,9 @@ PROGRAM obsmake
     allocate(obs(OBS_IN_NUM))
     call read_obs_all(obs)
 
-    call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_a)
+    !call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_a)
+    call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_d) !YSaw 20250624
+
 
 !-----------------------------------------------------------------------
 ! Generate observations
@@ -68,7 +82,8 @@ PROGRAM obsmake
       call obsmake_cal(obs)
     endif
 
-    call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_a)
+    !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_a)
+    call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_d) !YSaw 20250624
 
     deallocate(obs)
 
