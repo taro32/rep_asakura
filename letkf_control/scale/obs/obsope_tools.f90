@@ -672,13 +672,13 @@ SUBROUTINE obsmake_cal(obs)
     !if ( LOG_OUT ) then
     write(6,*) "MYRANK=", myrank, "MYRANK_D=", myrank_d, "iof=", iof, "obs(iof)%nobs=", obs(iof)%nobs
     !end if
-    if(myrank_d == 0) then
-      write(6,*) "before mpi_reduce ", obs(iof)%dat
-    endif
+    !if(myrank_d == 0) then
+    !  write(6,*) "before mpi_reduce ", obs(iof)%dat
+    !endif
     call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_d,ierr)
-    if(myrank_d == 0) then
-      write(6,*) "after mpi_reduce ", obs(iof)%dat
-    endif
+    !if(myrank_d == 0) then
+    !  write(6,*) "after mpi_reduce ", obs(iof)%dat
+    !endif
     !call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_a,ierr) ! YSaw 20250624
     if (myrank_d == 0) then
       obs(iof)%dat = bufr(1:obs(iof)%nobs)

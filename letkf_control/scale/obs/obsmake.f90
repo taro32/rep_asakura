@@ -44,15 +44,18 @@ PROGRAM obsmake
   call set_mem_node_proc(1)
   !call set_mem_node_proc(MEMBER+2) ! YSaw 20250625
   call set_scalelib('OBSMAKE')
-  if (myrank > 64) then
+  if (myrank > 63) then
     myrank_use = .false.
   endif
   write(6,*) "starting ... ", myrank, myrank_use
+  call set_common_scale
+  call set_common_mpi_scale
+  call set_common_obs_scale
   if (myrank_use) then
 
-    call set_common_scale
-    call set_common_mpi_scale
-    call set_common_obs_scale
+  !  call set_common_scale
+  !  call set_common_mpi_scale
+  !  call set_common_obs_scale
   
     !call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_a)
     call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_d) ! YSaw 20250624
@@ -78,19 +81,21 @@ PROGRAM obsmake
 !-----------------------------------------------------------------------
 ! Generate observations
 !-----------------------------------------------------------------------
-    if (myrank < 64) then ! YSaw debugging
-      call obsmake_cal(obs)
-    endif
+    !if (myrank < 64) then ! YSaw debugging
+    call obsmake_cal(obs)
+    !endif
 
     !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_a)
     call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_d) !YSaw 20250624
 
     deallocate(obs)
 
-    call unset_common_mpi_scale
+    !call unset_common_mpi_scale
 
   end if ! [ myrank_use ]
 
+  write(6,*) "ending ....", myrank
+  call unset_common_mpi_scale
   call unset_scalelib
 
 !-----------------------------------------------------------------------
