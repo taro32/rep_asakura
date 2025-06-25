@@ -134,6 +134,7 @@ subroutine finalize_mpi_scale
   integer :: ierr
 
 !  call PRC_MPIfinish
+  call MPI_Barrier(MPI_COMM_WORLD,ierr)
   call MPI_Finalize(ierr)
 
   return
