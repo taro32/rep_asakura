@@ -215,6 +215,11 @@ elif [ "$PRESET" == 'FUGAKU' ]; then
 
 # Y.Saw 20240614
 elif [ "$PRESET" == 'Wisteria' ]; then
+  echo "check" "$PROG"
+  if ( "$PROG" == "./obsmake" ); then
+  echo "smaller nodes for obsmake"
+  mpiexec -n $((SCALE_NP)) $PROG $CONF $ARGS
+  fi 
 
   mpiexec -n $((NNODES*PPN)) $PROG $CONF $ARGS
   res=$?

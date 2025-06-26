@@ -129,15 +129,17 @@ end subroutine initialize_mpi_scale
 ! finalize_mpi_scale
 !-------------------------------------------------------------------------------
 subroutine finalize_mpi_scale
-  use scale_prc, only: PRC_MPIfinish ! use PRC_MPIfinish by YSaw 20250625
+!  use scale_prc, only: PRC_MPIfinish ! use PRC_MPIfinish by YSaw 20250625
   implicit none
   integer :: ierr
 
-  call PRC_MPIfinish
+  !call PRC_MPIfinish
  
-!  call MPI_Barrier(MPI_COMM_WORLD,ierr)
-!  write(6,*) "really finalizing..... ", myrank
-!  call MPI_Finalize(ierr)
+  !call MPI_Barrier(MPI_COMM_a,ierr)
+  write(6,*) "reaching barrier..... ", myrank
+  call MPI_Barrier(MPI_COMM_u,ierr) ! a does not work, u?
+  write(6,*) "really finalizing..... ", myrank
+  call MPI_Finalize(ierr)
 
   return
 end subroutine finalize_mpi_scale

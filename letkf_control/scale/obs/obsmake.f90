@@ -43,10 +43,11 @@ PROGRAM obsmake
 
   call set_mem_node_proc(1)
   !call set_mem_node_proc(MEMBER+2) ! YSaw 20250625
-  call set_scalelib('OBSMAKE')
+  
   if (myrank > 63) then
     myrank_use = .false.
   endif
+  call set_scalelib('OBSMAKE')
   write(6,*) "starting ... ", myrank, myrank_use
   call set_common_scale
   call set_common_mpi_scale
@@ -102,8 +103,8 @@ PROGRAM obsmake
 ! Finalize
 !-----------------------------------------------------------------------
 
+  !call mpi_timer('FINALIZE undefined', 1, barrier=MPI_COMM_UNDEFINED) ! a does not work for undefined ones
   call mpi_timer('FINALIZE', 1, barrier=MPI_COMM_WORLD)
-
   call finalize_mpi_scale
 
   STOP
