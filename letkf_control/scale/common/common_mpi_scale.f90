@@ -137,7 +137,7 @@ subroutine finalize_mpi_scale
  
   !call MPI_Barrier(MPI_COMM_a,ierr)
   write(6,*) "reaching barrier..... ", myrank
-  call MPI_Barrier(MPI_COMM_u,ierr) ! a does not work, u?
+  call MPI_Barrier(MPI_COMM_d,ierr) ! a does not work, u?
   write(6,*) "really finalizing..... ", myrank
   call MPI_Finalize(ierr)
 
