@@ -5,7 +5,7 @@
 &PARAM_ENSEMBLE
 !--MEMBER--
 !MEMBER = 1,
-DET_RUN = .false.,
+DET_RUN = .True.,
 /
 
 &PARAM_PROCESS

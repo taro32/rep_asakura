@@ -41,25 +41,26 @@ PROGRAM obsmake
 
 !-----------------------------------------------------------------------
 
-  call set_mem_node_proc(1)
-  !call set_mem_node_proc(MEMBER+2) ! YSaw 20250625
+  !call set_mem_node_proc(1)
+  call set_mem_node_proc(MEMBER+2) ! YSaw 20250625
   
-  if (myrank > 63) then
-    myrank_use = .false.
-  endif
+  !if (myrank > 63) then
+  !  myrank_use = .false.
+  !endif
   call set_scalelib('OBSMAKE')
   write(6,*) "starting ... ", myrank, myrank_use
-  !call set_common_scale
-  !call set_common_mpi_scale
-  !call set_common_obs_scale
+  call set_common_scale
+  call set_common_mpi_scale
+  call set_common_obs_scale
+  write(6,*) "my status ... ", myrank, myrank_use, MPI_COMM_a, MPI_COMM_d, MPI_COMM_u, MPI_COMM_d, MPI_COMM_WORLD
   if (myrank_use) then
 
-    call set_common_scale
-    call set_common_mpi_scale
-    call set_common_obs_scale
-    write(6,*) "my status ... ", myrank, myrank_use, MPI_COMM_a, MPI_COMM_d, MPI_COMM_u, MPI_COMM_d, MPI_COMM_WORLD
-    !call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_a)
-    call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_WORLD) ! YSaw 20250624
+    !call set_common_scale
+    !call set_common_mpi_scale
+    !call set_common_obs_scale
+    
+    call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_d)
+    !call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_WORLD) ! YSaw 20250624
     !call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_e)
     !call MPI_COMM_RANK(MPI_COMM_a, tmp1, ierr)
     !call MPI_COMM_SIZE(MPI_COMM_a, tmp2, ierr)
@@ -76,8 +77,8 @@ PROGRAM obsmake
     allocate(obs(OBS_IN_NUM))
     call read_obs_all(obs)
 
-    !call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_a)
-    call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_WORLD) !YSaw 20250624
+    call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_d)
+    !call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_WORLD) !YSaw 20250624
     !call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_e)
 
 
@@ -88,8 +89,8 @@ PROGRAM obsmake
     call obsmake_cal(obs)
     !endif
 
-    !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_a)
-    call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_WORLD) !YSaw 20250624
+    call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_d)
+    !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_WORLD) !YSaw 20250624
     !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_e)
     deallocate(obs)
 
