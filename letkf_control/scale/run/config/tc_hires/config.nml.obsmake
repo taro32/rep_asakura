@@ -3,7 +3,8 @@
 /
 
 &PARAM_ENSEMBLE
-MEMBER = 1,
+!--MEMBER--
+!MEMBER = 1,
 DET_RUN = .false.,
 /
 

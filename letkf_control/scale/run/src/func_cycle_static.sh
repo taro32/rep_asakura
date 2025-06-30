@@ -1323,9 +1323,11 @@ while ((time <= ETIME)); do
 
    #------------------------------------------------------------------------------------------------
    # obsmake by Y.Saw
+   # add MEMBER 20250630
    #------------------------------------------------------------------------------------------------
   conf_file=$TMP/config/obsmake_${time}.conf
   cat $SCRP_DIR/config.nml.obsmake | sed \
+    -e "/!--MEMBER--/a MEMBER = $MEMBER," \
     -e "/!--PPN--/a PPN=$PPN,"  \
     -e "/!--MEM_NODES--/a MEM_NODES = $mem_nodes," \
     -e "/!--PRC_DOMAINS--/a PRC_DOMAINS=$SCALE_NP,"  \

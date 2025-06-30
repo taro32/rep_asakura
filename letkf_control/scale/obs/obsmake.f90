@@ -49,17 +49,18 @@ PROGRAM obsmake
   endif
   call set_scalelib('OBSMAKE')
   write(6,*) "starting ... ", myrank, myrank_use
-  call set_common_scale
-  call set_common_mpi_scale
-  call set_common_obs_scale
+  !call set_common_scale
+  !call set_common_mpi_scale
+  !call set_common_obs_scale
   if (myrank_use) then
 
-  !  call set_common_scale
-  !  call set_common_mpi_scale
-  !  call set_common_obs_scale
-  
+    call set_common_scale
+    call set_common_mpi_scale
+    call set_common_obs_scale
+    write(6,*) "my status ... ", myrank, myrank_use, MPI_COMM_a, MPI_COMM_d, MPI_COMM_u, MPI_COMM_d, MPI_COMM_WORLD
     !call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_a)
-    call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_d) ! YSaw 20250624
+    call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_WORLD) ! YSaw 20250624
+    !call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_e)
     !call MPI_COMM_RANK(MPI_COMM_a, tmp1, ierr)
     !call MPI_COMM_SIZE(MPI_COMM_a, tmp2, ierr)
     !write(6,*) 'MPI_COMM_a = ', myrank, tmp1, tmp2
@@ -76,7 +77,8 @@ PROGRAM obsmake
     call read_obs_all(obs)
 
     !call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_a)
-    call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_d) !YSaw 20250624
+    call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_WORLD) !YSaw 20250624
+    !call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_e)
 
 
 !-----------------------------------------------------------------------
@@ -87,8 +89,8 @@ PROGRAM obsmake
     !endif
 
     !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_a)
-    call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_d) !YSaw 20250624
-
+    call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_WORLD) !YSaw 20250624
+    !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_e)
     deallocate(obs)
 
     !call unset_common_mpi_scale
@@ -96,15 +98,19 @@ PROGRAM obsmake
   end if ! [ myrank_use ]
 
   write(6,*) "ending ....", myrank
-  call unset_common_mpi_scale
-  call unset_scalelib
+!  call unset_common_mpi_scale
+!  call unset_scalelib
 
 !-----------------------------------------------------------------------
 ! Finalize
 !-----------------------------------------------------------------------
 
   !call mpi_timer('FINALIZE undefined', 1, barrier=MPI_COMM_UNDEFINED) ! a does not work for undefined ones
+  write(6,*) "reaching barrier ", myrank
+  !call mpi_timer('FINALIZE', 1, barrier=MPI_COMM_WORLD)
   call mpi_timer('FINALIZE', 1, barrier=MPI_COMM_WORLD)
+  call unset_common_mpi_scale
+  call unset_scalelib
   call finalize_mpi_scale
 
   STOP

@@ -136,8 +136,8 @@ subroutine finalize_mpi_scale
   !call PRC_MPIfinish
  
   !call MPI_Barrier(MPI_COMM_a,ierr)
-  write(6,*) "reaching barrier..... ", myrank
-  call MPI_Barrier(MPI_COMM_d,ierr) ! a does not work, u?
+  !write(6,*) "reaching barrier..... ", myrank
+  !call MPI_Barrier(MPI_COMM_a,ierr) ! a does not work, u?
   write(6,*) "really finalizing..... ", myrank
   call MPI_Finalize(ierr)
 
@@ -2236,9 +2236,10 @@ subroutine mpi_timer(sect_name, level, barrier)
 
   timer_before_barrier = MPI_WTIME()
   timer_after_barrier = timer_before_barrier
-
+  write(6,*) 'in mpi_timer to check barrier ', USE_MPI_BARRIER, myrank
   if (USE_MPI_BARRIER .and. present(barrier)) then
     if (barrier /= MPI_COMM_NULL) then
+      write(6,*) 'barrier in mpi_timer ', myrank, sect_name, barrier
       call MPI_BARRIER(barrier, ierr)
       timer_after_barrier = MPI_WTIME()
     end if
