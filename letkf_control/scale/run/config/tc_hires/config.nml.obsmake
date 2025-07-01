@@ -1,11 +1,14 @@
 &PARAM_LOG
- LOG_LEVEL = 3,
+ LOG_LEVEL = 1,
 /
 
 &PARAM_ENSEMBLE
 !--MEMBER--
 !MEMBER = 1,
-DET_RUN = .True.,
+DET_RUN = .true.,
+DET_RUN_UPDATE = .false.,
+ DET_RUN_CYCLED = .true.,
+EFSO_RUN = .false.,
 /
 
 &PARAM_PROCESS

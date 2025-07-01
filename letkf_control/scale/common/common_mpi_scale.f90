@@ -85,6 +85,8 @@ module common_mpi_scale
 
   logical, save :: force_use_hist = .false.
 
+  integer, save :: universal_comm   ! Y.Saw replacement of mpi_comm_world
+
 contains
 
 !-------------------------------------------------------------------------------
@@ -96,7 +98,7 @@ subroutine initialize_mpi_scale
      PRC_UNIVERSAL_setup, &
      PRC_UNIVERSAL_myrank
   implicit none
-  integer :: universal_comm   ! dummy
+!  integer :: universal_comm   ! dummy
   integer :: universal_nprocs ! dummy
   integer :: universal_myrank ! dummy
   logical :: universal_master ! dummy
@@ -113,7 +115,7 @@ subroutine initialize_mpi_scale
   nprocs = universal_nprocs
   myrank = PRC_UNIVERSAL_myrank
 
-!  write(6,'(A,I6.6,A,I6.6)') 'Hello from MYRANK ', myrank, '/', nprocs-1
+  write(6,'(A,I6.6,A,I6.6)') 'Hello from MYRANK ', myrank, '/', nprocs-1
   if (r_size == r_dble) then
     MPI_r_size = MPI_DOUBLE_PRECISION
   else if (r_size == r_sngl) then
@@ -138,7 +140,7 @@ subroutine finalize_mpi_scale
   !call MPI_Barrier(MPI_COMM_a,ierr)
   !write(6,*) "reaching barrier..... ", myrank
   !call MPI_Barrier(MPI_COMM_a,ierr) ! a does not work, u?
-  write(6,*) "really finalizing..... ", myrank
+  !write(6,*) "really finalizing..... ", myrank
   call MPI_Finalize(ierr)
 
   return
@@ -190,7 +192,7 @@ subroutine set_common_mpi_scale
   end if
 #endif
 
-  call mpi_timer('set_common_mpi_scale:mpi_comm_split_e:', 2)
+  call mpi_timer('set_common_mpi_scale:mpi_comm_split_e:', 2, barrier=MPI_COMM_e)
 
   ! Read/calculate model coordinates
   !-----------------------------------------------------------------------------
@@ -250,7 +252,7 @@ subroutine set_common_mpi_scale
 
       write (6, '(A)') 'VERIFY_COORD: Model coordinate calculation is good.'
 
-      call mpi_timer('set_common_mpi_scale:verify_coord:', 2)
+      call mpi_timer('set_common_mpi_scale:verify_coord:', 2, barrier=MPI_COMM_e)
     end if
   end if
 
@@ -720,8 +722,12 @@ subroutine set_scalelib(execname)
   integer :: intercomm_child
 
   if (present(execname)) execname_ = execname
+  !write(6,*) "hitting first barrier in set_scalelib at", myrank
+  !call mpi_timer('', 2, barrier=MPI_COMM_WORLD)
+  !call mpi_timer('barrier in set_scalelib', 2, barrier=MPI_COMM_WORLD)
+  call mpi_timer('barrier in set_scalelib', 2, barrier=universal_comm)
 
-  call mpi_timer('', 2, barrier=MPI_COMM_WORLD)
+
 
   ! Communicator for all processes used
   !-----------------------------------------------------------------------------
@@ -734,8 +740,9 @@ subroutine set_scalelib(execname)
     color = MPI_UNDEFINED
     key   = MPI_UNDEFINED
   end if
-
-  call MPI_COMM_SPLIT(MPI_COMM_WORLD, color, key, MPI_COMM_u, ierr)
+  !write(6,*) "myrank, key = ", myrank, key
+  !call MPI_COMM_SPLIT(MPI_COMM_WORLD, color, key, MPI_COMM_u, ierr)
+  call MPI_COMM_SPLIT(universal_comm, color, key, MPI_COMM_u, ierr)
 
   if (.not. myrank_use) then
     write (6, '(A,I6.6,A)') 'MYRANK=', myrank, ': This process is not used!'
@@ -745,7 +752,8 @@ subroutine set_scalelib(execname)
   call MPI_COMM_SIZE(MPI_COMM_u, nprocs_u, ierr)
   call MPI_COMM_RANK(MPI_COMM_u, myrank_u, ierr)
 
-  call mpi_timer('set_scalelib:mpi_comm_split_u:', 2)
+  !call mpi_timer('set_scalelib:mpi_comm_split_u:', 2)
+  call mpi_timer('set_scalelib:mpi_comm_split_u:', 2, barrier=MPI_COMM_u)
 
   ! Communicator for all domains of single members
   !-----------------------------------------------------------------------------
@@ -767,7 +775,7 @@ subroutine set_scalelib(execname)
 !    color = MPI_UNDEFINED
 !    key   = MPI_UNDEFINED
 !  endif
-
+  !write(6,*) "myrank, color, key = ", myrank, color, key
   call MPI_COMM_SPLIT(MPI_COMM_u, color, key, global_comm, ierr)
 
   call PRC_GLOBAL_setup( .false.,    & ! [IN]
@@ -824,7 +832,7 @@ subroutine set_scalelib(execname)
 !  myrank_d = PRC_myrank
   myrank_d = local_myrank
 
-  call mpi_timer('set_scalelib:mpi_comm_split_d_local:', 2)
+  call mpi_timer('set_scalelib:mpi_comm_split_d_local:', 2, barrier=MPI_COMM_d)
 
   select case (execname_)
   case ('LETKF  ')
@@ -864,7 +872,7 @@ subroutine set_scalelib(execname)
   call MPI_COMM_SIZE(MPI_COMM_a, nprocs_a, ierr)
   call MPI_COMM_RANK(MPI_COMM_a, myrank_a, ierr)
 
-  call mpi_timer('set_scalelib:mpi_comm_split_a:', 2)
+  call mpi_timer('set_scalelib:mpi_comm_split_a but u:', 2, barrier=MPI_COMM_u)
 
   ! Setup scalelib LOG output (only for the universal master rank)
   !-----------------------------------------------------------------------------
@@ -2236,10 +2244,10 @@ subroutine mpi_timer(sect_name, level, barrier)
 
   timer_before_barrier = MPI_WTIME()
   timer_after_barrier = timer_before_barrier
-  write(6,*) 'in mpi_timer to check barrier ', USE_MPI_BARRIER, myrank
+  !write(6,*) 'in mpi_timer to check barrier ', USE_MPI_BARRIER, myrank
   if (USE_MPI_BARRIER .and. present(barrier)) then
     if (barrier /= MPI_COMM_NULL) then
-      write(6,*) 'barrier in mpi_timer ', myrank, sect_name, barrier
+      !write(6,*) 'barrier in mpi_timer ', myrank, sect_name, barrier
       call MPI_BARRIER(barrier, ierr)
       timer_after_barrier = MPI_WTIME()
     end if

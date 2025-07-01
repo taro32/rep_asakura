@@ -26,7 +26,7 @@ PROGRAM obsmake
 ! Initial settings
 !-----------------------------------------------------------------------
 
-  call initialize_mpi_scale
+  call initialize_mpi_scale 
   call mpi_timer('', 1)
 
   if (command_argument_count() >= 2) then
@@ -41,33 +41,27 @@ PROGRAM obsmake
 
 !-----------------------------------------------------------------------
 
-  !call set_mem_node_proc(1)
-  call set_mem_node_proc(MEMBER+2) ! YSaw 20250625
+  call set_mem_node_proc(1)
+  !call set_mem_node_proc(MEMBER+2) ! YSaw 20250625
   
   !if (myrank > 63) then
   !  myrank_use = .false.
   !endif
   call set_scalelib('OBSMAKE')
-  write(6,*) "starting ... ", myrank, myrank_use
+  !write(6,*) "starting ... ", myrank, myrank_use
   call set_common_scale
   call set_common_mpi_scale
   call set_common_obs_scale
-  write(6,*) "my status ... ", myrank, myrank_use, MPI_COMM_a, MPI_COMM_d, MPI_COMM_u, MPI_COMM_d, MPI_COMM_WORLD
+  !write(6,*) "my status ... ", myrank_d, myrank_use, MPI_COMM_a, MPI_COMM_d, MPI_COMM_u, MPI_COMM_WORLD
+
   if (myrank_use) then
 
     !call set_common_scale
     !call set_common_mpi_scale
     !call set_common_obs_scale
     
-    call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_d)
-    !call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_WORLD) ! YSaw 20250624
-    !call mpi_timer('INITIALIZE', 1, barrier=MPI_COMM_e)
-    !call MPI_COMM_RANK(MPI_COMM_a, tmp1, ierr)
-    !call MPI_COMM_SIZE(MPI_COMM_a, tmp2, ierr)
-    !write(6,*) 'MPI_COMM_a = ', myrank, tmp1, tmp2
-    !call MPI_COMM_RANK(MPI_COMM_d, tmp1, ierr)
-    !call MPI_COMM_SIZE(MPI_COMM_d, tmp2, ierr)
-    !write(6,*) 'MPI_COMM_d = ', myrank, tmp1, tmp2
+    call mpi_timer('INITIALIZE', 1, barrier=universal_comm)
+   
 
  
 !-----------------------------------------------------------------------
@@ -77,8 +71,8 @@ PROGRAM obsmake
     allocate(obs(OBS_IN_NUM))
     call read_obs_all(obs)
 
-    call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_d)
-    !call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_WORLD) !YSaw 20250624
+    call mpi_timer('READ_OBS', 1, barrier=universal_comm)
+    !call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_a) !YSaw 20250624
     !call mpi_timer('READ_OBS', 1, barrier=MPI_COMM_e)
 
 
@@ -89,8 +83,8 @@ PROGRAM obsmake
     call obsmake_cal(obs)
     !endif
 
-    call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_d)
-    !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_WORLD) !YSaw 20250624
+    call mpi_timer('OBSMAKE', 1, barrier=universal_comm)
+    !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_a) !YSaw 20250624
     !call mpi_timer('OBSMAKE', 1, barrier=MPI_COMM_e)
     deallocate(obs)
 
@@ -98,7 +92,7 @@ PROGRAM obsmake
 
   end if ! [ myrank_use ]
 
-  write(6,*) "ending ....", myrank
+  !write(6,*) "ending ....", myrank
 !  call unset_common_mpi_scale
 !  call unset_scalelib
 
@@ -106,12 +100,14 @@ PROGRAM obsmake
 ! Finalize
 !-----------------------------------------------------------------------
 
-  !call mpi_timer('FINALIZE undefined', 1, barrier=MPI_COMM_UNDEFINED) ! a does not work for undefined ones
-  write(6,*) "reaching barrier ", myrank
-  !call mpi_timer('FINALIZE', 1, barrier=MPI_COMM_WORLD)
-  call mpi_timer('FINALIZE', 1, barrier=MPI_COMM_WORLD)
-  call unset_common_mpi_scale
-  call unset_scalelib
+ 
+
+  call MPI_BARRIER(universal_comm, ierr)
+  !call unset_common_mpi_scale
+  !call unset_scalelib
+  call mpi_timer('FINALIZE', 1, barrier=universal_comm)
+  !write(6,*) "really finalizing...", myrank
+  !call MPI_Finalize(ierr)
   call finalize_mpi_scale
 
   STOP

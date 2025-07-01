@@ -213,11 +213,11 @@ PROGRAM letkf
     deallocate (obs)
     deallocate (gues3d, gues2d, anal3d, anal2d)
 
-    call unset_common_mpi_scale
+    !call unset_common_mpi_scale !canceled by YSaw
 
   end if ! [ myrank_use ]
 
-  call unset_scalelib
+  !call unset_scalelib ! canceled by YSaw
 
   call mpi_timer('FINALIZE', 1, barrier=MPI_COMM_WORLD)
 

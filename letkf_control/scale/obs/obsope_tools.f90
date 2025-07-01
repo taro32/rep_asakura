@@ -667,17 +667,19 @@ SUBROUTINE obsmake_cal(obs)
     call com_randn(nobsall, error) ! generate all random numbers at the same time
     ns = 0
   end if
-
+  !if (myrank_d == 0) write(6,*) "nobsmax, obs(1)%nobs, nobsall = ", nobsmax, obs(1)%nobs, nobsall 
+  !if (myrank_d == 0) write(6,*) "initial bufr ", bufr(1:obs(1)%nobs)
+  !if (myrank_d == 0) bufr = 0.0
   do iof = 1, OBS_IN_NUM
     !if ( LOG_OUT ) then
-    write(6,*) "MYRANK=", myrank, "MYRANK_D=", myrank_d, "iof=", iof, "obs(iof)%nobs=", obs(iof)%nobs
+    !write(6,*) "MYRANK=", myrank, "MYRANK_D=", myrank_d, "iof=", iof, "obs(iof)%nobs=", obs(iof)%nobs
     !end if
     !if(myrank_d == 0) then
-    !  write(6,*) "before mpi_reduce ", obs(iof)%dat
+    !  write(6,*) "before mpi_reduce ", bufr(1:obs(iof)%nobs)
     !endif
     call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_d,ierr)
     !if(myrank_d == 0) then
-    !  write(6,*) "after mpi_reduce ", obs(iof)%dat
+    !  write(6,*) "after mpi_reduce ", bufr(1:obs(iof)%nobs)
     !endif
     !call MPI_REDUCE(obs(iof)%dat,bufr(1:obs(iof)%nobs),obs(iof)%nobs,MPI_r_size,MPI_SUM,0,MPI_COMM_a,ierr) ! YSaw 20250624
     if (myrank_d == 0) then
@@ -737,6 +739,7 @@ SUBROUTINE obsmake_cal(obs)
     write(6,*) "MYRANK=", myrank, "MYRANK_D=", myrank_d, "is waiting at end write_obs_all"
     !end if
   end if
+  !call MPI_BARRIER(MPI_COMM_d, ierr)
 
 end subroutine obsmake_cal
 
