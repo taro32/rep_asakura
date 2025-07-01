@@ -401,8 +401,8 @@ while ((time <= ETIME)); do
         if ((OUT_OPT <= 3)) ;then
           for mem in $(seq -f %04g $MEMBER) $mnsp ; do
             mkdir -p $OUTDIR/$atime/gues/$mem
-            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a line 404" >&2 #YSaw 20250702
-            cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/
+            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ... omiting the copy of gues files" >&2 #YSaw 20250702
+            #cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/ deleted by YSaw although OUT_OPT = 1, gues is unnecessary
           done
         elif ((OUT_OPT <= 6)) ;then
           for mem in $mnsp ;do
