@@ -111,7 +111,7 @@ LTIMESLOT=21600 #864000     # Timeslot interval for 4D-LETKF (second)
 #===============================================================================
 # Parallelization settings
 
-MEMBER=100           # Ensemble size
+MEMBER=10           # Ensemble size
 
 PPN=4               # Number of processes per node
 

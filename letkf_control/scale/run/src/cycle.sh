@@ -375,10 +375,12 @@ while ((time <= ETIME)); do
         if ((ANAL_LLIO_TMP==1)) && ((atime <= ETIME)) ;then
           BGDIR=/local/$atime
           mkdir -p $OUTDIR/$atime/anal/mean
+          echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a line 378" >&2 # YSaw 20250702
           cp -r $BGDIR/anal/mean/* $OUTDIR/$atime/anal/mean/
           if ((OUT_OPT <= 4)) ;then
             for mem in $(seq -f %04g $MEMBER) ; do
               mkdir -p $OUTDIR/$atime/anal/$mem
+              echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a line 383" >&2 #YSaw 20250702
               cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/anal/$mem/
             done
           fi
@@ -399,16 +401,19 @@ while ((time <= ETIME)); do
         if ((OUT_OPT <= 3)) ;then
           for mem in $(seq -f %04g $MEMBER) $mnsp ; do
             mkdir -p $OUTDIR/$atime/gues/$mem
+            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a line 404" >&2 #YSaw 20250702
             cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/
           done
         elif ((OUT_OPT <= 6)) ;then
           for mem in $mnsp ;do
             mkdir -p $OUTDIR/$atime/gues/$mem
+            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a line 410" >&2 #YSaw 20250702
             cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/ 
           done       
         fi
         if ((NOBS_OUT==1)); then
           for pe in $(seq -f %06g 0 $((SCALE_NP-1)) ) ;do
+            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a line 416" >&2 #YSaw 20250702
             cp -r $BGDIR/anal/mean/init_$(datetime_scale $atime).pe${pe}.nc $TMP/nobs.d01_$(datetime_scale $atime).pe${pe}.nc
           done 
         elif ((RTPS_INFL_OUT==1)); then
