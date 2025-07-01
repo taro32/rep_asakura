@@ -36,9 +36,9 @@ OBSDA_RUN = .true. ,
 /
 
 &PARAM_OBS_ERROR
- OBSERR_U = 1.0, 
- OBSERR_V = 1.0, 
- OBSERR_T = 1.0, 
+ OBSERR_U = 0.1, 
+ OBSERR_V = 0.1, 
+ OBSERR_T = 0.1, 
  OBSERR_Q = 0.01 !1.0, 
  OBSERR_RH = 0.01, !0.1, 
  OBSERR_RADAR_REF = 5.0, 
