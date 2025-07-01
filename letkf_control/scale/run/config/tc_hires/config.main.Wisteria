@@ -36,7 +36,7 @@ DATA_BDY_GRADS=""
 
 OBS="$OUTDIR/obs"
 #OBSIN=/work/jh220020o/f00019/scale_enkc/scale/letkf_control/scale/run/config/case_tc/make_obsin/test_obs_3d_xyp.dat  #YSaw 20240702
-OBSIN=/work/jh250035o/f00019/scale/scale-letkc/letkf_control/scale/run/config/tc_hires/make_obsin/test_obs_3d_intv2_xyp.dat  #YSaw 20241111 dense network
+OBSIN=/work/jh250035o/f00019/scale/scale-letkc/letkf_control/scale/run/config/tc_hires/make_obsin/test_obs_3d_intv8_xyp.dat  #YSaw 20241111 dense network
 OBS_IN_FORMAT="PREPBUFR" # YSaw 20240702
 
 #===============================================================================
@@ -106,7 +106,7 @@ OBSNAME[1]=obs
 WINDOW_S=0 #864000     # SCALE forecast time when the assimilation window starts (second)
 WINDOW_E=21600 #864000     # SCALE forecast time when the assimilation window ends (second)
 LCYCLE=21600 #864000       # Length of a DA cycle (second)
-LTIMESLOT=10800 #864000     # Timeslot interval for 4D-LETKF (second)
+LTIMESLOT=21600 #864000     # Timeslot interval for 4D-LETKF (second)
 
 #===============================================================================
 # Parallelization settings
