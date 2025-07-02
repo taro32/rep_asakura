@@ -404,6 +404,11 @@ while ((time <= ETIME)); do
             echo "[$(datetime_now)] ${time}: ${stepname[$s]} ... omiting the copy of gues files" >&2 #YSaw 20250702
             #cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/ deleted by YSaw although OUT_OPT = 1, gues is unnecessary
           done
+          for mem in $mnsp ;do
+            mkdir -p $OUTDIR/$atime/gues/$mem
+            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a gues mean" >&2 #YSaw 20250702
+            cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/ 
+          done       
         elif ((OUT_OPT <= 6)) ;then
           for mem in $mnsp ;do
             mkdir -p $OUTDIR/$atime/gues/$mem
