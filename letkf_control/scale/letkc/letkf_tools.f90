@@ -59,7 +59,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size) :: control_std3d(nij1,nlev,nv3d) ! standard deviation for evaluating control perturbation
   REAL(r_size) :: control_relativenorm3d(nij1,nlev,nv3d) ! control norm/std for evaluating control perturbation
   REAL(r_size) :: controlperthreshold ! YSaw 20241101
-  REAL(r_size),PARAMETER :: control_lamda = 0.7 ! YSaw 20241101
+  REAL(r_size),PARAMETER :: control_lamda = 0.0 ! YSaw 20241101
 
 
 !  REAL(r_size) :: mean3d(nij1,nlev,nv3d)
@@ -642,7 +642,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 ! by Y.Saw 20241101
 ! only first 3-layer
 !
-  clev = 20
+  clev = 40 ! all layers
   controlperthreshold = maxval(control_relativenorm3d(:,1:clev,iv3d_q)) * control_lamda
   DO ilev = 1, nlev
    DO ij = 1, nij1

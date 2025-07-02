@@ -34,7 +34,7 @@ integer::ncid, vidlon, vidlat,vidz
   call ncio_read(ncid,"PRES",nlon,nlat,nlev,1,pres)
   call ncio_close( ncid ) 
 
-cfile="controltarget_800"
+cfile="controltarget_963"
 
 open (21, file=trim(cfile), form='unformatted', access='sequential') !, convert='big_endian')
 
@@ -53,7 +53,7 @@ ie = 1
   wk(4)=axz(iz)
 !  wk(4)=pres(ilon,ilat,ilev) * 0.01 !!! hPa
   print*, wk(4)
-  wk(5)=80000 * 0.01 !100000 * 0.01  !!! dat [hPa]
+  wk(5)=96300 * 0.01 !100000 * 0.01  !!! dat [hPa]
   wk(6)=errs(ie)   !!! err 
   wk(7)=1.0  !!! typ ADPUPA
   wk(8)=0.0   !!! dif

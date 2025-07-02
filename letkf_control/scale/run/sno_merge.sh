@@ -13,7 +13,7 @@ INPUT_SNOW_NP=16
 ALLVAR=T
 SINGLE_VAR=F
 
-tint=10800 #864000 # [second]
+tint=21600 #864000 # [second]
 tstart='2000-01-06 00:00:00'
 #tend=$tstart
 tend='2000-01-10 00:00:00'
@@ -32,8 +32,8 @@ TYPE=hist
 #DOM=2 
 
 # Output file (X & Y process number) for each member
-NP_OFILE_X=2
-NP_OFILE_Y=2
+NP_OFILE_X=8
+NP_OFILE_Y=8
 
 if [ "$INPUT_FROM_SNOW" == "T" ] ; then
   NP_OFILE_X=1

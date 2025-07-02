@@ -480,8 +480,14 @@ while ((time <= ETIME)); do
         if ((OUT_OPT <= 3)) ;then
           for mem in $(seq -f %04g $MEMBER) $mnsp ; do
             mkdir -p $OUTDIR/$time/gues/$mem
-            cp -r $BGDIR/anal/$mem/* $OUTDIR/$time/gues/$mem/
+            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ... omiting the copy of gues files" >&2 #YSaw 20250702
+            #cp -r $BGDIR/anal/$mem/* $OUTDIR/$time/gues/$mem/
           done
+          for mem in $mnsp ;do
+            mkdir -p $OUTDIR/$atime/gues/$mem
+            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a gues mean" >&2 #YSaw 20250702
+            cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/ 
+          done       
         elif ((OUT_OPT <= 6)) ;then
           for mem in $mnsp ;do
             mkdir -p $OUTDIR/$time/gues/$mem
@@ -533,8 +539,14 @@ while ((time <= ETIME)); do
         if ((OUT_OPT <= 3)) ;then
           for mem in $(seq -f %04g $MEMBER) $mnsp ; do
             mkdir -p $OUTDIR/$atime/gues/$mem
+            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ... omiting the copy of gues files" >&2 #YSaw 20250702
             cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/
           done
+          for mem in $mnsp ;do
+            mkdir -p $OUTDIR/$atime/gues/$mem
+            echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a gues mean" >&2 #YSaw 20250702
+            cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/ 
+          done       
         elif ((OUT_OPT <= 6)) ;then
           for mem in $mnsp ;do
             mkdir -p $OUTDIR/$atime/gues/$mem
