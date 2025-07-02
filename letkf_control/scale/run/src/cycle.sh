@@ -540,7 +540,7 @@ while ((time <= ETIME)); do
           for mem in $(seq -f %04g $MEMBER) $mnsp ; do
             mkdir -p $OUTDIR/$atime/gues/$mem
             echo "[$(datetime_now)] ${time}: ${stepname[$s]} ... omiting the copy of gues files" >&2 #YSaw 20250702
-            cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/
+            #cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/
           done
           for mem in $mnsp ;do
             mkdir -p $OUTDIR/$atime/gues/$mem
