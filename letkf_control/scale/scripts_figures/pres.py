@@ -49,8 +49,9 @@ import netCDF4 as nc
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241031_qvonly_noqc/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 
-workdir_letkf1 = '/work/jh250035o/f00019/enkc_with_TC/20250701_tchires_letkf/result/tc_hires/200001'
-workdir_letkf2 = '/work/jh250035o/f00019/enkc_with_TC/20250703_tchires_letkc_allQ_lamda08/result/tc_hires/200001'
+workdir_letkf1 = '/work/jh250035o/f00019/enkc_with_TC/20250703_tchires_letkc_allQ_lamda08/result/tc_hires/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250704_tchires_letkc_allQ_lamda08/result/tc_hires/200001'
+
 
 day = 1
 hour = 0
