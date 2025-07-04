@@ -13,10 +13,10 @@ INPUT_SNOW_NP=16
 ALLVAR=T
 SINGLE_VAR=F
 
-tint=21600 #864000 # [second]
-tstart='2000-01-06 00:00:00'
+tint=10800 #864000 # [second]
+tstart='2000-01-04 00:00:00'
 #tend=$tstart
-tend='2000-01-10 00:00:00'
+tend='2000-01-09 00:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 
@@ -246,10 +246,10 @@ if [ "$PRESET" = 'Wisteria' ]; then
 cat << EOF >> $jobsh
 #!/bin/bash 
 #
-#PJM -g "jh250035o" 
+#PJM -g "gv42" 
 #PJM -L "rscgrp=regular-o"
 #PJM -L "node=${SNO_NODE}"
-#PJM -L "elapse=48:00:00"
+#PJM -L "elapse=0:20:00"
 #PJM --mpi "max-proc-per-node=${PPN}"
 #PJM --omp "thread=${THREADS}"
 #PJM -j

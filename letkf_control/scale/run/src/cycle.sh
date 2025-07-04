@@ -486,7 +486,7 @@ while ((time <= ETIME)); do
           for mem in $mnsp ;do
             mkdir -p $OUTDIR/$atime/gues/$mem
             echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...copying a gues mean" >&2 #YSaw 20250702
-            cp -r $BGDIR/anal/$mem/* $OUTDIR/$atime/gues/$mem/ 
+            cp -r $BGDIR/anal/$mem/* $OUTDIR/$time/gues/$mem/ 
           done       
         elif ((OUT_OPT <= 6)) ;then
           for mem in $mnsp ;do

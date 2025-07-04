@@ -50,13 +50,15 @@ import netCDF4 as nc
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 
 workdir_letkf1 = '/work/jh250035o/f00019/enkc_with_TC/20250701_tchires_letkf/result/tc_hires/200001'
+workdir_letkf2 = '/work/jh250035o/f00019/enkc_with_TC/20250703_tchires_letkc_allQ_lamda08/result/tc_hires/200001'
+
 day = 1
 hour = 0
 i = 0
 minpres_letkf = np.zeros((36))
 minpres_mdet = np.zeros((36))
 print(minpres_letkf)
-for day in range(1,10):
+for day in range(4,9):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -67,27 +69,27 @@ for day in range(1,10):
         else:
             strhour = str(hour)
         print('reading..... ', day, hour)
-        data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00064/mean/history.pe000000.nc','r') #mean
+        data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #mean
         #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
-        pres = data.variables['PRES']
-        minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        #pres = data.variables['MSLP']
-        #minpres_letkf[i] = np.min(pres[0,:,:],axis=(0,1))/100
-        data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #letkf1
+        #pres = data.variables['PRES']
+        #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        pres = data.variables['MSLP']
+        minpres_letkf[i] = np.min(pres[0,:,:],axis=(0,1))/100
+        data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #letkf1
         #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
-        pres = data.variables['PRES']
-        minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        #pres = data.variables['MSLP']
-        #minpres_mdet[i] = np.min(pres[0,:,:],axis=(0,1))/100
+        #pres = data.variables['PRES']
+        #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        pres = data.variables['MSLP']
+        minpres_mdet[i] = np.min(pres[0,:,:],axis=(0,1))/100
         i = i + 1
 
 print(minpres_letkf)
 print(minpres_mdet)
 plt.plot(minpres_letkf[:],color='blue')
 plt.plot(minpres_mdet[:],color='green')
-plt.ylim(945,970)
+plt.ylim(970,1000)
 #plt.savefig('TCpres_nocntlvscntl_local095.png')
-plt.savefig('TCpres_tchires_letkf_ens100.png')
+plt.savefig('TCpres_tchires_letkc_allQ_lamda08.png')
 plt.show()
 
 
