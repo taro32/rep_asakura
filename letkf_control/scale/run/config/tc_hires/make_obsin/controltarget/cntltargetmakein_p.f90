@@ -50,7 +50,8 @@ ie = 1
   wk(1)=real(elms(ie))  
   wk(2)=axlon(ilon,ilat)
   wk(3)=axlat(ilon,ilat)
-  wk(4)=axz(iz)
+!  wk(4)=axz(iz)
+  wk(4)=axz(ilev)
 !  wk(4)=pres(ilon,ilat,ilev) * 0.01 !!! hPa
   print*, wk(4)
   wk(5)=99000 * 0.01 !100000 * 0.01  !!! dat [hPa]
@@ -59,7 +60,13 @@ ie = 1
   wk(8)=0.0   !!! dif
   write(21,iostat=ios) wk(1:8)
 !end do
-  write(*,'(F6.1,5F14.4)') wk(1:6)
+  write(*,*) wk(1)
+    write(*,*) wk(2)
+      write(*,*) wk(3)
+        write(*,*) wk(4)
+          write(*,*) wk(5)
+            write(*,*) wk(6)
+              write(*,*) wk(7)
 !end do
 !end do
 !end do
