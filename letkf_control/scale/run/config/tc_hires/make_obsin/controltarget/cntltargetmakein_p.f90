@@ -6,7 +6,7 @@ real(4),allocatable::axlon(:,:),axlat(:,:),axz(:),pres(:,:,:)
 
 integer,parameter::nelm=1 !3
 integer,parameter::elms(nelm)=(/14593/) !! Pres
-real(4),parameter::errs(nelm)=(/1.0/)    !! Pres 1.0hPa-->10.0hPa 20241124 
+real(4),parameter::errs(nelm)=(/10.0/)    !! Pres 1.0hPa-->10.0hPa 20241124 
 
 integer,parameter::intv_x=4 !not used
 integer,parameter::intv_y=4 !not used
@@ -34,7 +34,7 @@ integer::ncid, vidlon, vidlat,vidz
   call ncio_read(ncid,"PRES",nlon,nlat,nlev,1,pres)
   call ncio_close( ncid ) 
 
-cfile="controltarget_990"
+cfile="controltarget_990_error10"
 
 open (21, file=trim(cfile), form='unformatted', access='sequential') !, convert='big_endian')
 
