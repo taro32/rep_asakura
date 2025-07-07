@@ -36,9 +36,9 @@ import netCDF4 as nc
 #show()
 
 # LETKF mdet
-baseline = '/work/jh250035o/f00019/enkc_with_TC/20250703_tchires_letkc_allQ_lamda08/result/tc_hires/200001'
+baseline = '/work/gv42/f00019/enkc_with_TC/20250704_tchires_letkc_allQ_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250704_tchires_letkc_allQ_lamda08/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250704_tchires_letkc_allQ_all/result/tc_hires/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -52,7 +52,7 @@ for day in range(4,9):
         strday = '0'+str(day)
     else:
         strday = str(day)
-    for hour in range(0,24,6):
+    for hour in range(0,24,3):
         if hour < 10:
             strhour = '0'+str(hour)
         else:

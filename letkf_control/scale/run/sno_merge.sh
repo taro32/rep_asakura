@@ -246,7 +246,7 @@ if [ "$PRESET" = 'Wisteria' ]; then
 cat << EOF >> $jobsh
 #!/bin/bash 
 #
-#PJM -g "gv42" 
+#PJM -g "jh250035o" 
 #PJM -L "rscgrp=regular-o"
 #PJM -L "node=${SNO_NODE}"
 #PJM -L "elapse=0:20:00"
