@@ -2,14 +2,16 @@ program main
 use common_ncio
 implicit real(a-h,o-z)
 
+! 20250902 Y Sawada including central pressure observation
+
 real(4),allocatable::axlon(:,:),axlat(:,:),axz(:),pres(:,:,:)
 
-integer,parameter::nelm=4 !3
-integer,parameter::elms(nelm)=(/2819,2820,3073,3330/) !! U,V,T,Qv
-real(4),parameter::errs(nelm)=(/1.0,1.0,1.0,0.01/)    !! U,V,T,Qv 
+integer,parameter::nelm=5 !3
+integer,parameter::elms(nelm)=(/2819,2820,3073,3330,14593/) !! U,V,T,Qv,pres
+real(4),parameter::errs(nelm)=(/0.1,0.1,0.1,0.01,1.0/)    !! U,V,T,Qv,pres 
 
-integer,parameter::intv_x=100 !4
-integer,parameter::intv_y=100 !4
+integer,parameter::intv_x=2 !4
+integer,parameter::intv_y=2 !4
 integer,parameter::intv_z=2
 
 real(4)::wk(8)
@@ -34,14 +36,14 @@ integer::ncid, vidlon, vidlat,vidz
   call ncio_read(ncid,"PRES",nlon,nlat,nlev,1,pres)
   call ncio_close( ncid ) 
 
-cfile="test_obs_3d_intv100_xyp.dat"
+cfile="test_obs_3d_intv2_xyp_uvtqp.dat"
 
 open (21, file=trim(cfile), form='unformatted', access='sequential') !, convert='big_endian')
 
 do ilon=1,nlon,intv_x
 do ilat=1,nlat,intv_y
 do ilev=1,nlev,intv_z
-do ie=1,nelm
+do ie=1,nelm-1 !except for central pres
   print *, ilon, ilat, ilev, ie
   wk(1)=real(elms(ie))  
   wk(2)=axlon(ilon,ilat)
@@ -58,7 +60,23 @@ end do
 end do
 end do
 end do
-
+ilon = int(nlon/2.0)
+ilat = int(nlat/2.0)
+ilev = 1
+ie = nelm
+  print *, ilon, ilat, ilev, ie
+  wk(1)=real(elms(ie))  
+  wk(2)=axlon(ilon,ilat)
+  wk(3)=axlat(ilon,ilat)
+  wk(4)=axz(ilev)
+  !wk(4)=pres(ilon,ilat,ilev) * 0.01 !!! hPa
+  wk(5)=10.0  !!! dat
+  wk(6)=errs(ie)   !!! err 
+  wk(7)=1.0  !!! typ ADPUPA
+  wk(8)=0.0   !!! dif
+  write(21,iostat=ios) wk(1:8)
+  write(*,'(F6.1,5F14.4)') wk(1:6)
+  
 close(21)
 
 stop

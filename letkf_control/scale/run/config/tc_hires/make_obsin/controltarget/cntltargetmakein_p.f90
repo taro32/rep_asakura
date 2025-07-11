@@ -43,7 +43,7 @@ open (21, file=trim(cfile), form='unformatted', access='sequential') !, convert=
 !do ilev=1,nlev,intv_z
 !do ie=1,nelm
 ilon = int(nlon/2.0)
-ilat = int(nlon/2.0)
+ilat = int(nlat/2.0)
 ilev = 1
 ie = 1
   print *, ilon, ilat, ilev, ie
