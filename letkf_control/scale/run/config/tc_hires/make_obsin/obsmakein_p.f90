@@ -62,7 +62,7 @@ end do
 end do
 ilon = int(nlon/2.0)
 ilat = int(nlat/2.0)
-ilev = 1
+ilev = 2 ! first layer obs may be rejected?
 ie = nelm
   print *, ilon, ilat, ilev, ie
   wk(1)=real(elms(ie))  

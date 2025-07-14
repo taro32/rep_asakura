@@ -50,7 +50,7 @@ import netCDF4 as nc
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 
 workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20250704_tchires_letkc_allQ_baseline/result/tc_hires/200001'
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250709_tchires_letkc_allQ_lamda08_error2_loc150km/result/tc_hires/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250712_tchires_letkc_allQ_lamda08_error2_loc50km_improveobs/result/tc_hires/200001'
 
 
 day = 1
@@ -93,7 +93,7 @@ plt.plot(minpres_letkf[:],color='blue')
 plt.plot(minpres_mdet[:],color='green')
 plt.ylim(970,1000)
 #plt.savefig('TCpres_nocntlvscntl_local095.png')
-plt.savefig('TCpres_tchires_fcst_allQ_lamda08_error2_loc150km.png')
+plt.savefig('TCpres_tchires_letkc_allQ_lamda08_error2_loc50km_improveobs_letkf.png')
 plt.show()
 
 

@@ -41,6 +41,7 @@ OBSDA_RUN = .true. ,
  OBSERR_T = 0.1, 
  OBSERR_Q = 0.01 !1.0, 
  OBSERR_RH = 0.01, !0.1, 
+ OBSERR_PS = 500.d0 ! (Pa)
  OBSERR_RADAR_REF = 5.0, 
  OBSERR_RADAR_VR = 3.0, 
 /
