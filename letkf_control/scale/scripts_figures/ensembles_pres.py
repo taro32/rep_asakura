@@ -30,13 +30,15 @@ for i in range(1,nens+1):
     #if i == 89:
     data = nc.Dataset(workdir+stri+'/history.pe000000.nc','r')
     print("reading...", i)
-    pres = data.variables['MSLP']
+    #pres = data.variables['MSLP']
+    pres = data.variables['PRES']
+    minpres[:,i-1] = np.min(pres[:,0,:,:],axis=(1,2))/100
     #minpres[:,i-1] = np.min(pres[:,0,:,:],axis=(1,2))/100.0
-    minpres[:,i-1] = np.min(pres[:,:,:],axis=(1,2))/100.0
+    #minpres[:,i-1] = np.min(pres[:,:,:],axis=(1,2))/100.0
     #minpres[60,i-1] = np.min(pres[60,0,:,:],axis=(0,1))/100.0
 
-#print(minpres[60,80:100])
-#plt.plot(minpres[60,80:100],color="k")
+#print(minpres[60,:])
+#plt.plot(minpres[60,:],color="k")
 #plt.savefig("fcst_finalstate.png")
 #plt.plot(minpres[:,88],color="r")
 #plt.savefig("fcst_member0089")
@@ -44,10 +46,10 @@ for i in range(1,nens+1):
 
 for i in range(0,nens):
         plt.plot(minpres[:,i],color='k')
-redi = 50
-plt.plot(minpres[:,redi],color='r')
+redi = 25
+plt.plot(minpres[:,redi-1],color='r')
 
-plt.savefig("fcst_20250616_mslp_50")
+plt.savefig("fcst_20250616_pres_25")
 #show()
 sys.exit()
 
