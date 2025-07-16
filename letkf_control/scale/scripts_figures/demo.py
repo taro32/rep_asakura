@@ -38,7 +38,7 @@ import netCDF4 as nc
 # LETKF mdet
 baseline = '/work/gv42/f00019/enkc_with_TC/20250704_tchires_letkc_allQ_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250709_tchires_letkc_allQ_lamda08_error2_loc150km/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250716_tchires_letkc_allQ_lamda08_psobs_target965/result/tc_hires/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -47,7 +47,7 @@ hour = 0
 i = 0
 
 
-for day in range(4,8):
+for day in range(4,9):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -60,15 +60,15 @@ for day in range(4,8):
         print('reading..... ', day, hour)
         data = nc.Dataset(baseline+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
         #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
-        #pres = data.variables['PRES']
-        #minpres_baseline[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        pres = data.variables['MSLP']
-        minpres_baseline[i] = np.min(pres[1,:,:],axis=(0,1))/100
+        pres = data.variables['PRES']
+        minpres_baseline[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        #pres = data.variables['MSLP']
+        #minpres_baseline[i] = np.min(pres[1,:,:],axis=(0,1))/100
         data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
-        #pres = data.variables['PRES']
-        #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        pres = data.variables['MSLP']
-        minpres_mdet[i] = np.min(pres[1,:,:],axis=(0,1))/100
+        pres = data.variables['PRES']
+        minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        #pres = data.variables['MSLP']
+        #minpres_mdet[i] = np.min(pres[1,:,:],axis=(0,1))/100
         i = i + 1
 
 #plt.plot(minpres_baseline[:],color='black')
@@ -107,7 +107,7 @@ for day in range(4,9):
             strhour = str(hour)
         print('reading..... ', day, hour)
         data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
-        #pres = data.variables['PRES']
+        pres = data.variables['PRES']
         #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         if i != 0:
             valueold = valuenew
@@ -144,7 +144,7 @@ for day in range(4,9):
             plt.plot(minpres_mdet[:],color='green')
             
             plt.axvline(i, color='red',linestyle='--')
-            plt.ylim(970,1000)
+            plt.ylim(950,970)
             plt.xlim(0,72)
 
             figname = "demo"+valuename+'_'+strday+strhour+'U_2_3'
