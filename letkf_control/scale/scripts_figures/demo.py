@@ -36,9 +36,9 @@ import netCDF4 as nc
 #show()
 
 # LETKF mdet
-baseline = '/work/gv42/f00019/enkc_with_TC/20250704_tchires_letkc_allQ_baseline/result/tc_hires/200001'
+baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250716_tchires_letkc_allQ_lamda08_psobs_target955/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250718_tchires_letkc_allQ_lamda08_psobs_target960/result/tc_hires/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -47,7 +47,7 @@ hour = 0
 i = 0
 
 
-for day in range(4,9):
+for day in range(4,10):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -95,7 +95,7 @@ vvmax=-1.0
 #minpres_letkf = np.zeros((72))
 #minpres_mdet = np.zeros((72))
 #print(minpres_letkf)
-for day in range(4,9):
+for day in range(4,10):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -148,7 +148,7 @@ for day in range(4,9):
             plt.xlim(0,72)
 
             figname = "demo"+valuename+'_'+strday+strhour+'U_2_3'
-            plt.savefig('./demo_test/'+figname)
+            plt.savefig('./demo_test_20250718_tchires_letkc_allQ_lamda08_psobs_target960/'+figname)
             plt.clf()
         i = i + 1
         #show()
