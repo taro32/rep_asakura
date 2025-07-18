@@ -38,7 +38,7 @@ import netCDF4 as nc
 # LETKF mdet
 baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250718_tchires_letkc_allQ_lamda08_psobs_target960/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250718_tchires_letkc_allQ_lamda09_psobs_target960error1/result/tc_hires/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -148,7 +148,7 @@ for day in range(4,10):
             plt.xlim(0,72)
 
             figname = "demo"+valuename+'_'+strday+strhour+'U_2_3'
-            plt.savefig('./demo_test_20250718_tchires_letkc_allQ_lamda08_psobs_target960/'+figname)
+            plt.savefig('./demo_test_20250718_tchires_letkc_allQ_lamda09_psobs_target960error1/'+figname)
             plt.clf()
         i = i + 1
         #show()

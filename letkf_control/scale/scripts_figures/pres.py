@@ -50,7 +50,7 @@ import netCDF4 as nc
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 
 workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250718_tchires_letkc_allQ_lamda08_psobs_target960/result/tc_hires/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250718_tchires_letkc_allQ_lamda09_psobs_target960error1/result/tc_hires/200001'
 
 
 day = 1
@@ -73,14 +73,14 @@ for day in range(4,10):
         else:
             strhour = str(hour)
         print('reading..... ', strday, hour)
-        data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #mean
-        #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
+        #data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #mean
+        data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
         pres = data.variables['PRES']
         minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         #pres = data.variables['MSLP']
         #minpres_letkf[i] = np.min(pres[0,:,:],axis=(0,1))/100
-        data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #letkf1
-        #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mean/history.pe000000.nc','r')
+        #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #letkf1
+        data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mean/history.pe000000.nc','r')
         pres = data.variables['PRES']
         minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         #pres = data.variables['MSLP']
@@ -93,7 +93,7 @@ plt.plot(minpres_letkf[:],color='blue')
 plt.plot(minpres_mdet[:],color='green')
 plt.ylim(950,970)
 #plt.savefig('TCpres_nocntlvscntl_local095.png')
-plt.savefig('pres_tchires_letkc_allQ_lamda08_psobs_target960.png')
+plt.savefig('pres_tchires_letkc_allQ_lamda08_psobs_target960error1.png')
 plt.show()
 
 
