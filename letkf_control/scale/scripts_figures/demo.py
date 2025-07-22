@@ -38,7 +38,7 @@ import netCDF4 as nc
 # LETKF mdet
 baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250719_tchires_letkc_allQ_lamda085_psobs_target960/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250721_tchires_letkc_allQ_lamda085_psobs_target960_window1h/result/tc_hires/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -47,7 +47,7 @@ hour = 0
 i = 0
 
 
-for day in range(5,10):
+for day in range(4,10):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -60,15 +60,19 @@ for day in range(5,10):
         print('reading..... ', day, hour)
         data = nc.Dataset(baseline+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
         #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00004/mean/history.pe000000.nc','r')
-        pres = data.variables['PRES']
-        minpres_baseline[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        #pres = data.variables['MSLP']
-        #minpres_baseline[i] = np.min(pres[1,:,:],axis=(0,1))/100
-        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
-        pres = data.variables['PRES']
-        minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
-        #pres = data.variables['MSLP']
-        #minpres_mdet[i] = np.min(pres[1,:,:],axis=(0,1))/100
+        #pres = data.variables['PRES']
+        #minpres_baseline[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        pres = data.variables['MSLP']
+        minpres_baseline[i] = np.min(pres[0,:,:],axis=(0,1))/100
+        if day < 7:
+            data = nc.Dataset(baseline+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
+        else:
+            data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')    
+        #data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
+        #pres = data.variables['PRES']
+        #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
+        pres = data.variables['MSLP']
+        minpres_mdet[i] = np.min(pres[0,:,:],axis=(0,1))/100
         i = i + 1
 
 #plt.plot(minpres_baseline[:],color='black')
@@ -95,12 +99,12 @@ vvmax=-1.0
 #minpres_letkf = np.zeros((72))
 #minpres_mdet = np.zeros((72))
 #print(minpres_letkf)
-for day in range(5,10):
+for day in range(7,10):
     if day < 10:
         strday = '0'+str(day)
     else:
         strday = str(day)
-    for hour in range(0,24,3):
+    for hour in range(0,24,1):
         if hour < 10:
             strhour = '0'+str(hour)
         else:
@@ -143,12 +147,12 @@ for day in range(5,10):
             plt.plot(minpres_baseline[:],color='black')
             plt.plot(minpres_mdet[:],color='green')
             
-            plt.axvline(i, color='red',linestyle='--')
-            plt.ylim(950,970)
-            plt.xlim(0,72)
+            plt.axvline(18 + i/3.0, color='red',linestyle='--')
+            plt.ylim(975,995)
+            plt.xlim(0,45)
 
             figname = "demo"+valuename+'_'+strday+strhour+'U_2_3'
-            plt.savefig('./demo_test_20250719_tchires_letkc_allQ_lamda085_psobs_target960/'+figname)
+            plt.savefig('./demo_test_220250721_tchires_letkc_allQ_lamda085_psobs_target960_window1h/'+figname)
             plt.clf()
         i = i + 1
         #show()
