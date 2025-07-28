@@ -50,7 +50,7 @@ import netCDF4 as nc
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
 
 workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250719_tchires_letkc_allQ_lamda085_psobs_target960/result/tc_hires/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250722_tchires_letkc_allQ_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
 
 day = 1
 hour = 0
@@ -91,12 +91,12 @@ for day in range(4,10):
 
 print(minpres_letkf)
 print(minpres_mdet)
-plt.plot(minpres_letkf[:],color='blue')
+plt.plot(minpres_letkf[:],color='black')
 plt.plot(minpres_mdet[:],color='green')
-plt.ylim(975,995)
-plt.xlim(0,48)
+plt.ylim(978,995)
+plt.xlim(0,47)
 #plt.savefig('TCpres_nocntlvscntl_local095.png')
-plt.savefig('pres_tchires_letkc_allQ_lamda085_psobs_target960.png')
+plt.savefig('pres_tchires_letkc_allQ_lamda09_psobs_target960error1_window1h.png')
 plt.show()
 
 
