@@ -39,7 +39,7 @@ import matplotlib.colors as mcolors
 # LETKF mdet
 baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250728_tchires_letkc_allQ_lamda095_psobs_target960error1_window1h/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250729_tchires_letkc_allQ_lamda0975_psobs_target960error1_window1h/result/tc_hires/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -160,7 +160,7 @@ for day in range(7,10):
             #plt.xlim(0,45)
 
             figname = "demo"+valuename+'_'+strday+strhour+'QV_2_3'
-            plt.savefig('./demo_test_20250728_tchires_letkc_allQ_lamda095_psobs_target960error1_window1h/'+figname)
+            plt.savefig('./demo_test_20250729_tchires_letkc_allQ_lamda0975_psobs_target960error1_window1h/'+figname)
             plt.clf()
         i = i + 1
         #show()
