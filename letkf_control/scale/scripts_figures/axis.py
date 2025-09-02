@@ -17,19 +17,21 @@ import netCDF4 as nc
 # LETKF mdet
 #baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20241212_letkc_windonly_noqc_local07anddist_target990/result/case_tc/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250722_tchires_letkc_allQ_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
 
-
-distance = np.zeros((120,120))
-for i in range(0,120):
-    for j in range(0,120):
-        distance[i,j] =  np.sqrt((i-60)**2 + (j-60)**2)
+gridsize = 400
+verlevel = 40
+distance = np.zeros((gridsize,gridsize))
+for i in range(0,gridsize):
+    for j in range(0,gridsize):
+        distance[i,j] =  int(np.sqrt((i-gridsize/2)**2 + (j-gridsize/2)**2))
 #plt.imshow(distance,cmap='seismic')
+#plt.savefig("test.png")
 #plt.show()
 #sys.exit()
 
 #zlevel = 2
-valuename="U"
+valuename="QV"
 
 # figure setting
 vvmin=-1.0
@@ -40,20 +42,20 @@ vvmax=1.0
 
 #minpres_mdet = np.zeros((72))
 #print(minpres_letkf)
-interventioncount = np.zeros((20,120,120))
+interventioncount = np.zeros((verlevel,gridsize,gridsize))
 i = 0
-for day in range(7,10):
+for day in range(8,10):
     if day < 10:
         strday = '0'+str(day)
     else:
         strday = str(day)
-    for hour in range(0,24,3):
+    for hour in range(0,24,1):
         if hour < 10:
             strhour = '0'+str(hour)
         else:
             strhour = str(hour)
         print('reading..... ', day, hour)
-        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00004/mdet/history.pe000000.nc','r')
+        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
         #pres = data.variables['PRES']
         #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         if i != 0:
@@ -69,21 +71,26 @@ for day in range(7,10):
             diff[diff !=0.0] = 1
             interventioncount += diff
         i += 1
+#plt.imshow(interventioncount[0,:,:],cmap='seismic')
+#plt.savefig("test.png")
+#plt.show()
+#sys.exit()
 
-valueaxis = np.zeros((20,120))
-valueaxiscount = np.zeros((20,120))
-for i in range(0,120):
-    for j in range(0,120):
-        for k in range(0,20):
+valueaxis = np.zeros((verlevel,gridsize))
+valueaxiscount = np.zeros((verlevel,gridsize))
+for i in range(0,gridsize):
+    for j in range(0,gridsize):
+        for k in range(0,verlevel):
             valueaxis[k,int(distance[i,j])]+=interventioncount[k,i,j]
             valueaxiscount[k,int(distance[i,j])]+=1
 valueaxiscount [valueaxiscount == 0] = 1
-valueaxis = valueaxis/valueaxiscount
+#valueaxis = valueaxis/valueaxiscount
+#valueaxis = valueaxis
 figure(figsize=(10,10))
-#plt.imshow(valueaxis[:,0:50],cmap='seismic', vmin=0,vmax=1200,origin='lower')
-plt.imshow(valueaxis[:,0:50],cmap='seismic',vmin=0, vmax=10,origin='lower')
+plt.imshow(valueaxis[:,0:200],cmap='seismic', vmin=0,vmax=1200,origin='lower')
+#plt.imshow(valueaxis[:,0:200],cmap='seismic',vmin=0, vmax=10,origin='lower')
 plt.colorbar()
-plt.savefig('Uloclate.png')
+plt.savefig('qvloc_20250722_tchires_letkc_allQ_lamda09_psobs_target960error1_window1h.png')
 plt.show()
 
 
