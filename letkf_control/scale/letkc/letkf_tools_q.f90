@@ -59,7 +59,8 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size) :: control_std3d(nij1,nlev,nv3d) ! standard deviation for evaluating control perturbation
   REAL(r_size) :: control_relativenorm3d(nij1,nlev,nv3d) ! control norm/std for evaluating control perturbation
   REAL(r_size) :: controlperthreshold ! YSaw 20241101
-  REAL(r_size),PARAMETER :: control_lamda = 0.0 ! YSaw 20241101
+  REAL(r_size),PARAMETER :: control_lamda = 0.9 ! YSaw 20241101
+  logical,PARAMETER :: force_check = .FALSE.
 
 
 !  REAL(r_size) :: mean3d(nij1,nlev,nv3d)
@@ -94,7 +95,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   logical :: trans_done(nv3d+nv2d)
 
   INTEGER :: ij,ilev,n,m,i,k,nobsl
-  INTEGER :: clev                                !YSaw maxlevel for control
+  INTEGER, PARAMETER :: clev = 5                                !YSaw maxlevel for control
   INTEGER :: nobsl_t(nid_obs,nobtype)            !GYL
   REAL(r_size) :: cutd_t(nid_obs,nobtype)        !GYL
   REAL(r_size) :: beta                           !GYL
@@ -642,7 +643,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 ! by Y.Saw 20241101
 ! only first 3-layer
 !
-  clev = 40 ! all layers
+!  clev = 40 ! all layers
   controlperthreshold = maxval(control_relativenorm3d(:,1:clev,iv3d_q)) * control_lamda
   DO ilev = 1, nlev
    DO ij = 1, nij1
@@ -654,6 +655,15 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
             anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
             anal3d(ij,ilev,mmean,iv3d_q) = gues3d(ij,ilev,mmean,iv3d_q) ! is it necessary?
      ENDIF
+     IF(force_check)THEN ! checking control force is feasible
+            IF((anal3d(ij,ilev,mmdet,iv3d_q)-gues3d(ij,ilev,mmdet,iv3d_q)) > 0) THEN !positive Q is not allowed
+            DO k = 1, MEMBER
+               anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) + gues3d(ij,ilev,mmean,iv3d_q) ! neglecting small perturbation and reduce gues
+            ENDDO
+            anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
+            anal3d(ij,ilev,mmean,iv3d_q) = gues3d(ij,ilev,mmean,iv3d_q) ! is it necessary?
+            ENDIF
+      ENDIF ! end of force_check            
     ELSE  ! only 1-3 layer can be controlled by YSaw
             DO k = 1, MEMBER
                anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) + gues3d(ij,ilev,mmean,iv3d_q) ! neglecting small perturbation and reduce gues
