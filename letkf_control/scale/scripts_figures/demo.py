@@ -39,7 +39,7 @@ import matplotlib.colors as mcolors
 # LETKF mdet
 baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250722_tchires_letkc_allQ_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250902_tchires_letkc_L1to5Q_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -133,12 +133,12 @@ for day in range(7,10):
             ax1 = fig.add_subplot(2,3,1)
             ax1.set_title("QV [g/kg]",fontsize=16)
             ax1.tick_params(labelsize=8)
-            plt.imshow(valuenew[0,15,:,:]*1000, vmin=0, vmax=20.0)
+            plt.imshow(valuenew[0,0,:,:]*1000, vmin=0, vmax=20.0)
             plt.colorbar(shrink=0.3)
             plt.gca().invert_yaxis()
             ax2 = fig.add_subplot(2,3,2)
-            ax2.set_title("perturbation [g/kg] at lev 15",fontsize=16)
-            increment = valuenew[0,15,:,:] - valueold[1,15,:,:]
+            ax2.set_title("perturbation [g/kg] at lev 0",fontsize=16)
+            increment = valuenew[0,0,:,:] - valueold[1,0,:,:]
             #increment_big[100:500,100:500] = increment
             #print(shape(increment_big))
             #plt.imshow(increment_big[0:600,0:600]*1000, vmin=vvmin, vmax=vvmax, cmap="seismic")
@@ -147,8 +147,8 @@ for day in range(7,10):
             plt.colorbar(shrink=0.3)
             plt.gca().invert_yaxis()
             ax3 = fig.add_subplot(2,3,3)
-            ax3.set_title("perturbation [g/kg] at lev 20",fontsize=16)
-            increment = valuenew[0,20,:,:] - valueold[1,20,:,:]
+            ax3.set_title("perturbation [g/kg] at lev 3",fontsize=16)
+            increment = valuenew[0,3,:,:] - valueold[1,3,:,:]
             plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap="seismic")
             ax3.tick_params(labelsize=8)
             plt.colorbar(shrink=0.3)
@@ -162,8 +162,8 @@ for day in range(7,10):
             #plt.ylim(975,995)
             #plt.xlim(0,45)
 
-            figname = "demo"+valuename+'_'+strday+strhour+'QV_lev15_20'
-            plt.savefig('./demo_test_20250722_tchires_letkc_allQ_lamda09_psobs_target960error1_window1h/'+figname)
+            figname = "demo"+valuename+'_'+strday+strhour+'QV_lev0_3'
+            plt.savefig('./demo_test_20250902_tchires_letkc_L1to5Q_lamda09_psobs_target960error1_window1h/'+figname)
             plt.clf()
         i = i + 1
         #show()

@@ -60,7 +60,8 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size) :: control_relativenorm3d(nij1,nlev,nv3d) ! control norm/std for evaluating control perturbation
   REAL(r_size) :: controlperthreshold ! YSaw 20241101
   REAL(r_size),PARAMETER :: control_lamda = 0.9 ! YSaw 20241101
-  logical,PARAMETER :: force_check = .FALSE.
+  logical,PARAMETER :: force_check = .TRUE.
+  INTEGER, PARAMETER :: clev = 5                                !YSaw maxlevel for control
 
 
 !  REAL(r_size) :: mean3d(nij1,nlev,nv3d)
@@ -95,7 +96,6 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   logical :: trans_done(nv3d+nv2d)
 
   INTEGER :: ij,ilev,n,m,i,k,nobsl
-  INTEGER, PARAMETER :: clev = 5                                !YSaw maxlevel for control
   INTEGER :: nobsl_t(nid_obs,nobtype)            !GYL
   REAL(r_size) :: cutd_t(nid_obs,nobtype)        !GYL
   REAL(r_size) :: beta                           !GYL
