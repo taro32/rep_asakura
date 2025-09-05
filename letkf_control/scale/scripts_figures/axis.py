@@ -17,7 +17,7 @@ import netCDF4 as nc
 # LETKF mdet
 #baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250902_tchires_letkc_L1to5Q_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250902_tchires_letkc_L1to5_negativeQonly_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
 
 gridsize = 400
 verlevel = 40
@@ -90,7 +90,7 @@ figure(figsize=(10,10))
 #plt.imshow(valueaxis[:,0:200],cmap='seismic', vmin=0,vmax=1200,origin='lower')
 plt.imshow(valueaxis[:,0:200],cmap='seismic',vmin=0, vmax=10,origin='lower')
 plt.colorbar()
-plt.savefig('qvloc_20250902_tchires_letkc_L1to5Q_lamda09_psobs_target960error1_window1h.png')
+plt.savefig('qvloc_20250902_tchires_letkc_L1to5_negativeQonly_lamda09_psobs_target960error1_window1h.png')
 plt.show()
 
 

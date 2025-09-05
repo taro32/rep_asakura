@@ -61,7 +61,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size) :: controlperthreshold ! YSaw 20241101
   REAL(r_size),PARAMETER :: control_lamda = 0.9 ! YSaw 20241101
   logical,PARAMETER :: force_check = .TRUE.
-  INTEGER, PARAMETER :: clev = 5                                !YSaw maxlevel for control
+  INTEGER, PARAMETER :: clev = 1                                !YSaw maxlevel for control
 
 
 !  REAL(r_size) :: mean3d(nij1,nlev,nv3d)
