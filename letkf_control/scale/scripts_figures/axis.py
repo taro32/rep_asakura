@@ -17,7 +17,7 @@ import netCDF4 as nc
 # LETKF mdet
 #baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250902_tchires_letkc_L1to5_negativeQonly_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250905_tchires_letkc_L1_negativeQonly_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
 
 gridsize = 400
 verlevel = 40
@@ -44,7 +44,7 @@ vvmax=1.0
 #print(minpres_letkf)
 interventioncount = np.zeros((verlevel,gridsize,gridsize))
 i = 0
-for day in range(7,10):
+for day in range(8,10):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -71,10 +71,11 @@ for day in range(7,10):
             diff[diff !=0.0] = 1
             interventioncount += diff
         i += 1
-#plt.imshow(interventioncount[0,:,:],cmap='seismic')
-#plt.savefig("test.png")
-#plt.show()
-#sys.exit()
+plt.imshow(interventioncount[0,:,:],cmap='seismic')
+plt.colorbar()
+plt.savefig("test.png")
+plt.show()
+sys.exit()
 
 valueaxis = np.zeros((verlevel,gridsize))
 valueaxiscount = np.zeros((verlevel,gridsize))
@@ -90,7 +91,7 @@ figure(figsize=(10,10))
 #plt.imshow(valueaxis[:,0:200],cmap='seismic', vmin=0,vmax=1200,origin='lower')
 plt.imshow(valueaxis[:,0:200],cmap='seismic',vmin=0, vmax=10,origin='lower')
 plt.colorbar()
-plt.savefig('qvloc_20250902_tchires_letkc_L1to5_negativeQonly_lamda09_psobs_target960error1_window1h.png')
+plt.savefig('qvloc_20250905_tchires_letkc_L1_negativeQonly_lamda09_psobs_target960error1_window1h.png')
 plt.show()
 
 
