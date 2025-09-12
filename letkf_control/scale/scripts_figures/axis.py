@@ -44,7 +44,7 @@ vvmax=1.0
 #print(minpres_letkf)
 interventioncount = np.zeros((verlevel,gridsize,gridsize))
 i = 0
-for day in range(8,10):
+for day in range(7,10):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -74,8 +74,8 @@ for day in range(8,10):
 plt.imshow(interventioncount[0,:,:],cmap='seismic')
 plt.colorbar()
 plt.savefig("test.png")
-plt.show()
-sys.exit()
+#plt.show()
+#sys.exit()
 
 valueaxis = np.zeros((verlevel,gridsize))
 valueaxiscount = np.zeros((verlevel,gridsize))
@@ -89,8 +89,9 @@ valueaxis = valueaxis/valueaxiscount
 #valueaxis = valueaxis
 figure(figsize=(10,10))
 #plt.imshow(valueaxis[:,0:200],cmap='seismic', vmin=0,vmax=1200,origin='lower')
-plt.imshow(valueaxis[:,0:200],cmap='seismic',vmin=0, vmax=10,origin='lower')
-plt.colorbar()
+#plt.imshow(valueaxis[:,0:200],cmap='seismic',vmin=0, vmax=10,origin='lower')
+plt.plot(valueaxis[0,0:100])
+#plt.colorbar()
 plt.savefig('qvloc_20250905_tchires_letkc_L1_negativeQonly_lamda09_psobs_target960error1_window1h.png')
 plt.show()
 
