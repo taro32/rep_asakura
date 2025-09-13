@@ -84,6 +84,7 @@ for i in range(0,gridsize):
         for k in range(0,verlevel):
             valueaxis[k,int(distance[i,j])]+=interventioncount[k,i,j]
             valueaxiscount[k,int(distance[i,j])]+=1
+            print (i,j,k)
 valueaxiscount [valueaxiscount == 0] = 1
 valueaxis = valueaxis/valueaxiscount
 #valueaxis = valueaxis
