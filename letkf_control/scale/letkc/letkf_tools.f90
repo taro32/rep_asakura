@@ -62,6 +62,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size),PARAMETER :: control_lamda = 0.99 ! YSaw 20241101
   logical,PARAMETER :: force_check = .TRUE.
   INTEGER, PARAMETER :: clev = 1                                !YSaw maxlevel for control
+  REAL(r_size) :: local_max, global_max ! YSaw 20250918
 
 
 !  REAL(r_size) :: mean3d(nij1,nlev,nv3d)
@@ -644,7 +645,9 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 ! only first 3-layer
 !
 !  clev = 40 ! all layers
-  controlperthreshold = maxval(control_relativenorm3d(:,1:clev,iv3d_q)) * control_lamda
+  local_max = maxval(control_relativenorm3d(:,1:clev,iv3d_q))
+  CALL MPI_ALLREDUCE(local_max, global_max, 1, MPI_REAL8, MPI_MAX, MPI_COMM_WORLD, ierr)
+  controlperthreshold = global_max * control_lamda
   DO ilev = 1, nlev
    DO ij = 1, nij1
     IF (ilev <=  clev)THEN
