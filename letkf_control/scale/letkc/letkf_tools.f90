@@ -638,6 +638,13 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   END DO ! [ ilev=1,nlev ]
 !$OMP END DO
 
+  deallocate (hdxf,rdiag,rloc,dep)
+  if (DET_RUN) then
+    deallocate (depd)
+  end if
+  deallocate (trans,transm,transmd,pa)
+!$OMP END PARALLEL
+
 !
 ! Enforcing control perturbation local
 ! picking up perturbations with large S/N ratio
@@ -646,7 +653,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 !
 !  clev = 40 ! all layers
   local_max = maxval(control_relativenorm3d(:,1:clev,iv3d_q))
-  CALL MPI_ALLREDUCE(local_max, global_max, 1, MPI_REAL8, MPI_MAX, MPI_COMM_WORLD, ierr)
+  CALL MPI_ALLREDUCE(local_max, global_max, 1, MPI_r_size, MPI_MAX, MPI_COMM_a, ierr)
   controlperthreshold = global_max * control_lamda
   DO ilev = 1, nlev
    DO ij = 1, nij1
@@ -679,12 +686,12 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 ! end localizating of control perturbation
 !
 
-  deallocate (hdxf,rdiag,rloc,dep)
-  if (DET_RUN) then
-    deallocate (depd)
-  end if
-  deallocate (trans,transm,transmd,pa)
-!$OMP END PARALLEL
+!  deallocate (hdxf,rdiag,rloc,dep)
+!  if (DET_RUN) then
+!    deallocate (depd)
+!  end if
+!  deallocate (trans,transm,transmd,pa)
+!!$OMP END PARALLEL
 
   call mpi_timer('das_letkf:letkf_core:', 2)
 
