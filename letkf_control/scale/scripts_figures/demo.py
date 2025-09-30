@@ -39,7 +39,7 @@ import matplotlib.colors as mcolors
 # LETKF mdet
 baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda095_psobs_target960error1_window1h/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda0925_psobs_target960error1_window1h/result/tc_hires/200001'
 
 minpres_baseline = np.zeros((64))
 minpres_mdet = np.zeros((64))
@@ -142,14 +142,14 @@ for day in range(7,10):
             #increment_big[100:500,100:500] = increment
             #print(shape(increment_big))
             #plt.imshow(increment_big[0:600,0:600]*1000, vmin=vvmin, vmax=vvmax, cmap="seismic")
-            plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap="seismic")
+            plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap="seismic", interpolation='nearest')
             ax2.tick_params(labelsize=8)
             plt.colorbar(shrink=0.3)
             plt.gca().invert_yaxis()
             ax3 = fig.add_subplot(2,3,3)
             ax3.set_title("perturbation [g/kg] at lev 1",fontsize=16)
             increment = valuenew[0,1,:,:] - valueold[1,1,:,:]
-            plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap="seismic")
+            plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap="seismic", interpolation='nearest')
             ax3.tick_params(labelsize=8)
             plt.colorbar(shrink=0.3)
             plt.gca().invert_yaxis()
@@ -163,7 +163,7 @@ for day in range(7,10):
             #plt.xlim(0,45)
 
             figname = "demo"+valuename+'_'+strday+strhour+'QV_lev0_1'
-            plt.savefig('./demo_test_20250925_tchires_letkc_L1_negativeQonly_lamda095_psobs_target960error1_window1h/'+figname)
+            plt.savefig('./demo_test_20250925_tchires_letkc_L1_negativeQonly_lamda0925_psobs_target960error1_window1h/'+figname)
             plt.clf()
         i = i + 1
         #show()
