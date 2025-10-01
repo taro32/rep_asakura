@@ -14,93 +14,79 @@ import struct
 import netCDF4 as nc
 
 
-#workdir = '/work/jh220020o/f00019/scale_enkc/test_fcst/result_exp20240624/case_tc/20000101000000/fcst_sno_np00004/'
-#minpres = np.zeros((81,nens))
-#for i in range(1,nens+1):
-#    if i < 10:
-#        stri = '000'+str(i)
-#    elif i < 100:
-#        stri = '00'+str(i)
-#    elif i < 1000:
-#        stri = '0'+str(i)
-#    else:
-#        stri = str(i)
-#    data = nc.Dataset(workdir+stri+'/history.pe000000.nc','r')
-#    pres = data.variables['PRES']
-#    minpres[:,i-1] = np.min(pres[:,0,:,:],axis=(1,2))/100.0
-
-#for i in range(0,nens):
-#    if i == 95:
-#        plt.plot(minpres[:,i],color='r')
-#    else:
-#        plt.plot(minpres[:,i],color='k')
-#show()
-
-# LETKF mean
-#workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
-#workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241212_letkc_qvonly_noqc_local09anddist_target990/result/case_tc/200001'
-#workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241115_nocontrol_obserr01_denseob/result/case_tc/200001'
-#workdir_letkf1 = '/work/jh220020o/f00019/scale_enkc/20241105_letkc_qvonly_noqc_local001/result/case_tc/200001'
-#workdir_letkf2 = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241104_qvonly_noqc_local08/result/case_tc/200001'
-#workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241109_letkc_qvonly_noqc_local095_obserr01_withQ/result/case_tc/200001'
-#workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20241110_letkc_qvonly_noqc_local07_obserr01_withQ_infl145/result/case_tc/200001'
-#workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241219_letkc_qvonly_noqc_local07anddist_hv_target800/result/case_tc/200001'
-#workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20241115_nocontrol_obserr01_denseob/result/case_tc/200001'
-#workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241031_qvonly_noqc/result/case_tc/200001'
-#workdir_letkf = '/work/jh220020o/f00019/scale_enkc/test_letkc_20241029/result/case_tc/200001'
+def calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day):
+    vmax_letkf = np.zeros((72))
+    vmax_mdet = np.zeros((72))
+    i = 0
+    for day in range(4,10):
+        if day < 10:
+            strday = '0'+str(day)
+        else:
+            strday = str(day)
+        endhour = 24
+        for hour in range(0,endhour,3): #3
+            if hour < 10:
+                strhour = '0'+str(hour)
+            else:
+                strhour = str(hour)
+            print('reading..... ', strday, hour)
+            data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #mean
+            u10m = data.variables['U10m'][:,:,:]
+            v10m = data.variables['V10m'][:,:,:]
+            windspeed = np.sqrt(ma.power(u10m,2) + ma.power(v10m,2))
+            vmax_letkf[i]=np.max(windspeed[0,:,:],axis=(0,1))
+            if day < 7:
+                data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #letkf1
+            else:
+                data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #letkf1
+            u10m = data.variables['U10m'][:,:,:]
+            v10m = data.variables['V10m'][:,:,:]
+            windspeed = np.sqrt(ma.power(u10m,2) + ma.power(v10m,2))
+            vmax_mdet[i]=np.max(windspeed[0,:,:],axis=(0,1))
+            i = i + 1
+    return vmax_letkf, vmax_mdet
 
 workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
+
+start_day = 4
+end_day = 9
+numexp = 7
+control = np.zeros((72,numexp))
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250909_tchires_letkc_L1_negativeQonly_lamda00_psobs_target960error1_window1h/result/tc_hires/200001'
+nature, control[:,0] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda05_psobs_target960error1_window1h/result/tc_hires/200001'
+nature, control[:,1] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda08_psobs_target960error1_window1h/result/tc_hires/200001'
+nature, control[:,2] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250918_tchires_letkc_L1_negativeQonly_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
+nature, control[:,3] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
 workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda0925_psobs_target960error1_window1h/result/tc_hires/200001'
+nature, control[:,4] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda095_psobs_target960error1_window1h/result/tc_hires/200001'
+nature, control[:,5] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda099_psobs_target960error1_window1h/result/tc_hires/200001'
+nature, control[:,6] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
 
-day = 1
-hour = 0
-i = 0
-vmax_letkf = np.zeros((72))
-vmax_mdet = np.zeros((72))
+
+
+plt.rcParams.update({'font.size': 14})  # Increase font size globally
 #print(minpres_letkf)
-for day in range(4,10):
-    if day < 10:
-        strday = '0'+str(day)
-    else:
-        strday = str(day)
-    endhour = 24
-    #if day == 8:
-    #    endhour = 18
-    for hour in range(0,endhour,3): #3
-        if hour < 10:
-            strhour = '0'+str(hour)
-        else:
-            strhour = str(hour)
-        print('reading..... ', strday, hour)
-        data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #mean
-        u10m = data.variables['U10m'][:,:,:]
-        v10m = data.variables['V10m'][:,:,:]
-        #print(type(u10m))
-        windspeed = np.sqrt(ma.power(u10m,2) + ma.power(v10m,2))
-        vmax_letkf[i]=np.max(windspeed[0,:,:],axis=(0,1))
-        if day < 7:
-            data = nc.Dataset(workdir_letkf1+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #letkf1
-        else:
-            data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r') #letkf1
-        #data = nc.Dataset(workdir_letkf2+strday+strhour+'0000/hist_sno_np00064/mean/history.pe000000.nc','r')
-        u10m = data.variables['U10m'][:,:,:]
-        v10m = data.variables['V10m'][:,:,:]
-        #print(type(u10m))
-        windspeed = np.sqrt(ma.power(u10m,2) + ma.power(v10m,2))
-        vmax_mdet[i]=np.max(windspeed[0,:,:],axis=(0,1))
-        i = i + 1
-
-print(vmax_letkf)
-print(vmax_mdet)
-plt.plot(vmax_letkf[:],color='black')
-plt.plot(vmax_mdet[:],color='green')
-#plt.ylim(978,995)
-plt.ylim(15,35)
-plt.xlim(0,47)
+#print(minpres_mdet)
+plt.plot(nature[:],color='black',label='nature',linewidth=3)
+labels = ['$\\lambda$ = 0','$\\lambda$ = 0.5','$\\lambda$ = 0.8','$\\lambda$ = 0.9','$\\lambda$ = 0.925','$\\lambda$ = 0.95','$\\lambda$ = 0.99']
+for i in range (0,numexp):
+    plt.plot(control[:,i],label=labels[i])
+plt.ylim(20,35)
+#plt.ylim(950,970)
+plt.xlim(25,47)
+plt.xticks(np.arange(25, 48, 3), np.arange(0, 69, 9)) # Set x-axis ticks starting from 1
 #plt.savefig('TCpres_nocntlvscntl_local095.png')
-plt.savefig('vmax_tchires_letkc_L1_negativeQonly_lamda0925_psobs_target960error1_window1h.png')
+plt.legend(fontsize='small',ncol=2)  # Increase legend font size
+plt.xlabel('Time [h]', fontsize=14) # increase axis label font size
+plt.ylabel('VMAX (m/s)', fontsize=14) # increase axis label font size
+plt.title('Maximum 10m wind speed', fontsize=16) # increase title font size
+plt.savefig('vmax.png',dpi=300)
 plt.show()
-
 
 
 
