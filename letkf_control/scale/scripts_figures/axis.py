@@ -17,7 +17,7 @@ import netCDF4 as nc
 # LETKF mdet
 #baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda0925_psobs_target960error1_window1h/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250909_tchires_letkc_L1_negativeQonly_lamda00_psobs_target960error1_window1h/result/tc_hires/200001'
 
 gridsize = 400
 verlevel = 40
@@ -71,11 +71,43 @@ for day in range(7,10):
             diff[diff !=0.0] = 1
             interventioncount += diff
         i += 1
-plt.imshow(interventioncount[0,:,:],cmap='seismic',interpolation='nearest')
-plt.colorbar()
-plt.savefig("interventionlocation_20250925_tchires_letkc_L1_negativeQonly_lamda0925_psobs_target960error1_window1h")
+fig = plt.figure()
+plt.rcParams.update({'font.size': 14})  # Increase font size globally
+ax = plt.gca()
+plt.imshow(interventioncount[0,:,:],cmap='seismic',interpolation='nearest',vmin=0,vmax=np.max(interventioncount[0,:,:]))
+x_tick_distances = np.arange(0, 2001, 500) # Ticks at every 500 km
+y_tick_distances = np.arange(0, 2001, 500) # Ticks at every 500 km
+x_tick_positions = x_tick_distances / 5  # Convert distance to index
+y_tick_positions = y_tick_distances / 5  # Convert distance to index
+
+# Set x-axis limit
+# {{change 3}}
+ax.set_xlim(0, 400)
+ax.set_ylim(0, 400)
+
+# {{change 4}}
+ax.set_xticks(x_tick_positions)
+ax.set_yticks(y_tick_positions)
+
+
+# Generate x-axis tick labels (0 to 2000)
+# {{change 5}}
+x_tick_labels = [str(int(x)) for x in x_tick_distances]  # Convert distance to string
+y_tick_labels = [str(int(y)) for y in y_tick_distances]  # Convert distance to string
+
+# Set x-axis tick labels
+# {{change 6}}
+ax.set_xticklabels(x_tick_labels)
+ax.set_yticklabels(y_tick_labels)
+
+plt.colorbar(shrink=0.3)
+plt.xlabel('Distance (km)')
+plt.ylabel('Distance (km)')        
+#plt.gca().invert_yaxis()
+ax.grid(True, linestyle='--')
+plt.savefig("interventionlocation_20250909_tchires_letkc_L1_negativeQonly_lamda00_psobs_target960error1_window1h")
 #plt.show()
-#sys.exit()
+sys.exit()
 
 valueaxis = np.zeros((verlevel,gridsize))
 valueaxiscount = np.zeros((verlevel,gridsize))
@@ -93,7 +125,7 @@ figure(figsize=(10,10))
 #plt.imshow(valueaxis[:,0:200],cmap='seismic',vmin=0, vmax=10,origin='lower')
 plt.plot(valueaxis[0,0:100])
 #plt.colorbar()
-plt.savefig('qvloc_20250925_tchires_letkc_L1_negativeQonly_lamda0925_psobs_target960error1_window1h.png')
+plt.savefig('qvloc_20250925_tchires_letkc_L1_negativeQonly_lamda095_psobs_target960error1_window1h.png')
 plt.show()
 
 
