@@ -11,13 +11,14 @@ import cartopy.feature as cfeature
 import numpy.ma as ma
 import struct
 import netCDF4 as nc
+import matplotlib.colors as mcolors
 
 
 
 # LETKF mdet
 #baseline = '/work/jh220020o/f00019/scale_enkc/test_letkf_obsmake_20241004/result/case_tc/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250909_tchires_letkc_L1_negativeQonly_lamda00_psobs_target960error1_window1h/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250918_tchires_letkc_L1_negativeQonly_lamda09_psobs_target960error1_window1h/result/tc_hires/200001'
 
 gridsize = 400
 verlevel = 40
@@ -43,6 +44,7 @@ vvmax=1.0
 #minpres_mdet = np.zeros((72))
 #print(minpres_letkf)
 interventioncount = np.zeros((verlevel,gridsize,gridsize))
+diff = np.zeros((verlevel,gridsize,gridsize))
 i = 0
 for day in range(7,10):
     if day < 10:
@@ -67,14 +69,20 @@ for day in range(7,10):
         #minpres_mdet[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         
         if i != 0:
-            diff = valuenew[0,:,:,:] - valueold[1,:,:,:]
-            diff[diff !=0.0] = 1
-            interventioncount += diff
+            diff += valuenew[0,:,:,:] - valueold[1,:,:,:]
+            #diff[diff !=0.0] = 1
+            #interventioncount += diff
         i += 1
+colors = ["darkblue", "white"]
+cmap_name = 'blue_to_white'
+#colors = ["darkblue", "red"]
+#cmap_name = 'blue_to_red'
+cm = mcolors.LinearSegmentedColormap.from_list(cmap_name, colors, N=256)
 fig = plt.figure()
 plt.rcParams.update({'font.size': 14})  # Increase font size globally
 ax = plt.gca()
-plt.imshow(interventioncount[0,:,:],cmap='seismic',interpolation='nearest',vmin=0,vmax=np.max(interventioncount[0,:,:]))
+#plt.imshow(interventioncount[0,:,:],cmap='seismic',interpolation='nearest',vmin=0,vmax=np.max(interventioncount[0,:,:]))
+plt.imshow(diff[0,:,:]*1000,cmap=cm,interpolation='nearest',vmin=-8.0, vmax=0.0)#vmin=np.min(diff[0,:,:]*1000),vmax=0.0)
 x_tick_distances = np.arange(0, 2001, 500) # Ticks at every 500 km
 y_tick_distances = np.arange(0, 2001, 500) # Ticks at every 500 km
 x_tick_positions = x_tick_distances / 5  # Convert distance to index
@@ -105,7 +113,7 @@ plt.xlabel('Distance (km)')
 plt.ylabel('Distance (km)')        
 #plt.gca().invert_yaxis()
 ax.grid(True, linestyle='--')
-plt.savefig("interventionlocation_20250909_tchires_letkc_L1_negativeQonly_lamda00_psobs_target960error1_window1h")
+plt.savefig("totalvaporchange_20250918_tchires_letkc_L1_negativeQonly_lamda09_psobs_target960error1_window1h")
 #plt.show()
 sys.exit()
 

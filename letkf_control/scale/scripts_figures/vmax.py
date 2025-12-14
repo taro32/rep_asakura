@@ -50,7 +50,7 @@ workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline
 
 start_day = 4
 end_day = 9
-numexp = 7
+numexp = 6
 control = np.zeros((72,numexp))
 workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250909_tchires_letkc_L1_negativeQonly_lamda00_psobs_target960error1_window1h/result/tc_hires/200001'
 nature, control[:,0] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
@@ -64,8 +64,8 @@ workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negat
 nature, control[:,4] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
 workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda095_psobs_target960error1_window1h/result/tc_hires/200001'
 nature, control[:,5] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda099_psobs_target960error1_window1h/result/tc_hires/200001'
-nature, control[:,6] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
+#workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda099_psobs_target960error1_window1h/result/tc_hires/200001'
+#nature, control[:,6] = calculate_vmax(workdir_letkf1, workdir_letkf2, start_day, end_day)
 
 
 
@@ -85,7 +85,7 @@ plt.legend(fontsize='small',ncol=2)  # Increase legend font size
 plt.xlabel('Time [h]', fontsize=14) # increase axis label font size
 plt.ylabel('VMAX (m/s)', fontsize=14) # increase axis label font size
 plt.title('Maximum 10m wind speed', fontsize=16) # increase title font size
-plt.savefig('vmax.png',dpi=300)
+plt.savefig('vmax_paper.png',dpi=300)
 plt.show()
 
 

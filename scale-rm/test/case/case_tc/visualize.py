@@ -23,8 +23,10 @@ data = nc.Dataset(filename,'r')
 # your target
 zlevel = 0 # height
 time = 400 #timestamp
-valuename="QV" # variables QV = water vapor
+valuename="PT" # variables QV = water vapor
 
+
+#value[time, z, y, x]
 
 # visualization
 value = data.variables[valuename]
@@ -34,7 +36,8 @@ plt.rcParams['axes.labelsize'] = 24
 plt.rcParams['font.size'] = 24
 ax1.set_title("QV [g/kg]",fontsize=24)
 ax1.tick_params(labelsize=24)
-plt.imshow(value[time,zlevel,:,:]*1000)
+plt.imshow(value[time,:15,60,:])
+ax1.invert_yaxis()
 plt.colorbar(shrink=0.3)
 plt.savefig('./test_tc.png')
 
