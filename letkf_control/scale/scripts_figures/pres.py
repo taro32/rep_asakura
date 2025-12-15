@@ -32,21 +32,25 @@ def calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day):
             print('reading..... ', strday, hour)
             data = nc.Dataset(workdir_letkf1 + strday + strhour + '0000/hist_sno_np00064/mdet/history.pe000000.nc', 'r')
             pres = data.variables['MSLP']
-            minpres_letkf[i] = np.min(pres[0, :, :], axis=(0, 1)) / 100
+            pres = data.variables['PRES']
+            #minpres_letkf[i] = np.min(pres[0, :, :], axis=(0, 1)) / 100
+            minpres_letkf[i] = np.min(pres[0, 0, :, :], axis=(0, 1)) / 100
 
-            if day < 7:
-                data = nc.Dataset(workdir_letkf1 + strday + strhour + '0000/hist_sno_np00064/mdet/history.pe000000.nc', 'r')
-            else:
-                data = nc.Dataset(workdir_letkf2 + strday + strhour + '0000/hist_sno_np00064/mdet/history.pe000000.nc', 'r')
+            #if day < 7:
+            #    data = nc.Dataset(workdir_letkf1 + strday + strhour + '0000/hist_sno_np00064/mdet/history.pe000000.nc', 'r')
+            #else:
+            data = nc.Dataset(workdir_letkf2 + strday + strhour + '0000/hist_sno_np00064/mdet/history.pe000000.nc', 'r')
             pres = data.variables['MSLP']
-            minpres_mdet[i] = np.min(pres[0, :, :], axis=(0, 1)) / 100
+            pres = data.variables['PRES']
+            #minpres_mdet[i] = np.min(pres[0, :, :], axis=(0, 1)) / 100
+            minpres_mdet[i] = np.min(pres[0, 0, :, :], axis=(0, 1)) / 100
             i = i + 1
     return minpres_letkf, minpres_mdet
 
 
 workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 
-start_day = 5
+start_day = 4
 end_day = 6
 numexp = 1 #6
 control = np.zeros((72,numexp))
@@ -64,7 +68,7 @@ control = np.zeros((72,numexp))
 #nature, control[:,5] = calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day)
 #workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20251012_tchires_letkc_L1_negativeQonly_lamda0975_psobs_target960error1_window1h/result/tc_hires/200001'
 #nature, control[:,6] = calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day)
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20251211_tchires_letkc_L1_RI_lamda09_psobs_target990error1_window1h/result/tc_hires/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20251215_tchires_letkc_L1_allQ_RI_lamda09_psobs_target990error1_window1h/result/tc_hires/200001'
 nature, control[:,0] = calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day)
 
 
@@ -80,8 +84,8 @@ for i in range (0,numexp):
 #plt.ylim(977,985)
 #plt.ylim(950,970)
 #plt.xlim(25,47)
-plt.xlim(0,14)
-plt.ylim(980,1000)
+#plt.xlim(0,24)
+plt.ylim(950,1000)
 #plt.xticks(np.arange(25, 48, 3), np.arange(0, 69, 9)) # Set x-axis ticks starting from 1
 #plt.savefig('TCpres_nocntlvscntl_local095.png')
 plt.legend(fontsize='small',ncol=2)  # Increase legend font size

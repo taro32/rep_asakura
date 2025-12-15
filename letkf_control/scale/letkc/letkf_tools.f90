@@ -59,8 +59,8 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size) :: control_std3d(nij1,nlev,nv3d) ! standard deviation for evaluating control perturbation
   REAL(r_size) :: control_relativenorm3d(nij1,nlev,nv3d) ! control norm/std for evaluating control perturbation
   REAL(r_size) :: controlperthreshold ! YSaw 20241101
-  REAL(r_size),PARAMETER :: control_lamda = 0.9 ! YSaw 20241101
-  logical,PARAMETER :: force_check = .FALSE.
+  REAL(r_size),PARAMETER :: control_lamda = 0.0 ! YSaw 20241101
+  logical,PARAMETER :: force_check = .TRUE.
   INTEGER, PARAMETER :: clev = 1                                !YSaw maxlevel for control
   REAL(r_size) :: local_max, global_max ! YSaw 20250918
 

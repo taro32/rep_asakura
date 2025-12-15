@@ -14,7 +14,7 @@ ALLVAR=T
 SINGLE_VAR=F
 
 tint=3600 #864000 # [second]
-tstart='2000-01-06 00:00:00'
+tstart='2000-01-05 12:00:00'
 #tend=$tstart
 tend='2000-01-07 00:00:00'
 . ./config.main
