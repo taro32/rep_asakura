@@ -69,7 +69,7 @@ control = np.zeros((72,numexp))
 #workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20251012_tchires_letkc_L1_negativeQonly_lamda0975_psobs_target960error1_window1h/result/tc_hires/200001'
 #nature, control[:,6] = calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day)
 #workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20251215_tchires_letkc_L1_RI_lamda00_psobs_target990error1_window1h/result/tc_hires/200001'
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20251216_tchires_letkc_L1_RI_lamda05_psobs_target990error1_window1h/result/tc_hires/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20251216_tchires_letkc_L1_RI_lamda025_psobs_target990error1_window1h/result/tc_hires/200001'
 nature, control[:,0] = calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day)
 
 
