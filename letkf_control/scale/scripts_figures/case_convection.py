@@ -40,7 +40,7 @@ import matplotlib.colors as mcolors
 baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
 #workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda08_psobs_target960error1_window1h/result/tc_hires/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20251216_tchires_letkc_L1_RI_lamda08_psobs_target990error1_window1h/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20251216_tchires_letkc_L1_RI_lamda025_psobs_target990error1_window1h/result/tc_hires/200001'
 
 
 
@@ -149,7 +149,7 @@ for day in range(4,7):
 
 
             figname = "case_convection2"+valuename+'_'+strday+strhour+'QV_lev0_1'
-            plt.savefig('./demo_test_20251216_tchires_letkc_L1_RI_lamda08_psobs_target990error1_window1h/'+figname, dpi=300)
+            plt.savefig('./demo_test_20251216_tchires_letkc_L1_RI_lamda025_psobs_target990error1_window1h/'+figname, dpi=300)
             plt.clf()
         i = i + 1
         #show()
