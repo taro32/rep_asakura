@@ -13,10 +13,10 @@ INPUT_SNOW_NP=16
 ALLVAR=T
 SINGLE_VAR=F
 
-tint=3600 #864000 # [second]
-tstart='2000-01-05 12:00:00'
+tint=10800 #3600 #864000 # [second]
+tstart='2000-01-10 00:00:00'
 #tend=$tstart
-tend='2000-01-07 00:00:00'
+tend='2000-01-11 00:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 
