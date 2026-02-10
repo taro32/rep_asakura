@@ -36,7 +36,7 @@ def calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day):
             minpres_letkf[i] = np.min(pres[0, :, :], axis=(0, 1)) / 100
             #minpres_letkf[i] = np.min(pres[0, 0, :, :], axis=(0, 1)) / 100
 
-            if day < 7 or day > 9:
+            if day < 7:
                 data = nc.Dataset(workdir_letkf1 + strday + strhour + '0000/hist_sno_np00064/mdet/history.pe000000.nc', 'r')
             else:
                 data = nc.Dataset(workdir_letkf2 + strday + strhour + '0000/hist_sno_np00064/mdet/history.pe000000.nc', 'r')
@@ -79,7 +79,7 @@ control = np.zeros((72,numexp))
 #workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20251216_tchires_letkc_L1_RI_lamda08_psobs_target990error1_window1h/result/tc_hires/200001'
 #nature, control[:,3] = calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day)
 
-workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20260209_tchires_letkc_L1_negativeQonly_lamda09_psobs_target960error1_window1h_revise/result/tc_hires/200001'
+workdir_letkf2 = '/work/gv42/f00019/enkc_with_TC/20260210_tchires_letkc_L1_negativeQonly_lamda09_psobs_target960error1_window1h_revise/result/tc_hires/200001'
 nature, control[:,0] = calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day)
 
 
@@ -95,7 +95,7 @@ for i in range (0,numexp):
     #plt.plot(control[:,i])
 #plt.ylim(977,985)
 #plt.ylim(950,985)
-plt.ylim(970,985)
+plt.ylim(974,982)
 #plt.ylim(950,970)
 #plt.xlim(25,47)
 plt.xlim(0,23)
