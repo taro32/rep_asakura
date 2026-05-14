@@ -38,7 +38,7 @@
 
 &PARAM_RESTART
  RESTART_OUTPUT       = .true.,
- RESTART_OUT_BASENAME = "init/init1",
+ RESTART_OUT_BASENAME = "init",
 /
 
 &PARAM_STATISTICS
@@ -59,7 +59,7 @@
 /
 
 &PARAM_MKINIT_SOUNDING
- ENV_IN_SOUNDING_file = "tropicalcyclone.txt",
+!--ENV_IN_SOUNDING_file--
 /
 
 &PARAM_BUBBLE
