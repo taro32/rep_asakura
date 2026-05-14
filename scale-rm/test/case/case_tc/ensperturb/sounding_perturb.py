@@ -12,7 +12,7 @@ data = np.loadtxt('./tropicalcyclone_base.txt')
 
 nens = 100
 mean = 0
-std_dev = 0.5
+std_dev = 0.1
 
 # Parameters for a 2D array
 num_rows = 13       # Number of rows
