@@ -1,0 +1,83 @@
+#####
+#
+# SCALE-RM mkinit configulation for tropical cyclone test
+#
+#####
+
+&PARAM_IO
+ IO_LOG_BASENAME = 'init_LOG',
+/
+
+&PARAM_PRC_CARTESC
+ PRC_NUM_X = 8,
+ PRC_NUM_Y = 4,
+/
+
+&PARAM_ATMOS_GRID_CARTESC_INDEX
+ KMAX  =  20,
+ IMAX  =  15,
+ JMAX  =  30,
+ IHALO =  2,
+ JHALO =  2,
+/
+
+&PARAM_ATMOS_GRID_CARTESC
+ DX        = 25000.0D0,
+ DY        = 25000.0D0,
+ FZ(:) =    300.0000D0,   652.5000D0,  1066.6875D0,  1553.3578D0,  2125.1953D0,
+           2797.1045D0,  3586.5977D0,  4514.2520D0,  5604.2456D0,  6884.9883D0,
+           8164.9883D0,  9444.9883D0, 10724.9883D0, 12004.9883D0, 13284.9883D0,
+          14564.9883D0, 15844.9883D0, 17124.9883D0, 18404.9883D0, 19684.9883D0,
+ BUFFER_DZ =  3000.0D0,
+/
+
+&PARAM_TIME
+ TIME_STARTDATE = 2000, 1, 1, 0, 0, 0,
+ TIME_STARTMS   = 0.D0,
+/
+
+&PARAM_RESTART
+ RESTART_OUTPUT       = .true.,
+ RESTART_OUT_BASENAME = "init/init1",
+/
+
+&PARAM_STATISTICS
+ STATISTICS_checktotal     = .true.,
+ STATISTICS_use_globalcomm = .true.,
+/
+
+&PARAM_ATMOS
+ ATMOS_DYN_TYPE    = "HEVI",
+ ATMOS_PHY_MP_TYPE = "TOMITA08",
+ ATMOS_PHY_TB_TYPE = "SMAGORINSKY",
+ ATMOS_PHY_BL_TYPE = "MYNN",
+ ATMOS_PHY_SF_TYPE = "BULK",
+/
+
+&PARAM_MKINIT
+ MKINIT_initname = "TROPICALCYCLONE",
+/
+
+&PARAM_MKINIT_SOUNDING
+ ENV_IN_SOUNDING_file = "tropicalcyclone.txt",
+/
+
+&PARAM_BUBBLE
+ BBL_CZ =  1.5D3,
+ BBL_CX = 75.0D3,
+ BBL_CY = 75.0D3,
+ BBL_RZ =  3.0D3,
+ BBL_RX = 25.0D3,
+ BBL_RY = 25.0D3,
+/
+
+&PARAM_MKINIT_TROPICALCYCLONE
+ NR    =      300    ! number of radial grid [-]
+ MWS   =   20.E+0    ! maximum wind speed [m s-1]
+ RMW   =  120.E+3    ! radius of maximum wind [m]
+ R0    =  750.E+3    ! outermost radius [m]
+ F0    =    5.E-5    ! Coriolis parameter [s-1]
+ ZTOP  =   15.E+3    ! top height of vortex [m]
+ VORTEX_CX =  1500.E+3 ! center of vortex [m]
+ VORTEX_CY =  1500.E+3 ! center of vortex [m]
+/

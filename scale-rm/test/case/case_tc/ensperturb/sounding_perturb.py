@@ -10,7 +10,7 @@ from scipy.io import FortranFile
 
 data = np.loadtxt('./tropicalcyclone_base.txt')
 
-nens = 100
+nens = 101
 mean = 0
 std_dev = 0.1
 
