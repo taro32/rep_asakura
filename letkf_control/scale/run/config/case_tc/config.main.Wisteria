@@ -117,8 +117,8 @@ PPN=4               # Number of processes per node
 
 THREADS=12          # Number of threads per process
 
-SCALE_NP_X=2        # = PRC_NUM_X
-SCALE_NP_Y=2        # = PRC_NUM_Y
+SCALE_NP_X=8        # = PRC_NUM_X
+SCALE_NP_Y=4        # = PRC_NUM_Y
 SCALE_NP=$(( SCALE_NP_X  * SCALE_NP_Y )) # Number of processes to run SCALE
 
 if (( DET_RUN == 1 && EFSO_RUN == 1));then
