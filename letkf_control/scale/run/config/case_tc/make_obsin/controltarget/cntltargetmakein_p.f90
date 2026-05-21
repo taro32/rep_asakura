@@ -14,7 +14,7 @@ integer,parameter::intv_z=2 !not used
 
 real(4)::wk(8)
 character(len=200)::cfile
-character(len=200)::ncfile_in='../history.pe000000.nc'
+character(len=200)::ncfile_in='../merged_history1.pe000000.nc'
 
 integer::ncid, vidlon, vidlat,vidz
 
@@ -34,7 +34,7 @@ integer::ncid, vidlon, vidlat,vidz
   call ncio_read(ncid,"PRES",nlon,nlat,nlev,1,pres)
   call ncio_close( ncid ) 
 
-cfile="controltarget_800"
+cfile="controltarget_1000"
 
 open (21, file=trim(cfile), form='unformatted', access='sequential') !, convert='big_endian')
 
@@ -43,23 +43,31 @@ open (21, file=trim(cfile), form='unformatted', access='sequential') !, convert=
 !do ilev=1,nlev,intv_z
 !do ie=1,nelm
 ilon = int(nlon/2.0)
-ilat = int(nlon/2.0)
+ilat = int(nlat/2.0)
 ilev = 1
 ie = 1
   print *, ilon, ilat, ilev, ie
   wk(1)=real(elms(ie))  
   wk(2)=axlon(ilon,ilat)
   wk(3)=axlat(ilon,ilat)
-  wk(4)=axz(iz)
+!  wk(4)=axz(iz)
+  wk(4)=axz(ilev)
 !  wk(4)=pres(ilon,ilat,ilev) * 0.01 !!! hPa
   print*, wk(4)
-  wk(5)=80000 * 0.01 !100000 * 0.01  !!! dat [hPa]
+  !wk(5)=99000 * 0.01 !100000 * 0.01  !!! dat [hPa]
+  wk(5)=100000 * 0.01 !100000 * 0.01  !!! dat [hPa]
   wk(6)=errs(ie)   !!! err 
   wk(7)=1.0  !!! typ ADPUPA
   wk(8)=0.0   !!! dif
   write(21,iostat=ios) wk(1:8)
 !end do
-  write(*,'(F6.1,5F14.4)') wk(1:6)
+  write(*,*) wk(1)
+    write(*,*) wk(2)
+      write(*,*) wk(3)
+        write(*,*) wk(4)
+          write(*,*) wk(5)
+            write(*,*) wk(6)
+              write(*,*) wk(7)
 !end do
 !end do
 !end do

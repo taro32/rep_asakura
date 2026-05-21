@@ -11,7 +11,7 @@ OBJS    = common_ncio.o
 #PROGS     += dec_pawr
 #endif
 
-COMMON_DIR = /work/jh220020o/f00019/scale_enkc/scale/letkf/scale/common
+COMMON_DIR = /work/jh250035o/f00019/scale/scale-letkc/letkf_control/scale/common
 
 COMMON_OBJS = $(COMMON_DIR)/SFMT.o           \
               $(COMMON_DIR)/common.o         \

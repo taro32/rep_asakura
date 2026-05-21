@@ -14,7 +14,7 @@ integer,parameter::intv_z=2
 
 real(4)::wk(8)
 character(len=200)::cfile
-character(len=200)::ncfile_in='merged_history.pe000000.nc'
+character(len=200)::ncfile_in='merged_history1.pe000000.nc'
 
 integer::ncid, vidlon, vidlat,vidz
 
