@@ -37,10 +37,9 @@ import matplotlib.colors as mcolors
 #show()
 
 # LETKF mdet
-baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
+#baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda0925_psobs_target960error1_window1h/result/tc_hires/200001'
-
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20260519_test/result/case_tc/200001'
 
 day = 1
 hour = 0
@@ -67,7 +66,7 @@ cm = mcolors.LinearSegmentedColormap.from_list(cmap_name, colors, N=256)
 #minpres_mdet = np.zeros((72))
 #print(minpres_letkf)
 increment_big = np.zeros((600,600))
-for day in range(7,10):
+for day in range(1,10):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -78,7 +77,7 @@ for day in range(7,10):
         else:
             strhour = str(hour)
         print('reading..... ', day, hour)
-        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
+        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00032/mdet/history.pe000000.nc','r')
         if i != 0:
             valueold = valuenew
 
@@ -95,7 +94,7 @@ for day in range(7,10):
             #plt.colorbar(shrink=0.3)
             #plt.gca().invert_yaxis()
             plt.rcParams.update({'font.size': 14})  # Increase font size globally
-            plt.set_title("perturbation [g/kg] at lev 0",fontsize=16)
+            #plt.set_title("perturbation [g/kg] at lev 0",fontsize=16)
             increment = valuenew[0,0,:,:] - valueold[1,0,:,:]
             #increment_big[100:500,100:500] = increment
             #print(shape(increment_big))
@@ -113,7 +112,7 @@ for day in range(7,10):
             #plt.ylim(975,995)
             #plt.xlim(0,45)
             figname = "demo"+valuename+'_'+strday+strhour+'QV_lev0_1'
-            plt.savefig('./demo_test_20250925_tchires_letkc_L1_negativeQonly_lamda0925_psobs_target960error1_window1h/'+figname)
+            plt.savefig('./demo_test_20260519/'+figname)
             plt.clf()
         i = i + 1
         #show()

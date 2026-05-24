@@ -14,7 +14,7 @@ ALLVAR=T
 SINGLE_VAR=F
 
 tint=3600 #864000 # [second]
-tstart='2000-01-09 12:00:00'
+tstart='2000-01-10 00:00:00'
 #tend=$tstart
 tend='2000-01-11 00:00:00'
 . ./config.main
@@ -33,7 +33,7 @@ TYPE=hist
 
 # Output file (X & Y process number) for each member
 NP_OFILE_X=8
-NP_OFILE_Y=8
+NP_OFILE_Y=4
 
 if [ "$INPUT_FROM_SNOW" == "T" ] ; then
   NP_OFILE_X=1

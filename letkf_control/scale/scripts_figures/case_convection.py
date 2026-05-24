@@ -37,10 +37,10 @@ import matplotlib.colors as mcolors
 #show()
 
 # LETKF mdet
-baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
+#baseline = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf = '/work/jh220020o/f00019/scale_enkc/20241107_letkc_qvonly_noqc_local09_obserr01/result/case_tc/200001'
 #workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20250925_tchires_letkc_L1_negativeQonly_lamda08_psobs_target960error1_window1h/result/tc_hires/200001'
-workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20251216_tchires_letkc_L1_RI_lamda025_psobs_target990error1_window1h/result/tc_hires/200001'
+workdir_letkf = '/work/gv42/f00019/enkc_with_TC/20260519_test/result/case_tc/200001'
 
 
 
@@ -71,7 +71,7 @@ cm = mcolors.LinearSegmentedColormap.from_list(cmap_name, colors, N=256)
 #minpres_mdet = np.zeros((72))
 #print(minpres_letkf)
 increment_big = np.zeros((600,600))
-for day in range(4,7):
+for day in range(1,10):
     if day < 10:
         strday = '0'+str(day)
     else:
@@ -82,7 +82,7 @@ for day in range(4,7):
         else:
             strhour = str(hour)
         print('reading..... ', day, hour)
-        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00064/mdet/history.pe000000.nc','r')
+        data = nc.Dataset(workdir_letkf+strday+strhour+'0000/hist_sno_np00032/mdet/history.pe000000.nc','r')
         #minpres_letkf[i] = np.min(pres[1,0,:,:],axis=(0,1))/100
         if i != 0:
             valueold = valuenew
@@ -113,16 +113,16 @@ for day in range(4,7):
             ax.clabel(contours, inline=True, fontsize=8)
             plt.imshow(increment*1000, vmin=vvmin, vmax=vvmax, cmap=cm, interpolation='nearest')
 
-            x_tick_distances = np.arange(0, 2001, 500) # Ticks at every 500 km
-            y_tick_distances = np.arange(0, 2001, 500) # Ticks at every 500 km
+            x_tick_distances = np.arange(0, 3001, 500) # Ticks at every 500 km
+            y_tick_distances = np.arange(0, 3001, 500) # Ticks at every 500 km
 
-            x_tick_positions = x_tick_distances / 5  # Convert distance to index
-            y_tick_positions = y_tick_distances / 5  # Convert distance to index
+            x_tick_positions = x_tick_distances / 25  # Convert distance to index
+            y_tick_positions = y_tick_distances / 25  # Convert distance to index
 
             # Set x-axis limit
             # {{change 3}}
-            ax.set_xlim(0, 400)
-            ax.set_ylim(0, 400)
+            ax.set_xlim(0, 120) #400
+            ax.set_ylim(0, 120) #400
 
             # {{change 4}}
             ax.set_xticks(x_tick_positions)
@@ -148,8 +148,8 @@ for day in range(4,7):
             
 
 
-            figname = "case_convection2"+valuename+'_'+strday+strhour+'QV_lev0_1'
-            plt.savefig('./demo_test_20251216_tchires_letkc_L1_RI_lamda025_psobs_target990error1_window1h/'+figname, dpi=300)
+            figname = "case_convection"+valuename+'_'+strday+strhour+'QV_lev0_1'
+            plt.savefig('./demo_test_20260519/'+figname, dpi=300)
             plt.clf()
         i = i + 1
         #show()
