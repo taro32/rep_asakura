@@ -1,11 +1,11 @@
-# rep_asakura: ensemble-initialization and run workflow
+# rep_asakura: アンサンブル初期値作成と実行の流れ
 
-This directory contains the input setup for an idealized SCALE-RM ensemble
-experiment.  Its generated member directories (`1`–`101`), `letkfinput/`,
-NetCDF files, logs, and history/restart outputs are execution products; they
-are not source inputs.
+このディレクトリには、理想化 SCALE-RM アンサンブル実験の入力設定を
+置いています。メンバー別ディレクトリ（`1`–`101`）、`letkfinput/`、
+NetCDF ファイル、ログ、history/restart 出力は計算による生成物であり、
+ソース入力ではありません。
 
-## Overall relationship
+## 全体の関係
 
 ```text
 ensperturb/env.txt
@@ -15,65 +15,64 @@ ensperturb/env.txt
 ensperturb/env_perturb1.txt ... env_perturb101.txt
         |
         |  ensinit.sh
-        |  - copies init.conf_base and init.sh_base into each member directory
-        |  - inserts that member's ENV_IN_SOUNDING_file into init.conf
-        |  - submits pjsub init.sh
+        |  - 各メンバーの init.conf / init.sh をテンプレートから作成
+        |  - 各メンバー用 ENV_IN_SOUNDING_file を init.conf に挿入
+        |  - pjsub init.sh を投入
         v
 1/ ... 101/
   init.conf + init.sh
         |
-        |  scale-rm_init (from ../../case_tc/scale-rm_init)
+        |  scale-rm_init（../../case_tc/scale-rm_init）
         v
-member initial-condition/restart NetCDF files
+メンバーごとの初期値・restart NetCDF ファイル
         |
         |  preprocess_init.sh
-        |  - copies each member to letkfinput/0001 ... letkfinput/0101
+        |  - 各メンバーを letkfinput/0001 ... letkfinput/0101 へコピー
         v
 letkfinput/0001 ... letkfinput/0101
 
 run.sh + run.conf
         |
-        |  scale-rm (from ../case_tc/scale-rm)
+        |  scale-rm（../case_tc/scale-rm）
         v
-history and restart output configured in run.conf
+run.conf で指定された history / restart 出力
 ```
 
-## Files by role
+## ファイルごとの役割
 
-| File(s) | Role | Relationship |
+| ファイル | 役割 | 関係 |
 | --- | --- | --- |
-| `ensperturb/env.txt` | Base sounding profile. | Input read by `sounding_perturb.py`. |
-| `ensperturb/sounding_perturb.py` | Creates 101 perturbed sounding profiles. | Adds independent normally distributed noise (mean 0, standard deviation 0.1) to column 3 for the first 13 rows, and writes `env_perturb1.txt`–`env_perturb101.txt`.  This is the file referred to as `sound.py` in the workflow; its actual filename is `sounding_perturb.py`. |
-| `ensperturb/env_perturb*.txt` | Generated, per-member sounding inputs. | `ensinit.sh` selects one file for each member. |
-| `ensinit.sh` | Ensemble initializer/submitter. | Creates member directories `1`–`101`, derives each `init.conf`, copies `init.sh`, and submits the initialization job. |
-| `init.conf_base` | Template for each member's SCALE-RM initialization configuration. | The marker `!--ENV_IN_SOUNDING_file--` is replaced by an `ENV_IN_SOUNDING_file` entry that points to the corresponding perturbed sounding. |
-| `init.sh_base` | Template batch script for the initialization job. | Calls `../../case_tc/scale-rm_init ./init.conf`. |
-| `1/`–`101/` | Per-member working/output directories. | Contain the derived `init.conf`/`init.sh` plus generated initialization NetCDF files and logs. |
-| `preprocess_init.sh` | Stages initialized members for LETKF input. | Copies members `1`–`101` to zero-padded `letkfinput/0001`–`letkfinput/0101`. |
-| `init.conf`, `init.sh` | Standalone initialization configuration and job script at the directory root. | Use the unperturbed `ensperturb/env.txt`; unlike the ensemble flow, these are not generated from the templates. |
-| `run.conf`, `run.sh` | Main SCALE-RM integration configuration and batch script. | `run.sh` calls `../case_tc/scale-rm run.conf`; `run.conf` specifies the restart input and history/restart output basenames. |
-| `param.bucket.conf`, `PARAG.29`, `PARAPC.29`, `VARDATA.RM29`, `cira.nc`, `MIPAS/` | Static land/radiation inputs. | Referenced by `init.conf_base` (through `../...`) and by the root `init.conf`/`run.conf`. |
+| `ensperturb/env.txt` | 基準となるサウンディングプロファイル。 | `sounding_perturb.py` が読み込む入力。 |
+| `ensperturb/sounding_perturb.py` | 101 個の摂動済みサウンディングプロファイルを作成する。 | 先頭13行の第3列に、平均0・標準偏差0.1の独立な正規乱数を加え、`env_perturb1.txt`–`env_perturb101.txt` を出力する。処理の中で `sound.py` と呼ばれていたものの実ファイル名は `sounding_perturb.py`。 |
+| `ensperturb/env_perturb*.txt` | メンバー別の摂動済みサウンディング入力。 | `ensinit.sh` がメンバーごとに1ファイルを選ぶ。 |
+| `ensinit.sh` | アンサンブル初期値作成・投入スクリプト。 | `1`–`101` を作成し、それぞれの `init.conf` を生成、`init.sh` をコピーして初期値計算ジョブを投入する。 |
+| `init.conf_base` | メンバー別 SCALE-RM 初期化設定のテンプレート。 | `!--ENV_IN_SOUNDING_file--` の位置に、対応する摂動サウンディングを指す `ENV_IN_SOUNDING_file` 設定を挿入する。 |
+| `init.sh_base` | 初期化ジョブ用のバッチスクリプトのテンプレート。 | `../../case_tc/scale-rm_init ./init.conf` を実行する。 |
+| `1/`–`101/` | メンバー別の作業・出力ディレクトリ。 | 生成された `init.conf` / `init.sh`、初期値 NetCDF、ログを含む。 |
+| `preprocess_init.sh` | 初期値メンバーを LETKF 入力用に配置する。 | メンバー `1`–`101` をゼロ埋めした `letkfinput/0001`–`letkfinput/0101` へコピーする。 |
+| `init.conf`, `init.sh` | ディレクトリ直下の単独初期化用設定・ジョブスクリプト。 | 摂動なしの `ensperturb/env.txt` を使う。テンプレートから作られるアンサンブルの流れとは別のもの。 |
+| `run.conf`, `run.sh` | SCALE-RM 本計算用の設定・バッチスクリプト。 | `run.sh` が `../case_tc/scale-rm run.conf` を実行し、`run.conf` が restart 入力と history/restart 出力名を指定する。 |
+| `param.bucket.conf`, `PARAG.29`, `PARAPC.29`, `VARDATA.RM29`, `cira.nc`, `MIPAS/` | 陸面・放射の静的入力。 | `init.conf_base`（`../...` 経由）および直下の `init.conf` / `run.conf` から参照される。 |
 
-## Operational order
+## 実行順
 
-1. In `ensperturb/`, run `python sounding_perturb.py` to regenerate the 101
-   sounding files when a new random ensemble is required.  The script has no
-   fixed random seed, so rerunning it changes the ensemble.
-2. From this directory, run `ensinit.sh`.  It submits 101 SCALE-RM initial
-   condition jobs, one per sounding file.
-3. After all initialization jobs complete successfully, run
-   `preprocess_init.sh` to arrange the members under `letkfinput/`.
-4. Submit `run.sh` when the `RESTART_IN_BASENAME` configured in `run.conf` is
-   available.  The current `run.conf` points to
-   `./init_per_SM_R131_0.1_1/perturbed_restart_20000131-000000.000`; that
-   pathname is distinct from the direct `init` outputs made by `ensinit.sh`,
-   so it must be created or updated by the appropriate downstream processing
-   before the run can start.
+1. `ensperturb/` で `python sounding_perturb.py` を実行し、新しい乱数
+   アンサンブルが必要な場合に101個のサウンディングファイルを作る。
+   乱数シードは固定されていないため、再実行するとアンサンブルは変わる。
+2. このディレクトリで `ensinit.sh` を実行する。101個のサウンディング
+   ファイルに対応した SCALE-RM 初期値計算ジョブが投入される。
+3. すべての初期化ジョブが正常終了した後、`preprocess_init.sh` を実行して
+   メンバーを `letkfinput/` の下に配置する。
+4. `run.conf` の `RESTART_IN_BASENAME` が利用可能になったら `run.sh` を
+   投入する。現在の `run.conf` は
+   `./init_per_SM_R131_0.1_1/perturbed_restart_20000131-000000.000`
+   を指している。これは `ensinit.sh` が直接出力する `init` ファイルとは
+   別のパスであるため、本計算の前に後続処理で作成するか、設定を更新する
+   必要がある。
 
-## Version-control scope
+## バージョン管理の対象
 
-The committed source set contains scripts, configurations, sounding inputs,
-and the small static land/radiation inputs needed to understand and recreate
-the setup.  Generated NetCDF files, member/output directories, logs, and
-other run products are intentionally excluded: this working directory holds
-about 603 GB of such products.
+コミットには、設定・スクリプト・サウンディング入力・再現に必要な小規模の
+静的な陸面/放射入力を含めています。メンバー別ディレクトリ、NetCDF、ログ、
+その他の計算生成物は意図的に含めていません。この作業ディレクトリには、
+これらの生成物が約603 GBあります。
