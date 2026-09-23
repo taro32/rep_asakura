@@ -4,6 +4,42 @@
 - 2026-09-23: 実験ディレクトリを `letkf_control/scale/convection/` に一本化
 - 2026-09-24: 実験規模を **2 km × 20 member** に変更（4 km 案を取りやめ）
 
+## 進捗状況
+
+完了したら `[ ]` を `[x]` にし、行末に完了日を書く（例: `— 2026-09-25`）。
+
+- [ ] Phase 0 — 現状保存と実験条件の確定
+  - [ ] 0-1 git の状態を固める（.gitignore、staged ファイルの整理、タグ）
+  - [ ] 0-2 構成と実行ファイルの記録（`docs/phase0/`）
+  - [ ] 0-3 既存 2 km 生成物の保全（読み取り専用化、`1/`–`21/` の md5）
+  - [ ] 0-4 STIME とスピンアップの確認
+  - [ ] 0-5 OUTDIR とノード時間予算の確定
+- [ ] Phase 1 — case_tc の依存関係の確定
+  - [ ] スクリプト → 実行ファイル → 設定の対応表
+  - [ ] `scale-rm_init_ens`（step 2, 6）が陸面状態を上書きしないか
+  - [ ] LETKC / LETKF での陸面変数の扱い
+  - [ ] controltarget の入力形式
+- [ ] Phase 2 — convection/ の骨組み作成（framework・dat・init のコピー）
+- [ ] Phase 3 — 単独 forecast と実行時間の計測
+  - [ ] 1 member × 1 時間の実行時間
+  - [ ] 1 cycle の所要時間の見積もりと `TIME_LIMIT`・ジョブ分割の方針
+- [ ] Phase 4 — 初期値を OUTDIR に取り込む（md5 一致を確認）
+- [ ] Phase 5 — cycle 設定の作成と ensemble forecast の接続
+  - [ ] `config.main.Wisteria`, `config.cycle`, `config.nml.*` の作成
+  - [ ] step 1–3（MEMBER=2）
+  - [ ] step 1–3（MEMBER=20）
+- [ ] Phase 6 — LETKC と mdet controlled forecast（**M1**）
+  - [ ] 2 km 格子のダミー controltarget
+  - [ ] step 1–7 正常終了
+- [ ] Phase 7 — obsmake / OBSOPE / LETKF
+  - [ ] 2 km 格子用の OBSIN
+  - [ ] step 1–10 正常終了（0001–0020 の analysis）
+- [ ] Phase 8 — cycling
+  - [ ] 1 cycle
+  - [ ] 2 cycle（時刻・restart の引き継ぎの整合）
+  - [ ] 48 時間
+
+
 ## 0. 目的
 
 現在正常に動作している `case_tc` の EnKC（LETKC）cycling 実装を使い、
