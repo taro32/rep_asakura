@@ -232,7 +232,7 @@ fi
 #===============================================================================
 # Definition of sub-directories
 
-SCRP_DIR="$DIR/run"              # Job script directory
+SCRP_DIR="$DIR/convection"       # Job script directory（run/ から変更。設定ファイルと src/ をここから TMP にコピーする）
 COMMON_DIR="$DIR/common"         # Common program directory
 LETKF_DIR="$DIR/letkf"           # LETKF program directory
 LETKC_DIR="$DIR/letkc"           # LETKC program directory

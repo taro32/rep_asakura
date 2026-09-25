@@ -50,6 +50,41 @@ cd /work/02/gv42/v42013/scale-letkc/letkf_control/scale/convection
 - `$OUTDIR/20000101000000/hist/{0001,0002,mean,mdet}/history.pe*.nc` が出力され、時刻が 0, 10, …, 60 分の 7 回ある
 - 113 項目が history に入っている
 
+## 動作確認の記録
+
+### 1 回目（2026-09-25 15:39、ジョブ 9718963）— 失敗
+
+- ジョブは 2 秒で終了した。ジョブのログ（`$OUTDIR/exp/9718963_cycle_20000101000000/cycle_job.sh.9718963.out`）に
+  `mpiexec -n 3264 ./scale-rm_ens ...` と `The specified number of processes is too many.` が出ていた。
+- **原因:** ジョブ側で case_tc の設定（`MEMBER=100`、`tmp/tropicalcyclone`、OUTDIR = `20260603_enkc/result/case_tc`）が読まれていた。
+  `config.rc` の `SCRP_DIR="$DIR/run"` が固定になっていて、`cycle_run.sh` が設定ファイルと `src/` を `run/` から TMP にコピーしていたため。
+  投入側は `convection/config.main` を読むので、画面の表示（MEMBER=2 など）は正しく見えていた。
+- **対処:** `convection/config.rc` の `SCRP_DIR` を `$DIR/convection` にした。
+- **影響の確認:** case_tc の OUTDIR（`/work/gv42/v42013/20260603_enkc/result/case_tc`）に 15:39 以降に変更されたファイルはなかった。
+  ジョブ側の作業領域 `tmp/tropicalcyclone` も存在しないまま（`cd` に失敗して止まった）。
+- convection の OUTDIR には、投入側が作った空のディレクトリ（`20000101010000/` など）と `config/`・`exp/` が残っている。次の実行で使われるので、そのままにした。
+
+### 2 回目（2026-09-25 15:45、ジョブ 9719033）— 成功
+
+`SCRP_DIR` を直してから、同じコマンドで投入した。
+
+| 確認したこと | 結果 |
+| --- | --- |
+| ジョブ | debug-o・144 ノード、経過 17 秒で正常終了（`SCALE-LETKF successfully completed`） |
+| step の動き | step 1・2 は飛ばされ、step 3（アンサンブル予報）が 16 秒で終わった |
+| ジョブ側の設定 | `$OUTDIR/exp/9719033_cycle_20000101000000/config.main` が convection のもの（`MEMBER=2`、`TMPSUBDIR=convection`） |
+| 1 時間後の restart | `20000101010000/anal/{0001,0002,mean,mdet}/init_20000101-010000.000.pe*.nc` が各 144 ファイル |
+| history | `20000101000000/hist/{0001,0002,mean,mdet}/history.pe*.nc` が各 144 ファイル。時刻は 0, 10, …, 60 分の 7 回。113 項目すべてある |
+| 値 | NaN なし。値の範囲は Phase 3 と同じ |
+| **0001 と Phase 3（member 1 の単独予報）** | **全変数で完全に一致**（DENS, MOMZ, RHOT, QV, QC, QR, LAND_WATER, LAND_TEMP の差の最大が 0） |
+| mean と mdet | 完全に一致（どちらも `21/` の初期値から始めているので当然） |
+| 0001 と 0002 | 異なる（別の member として計算されている） |
+
+cycle の実行ファイル（`scale-rm_ens`）で回しても、Phase 3 の `bin/scale-rm` と同じ結果になった。
+
+**history の量:** 4 member で 4.1 GB（1 member・1 cycle あたり約 1 GB）。
+本番（22 run × 48 cycle）では約 **1.1 TB** になる（Phase 5 の見込み 0.9 TB より少し多い）。
+
 ## 本番で変えるところ
 
 | ファイル | 項目 | 動作確認 | 本番 |

@@ -99,6 +99,11 @@ cycle の途中で初期値を作り直すことはない。
 | `config.nml.*` | `tmp/<TMPSUBDIR>/` | すべて |
 | `config.cycle`, `config.fcst`, `config.rc` | 同上 | `config.[c,f,r]*` に当たるもの |
 | `config.main.Wisteria` | 同上 | **`config.main` ではない**（4.1 節） |
+
+**訂正（2026-09-25、Phase 5 の試験で判明）:** コピー元は `cycle_run.sh` のあるディレクトリではなく、
+`config.rc` 235 行目の `SCRP_DIR="$DIR/run"` で**固定**されていた。
+そのため `convection/` から実行しても、設定ファイルと `src/` は `run/`（case_tc）からコピーされる。
+`convection/config.rc` の `SCRP_DIR` を `$DIR/convection` に変えて解決した。
 | `src/` | 同上 | |
 | `OBSIN` のファイル | `tmp/<TMPSUBDIR>/obsin/obsin.dat` | |
 | 実行ファイル（`../common/`, `../ensmodel/`, `../letkc/`, `../letkf/`, `../obs/`） | `tmp/<TMPSUBDIR>/` | `convection/` からの相対位置は `run/` と同じ |

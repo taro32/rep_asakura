@@ -27,7 +27,7 @@
 - [x] Phase 4 — 初期値を OUTDIR に取り込む（md5 一致を確認） — 2026-09-25（22 member、`docs/phase4/import_result.md`）
 - [ ] Phase 5 — cycle 設定の作成と ensemble forecast の接続
   - [x] `config.main.Wisteria`, `config.cycle`, `config.nml.*` の作成 — 2026-09-25（`docs/phase5/config_notes.md`）
-  - [ ] step 1–3（MEMBER=2）
+  - [x] step 1–3（MEMBER=2） — 2026-09-25（16 秒。0001 は Phase 3 と完全一致。`docs/phase5/config_notes.md`）
   - [ ] step 1–3（MEMBER=20）
 - [ ] Phase 6 — LETKC と mdet controlled forecast（**M1**）
   - [ ] 2 km 格子のダミー controltarget
@@ -204,21 +204,28 @@ letkf_control/scale/tmp/convection/               ← cycle_run.sh が毎回作�
 | `letkf_control/scale/run/config/case_tc/` | case_tc のケース設定（**参考**。namelist の `!--XXX--` マーカーの位置を引き継ぐ） |
 | `letkf_control/scale/tmp/<TMPSUBDIR>/` | `cycle_run.sh` が実行ごとに作り直す作業領域。**移植元ではない** |
 
-`DET_RUN_UPDATE=2` の step（`src/func_cycle_static.sh`）:
+### step とは
 
-```text
-1. scale-rm_pp_ens      SCALE pp
-2. scale-rm_init_ens    SCALE init
-3. scale-rm_ens         ensemble forecast
-4. letkc                mdet を LETKC で更新
-5. scale-rm_pp_ens
-6. scale-rm_init_ens
-7. scale-rm_ens         mdet controlled forecast
-8. obsmake
-9. obsope
-10. letkf               ensemble analysis
-11. efso                （有効時のみ）
-```
+1 回の cycle（時刻 t → t+1h）は、決まった順番の処理でできている。
+cycle スクリプトはこの処理に 1〜11 の番号を付けていて、これを **step** と呼ぶ
+（定義は `src/func_cycle_static.sh`、`DET_RUN_UPDATE=2` のとき）。
+`cycle_run.sh` の引数 `ISTEP`・`FSTEP` で、何番の step から何番の step までを実行するかを指定できる。
+
+| step | 実行ファイル | やること | convection での扱い |
+| --- | --- | --- | --- |
+| 1 | `scale-rm_pp_ens` | 地形・土地利用のファイルを作る | **飛ばす**（地形なし・全面陸） |
+| 2 | `scale-rm_init_ens` | 初期値をゼロから作る | **飛ばす**（`BDY_FORMAT=5`。初期値は Phase 4 で用意） |
+| **3** | `scale-rm_ens` | **全 member（0001〜0020・mean・mdet）の 1 時間予報** | 実行する |
+| **4** | `letkc` | **LETKC**: step 3 の予報と controltarget から、mdet の初期値を修正する（制御） | 実行する |
+| 5 | `scale-rm_pp_ens` | step 1 と同じ | 飛ばす |
+| 6 | `scale-rm_init_ens` | step 2 と同じ | 飛ばす |
+| **7** | `scale-rm_ens` | **修正後の mdet を含めて、1 時間予報をやり直す**（全 member） | 実行する |
+| **8** | `obsmake` | **mdet の予報から観測を作る** | 実行する |
+| 9 | `obsope` | 観測演算子を単独で計算する | 飛ばす（step 10 の中で計算する） |
+| **10** | `letkf` | **LETKF**: 観測を使って 0001〜0020 の解析値を作る。これが次の cycle の初期値になる | 実行する |
+| 11 | `efso` | 観測の影響評価 | 飛ばす（`EFSO_RUN=0`） |
+
+入出力のファイルなど詳しいことは `docs/phase1/dependency.md` の 2 節にある。
 
 この構造は変更しない。
 
@@ -249,7 +256,7 @@ mdet       : deterministic / control（21番目の member として扱わない�
 
 | 対象 | 分類 | 内容 |
 | --- | --- | --- |
-| `cycle_run.sh`, `fcst_run.sh`, `src/`, `config.rc` | `run/` から複製 | 中身は変更しない。例外: `cycle_run.sh` の rscgrp の 1 行を `${RSCGRP:-regular-o}` にした（Phase 3） |
+| `cycle_run.sh`, `fcst_run.sh`, `src/`, `config.rc` | `run/` から複製 | 中身は変更しない。例外: `cycle_run.sh` の rscgrp の 1 行を `${RSCGRP:-regular-o}` にした（Phase 3）。`config.rc` の `SCRP_DIR` を `$DIR/run` から `$DIR/convection` にした（Phase 5。これがないと run/ の設定が使われる） |
 | `config.main.Wisteria` | 新規 | OUTDIR, OBSIN, SOUNDING, MEMBER=20, SCALE_NP_X=12, SCALE_NP_Y=12, PPN=4, THREADS=12, TMPSUBDIR=convection |
 | `config.cycle`, `config.fcst` | 新規 | STIME, ETIME（STIME + 48h）, TIME_LIMIT, OUT_OPT |
 | `config.nml.scale`, `config.nml.scale_init` | 新規 | rep_asakura の `run.conf` / `init.conf_base` に、case_tc テンプレートの `!--XXX--` マーカーを埋め込む |
