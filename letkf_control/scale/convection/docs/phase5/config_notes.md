@@ -85,6 +85,22 @@ cycle の実行ファイル（`scale-rm_ens`）で回しても、Phase 3 の `bi
 **history の量:** 4 member で 4.1 GB（1 member・1 cycle あたり約 1 GB）。
 本番（22 run × 48 cycle）では約 **1.1 TB** になる（Phase 5 の見込み 0.9 TB より少し多い）。
 
+### 3 回目（2026-09-25 15:49、ジョブ 9719073）— MEMBER=20、成功
+
+`config.main.Wisteria` を `MEMBER=20`、`RSCGRP=regular-o` にして、同じコマンドで投入した。
+
+| 確認したこと | 結果 |
+| --- | --- |
+| ジョブ | regular-o から **large-o** に振り分けられた。経過 26 秒で正常終了。割り当ては 840 ノード（`14x15x4` の形。要求は 792）、トークン 5.7 |
+| step 3 | 25 秒（MEMBER=2 のときの 16 秒より少し長い） |
+| 出力 | 0001〜0020・mean・mdet の 22 本すべて、1 時間後の restart と history が各 144 ファイル。history は 22 本で 22 GB |
+| 値 | 22 本すべて、13 変数で NaN・Inf なし |
+| 0001 と Phase 3 | 完全に一致（RHOT の差の最大 0） |
+| mean と mdet | 完全に一致 |
+| member の違い | 0001 と各 member の MOMZ の差の最大は 1.9〜5.8。0018〜0020 は差が大きい（約 5–6） |
+| history（0020） | 時刻 0, 10, …, 60 分の 7 回 |
+| STIME の初期値 | step 3 の後も、22 本すべて `docs/phase0/init_1-21.md5` と一致（書き換えられていない） |
+
 ## 本番で変えるところ
 
 | ファイル | 項目 | 動作確認 | 本番 |

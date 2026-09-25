@@ -25,10 +25,10 @@
   - [x] 1 member × 1 時間の実行時間 — 2026-09-25（21 秒。`docs/phase3/fcst1h_result.md`）
   - [x] 1 cycle の所要時間の見積もりと `TIME_LIMIT`・ジョブ分割の方針 — 2026-09-25（数分／cycle。1 ジョブ・TIME_LIMIT 12 時間。debug-o を切り替え可能に）
 - [x] Phase 4 — 初期値を OUTDIR に取り込む（md5 一致を確認） — 2026-09-25（22 member、`docs/phase4/import_result.md`）
-- [ ] Phase 5 — cycle 設定の作成と ensemble forecast の接続
+- [x] Phase 5 — cycle 設定の作成と ensemble forecast の接続 — 2026-09-25
   - [x] `config.main.Wisteria`, `config.cycle`, `config.nml.*` の作成 — 2026-09-25（`docs/phase5/config_notes.md`）
   - [x] step 1–3（MEMBER=2） — 2026-09-25（16 秒。0001 は Phase 3 と完全一致。`docs/phase5/config_notes.md`）
-  - [ ] step 1–3（MEMBER=20）
+  - [x] step 1–3（MEMBER=20） — 2026-09-25（large-o、25 秒。22 本すべて正常）
 - [ ] Phase 6 — LETKC と mdet controlled forecast（**M1**）
   - [ ] 2 km 格子のダミー controltarget
   - [ ] step 1–7 正常終了

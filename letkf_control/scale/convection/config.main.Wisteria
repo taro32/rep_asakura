@@ -112,7 +112,7 @@ LTIMESLOT=3600 #864000     # Timeslot interval for 4D-LETKF (second)
 #===============================================================================
 # Parallelization settings
 
-MEMBER=2             # Ensemble size
+MEMBER=20            # Ensemble size
                      #   動作確認: 2（(2+2) × 36 = 144 ノード、debug-o）
                      #   本番:     20（(20+2) × 36 = 792 ノード、regular-o → large-o）
 
@@ -132,7 +132,7 @@ else
   NNODES=$(( ( MEMBER + 1 ) * ( SCALE_NP / PPN ) ))
 fi
 
-RSCGRP=debug-o      # ジョブの rscgrp（convection/cycle_run.sh が使う。空なら regular-o）
+RSCGRP=regular-o    # ジョブの rscgrp（convection/cycle_run.sh が使う。空なら regular-o）
                     #   動作確認: debug-o（最大 144 ノード・30 分）
                     #   本番:     regular-o（792 ノードなら large-o に振り分けられる）
 
