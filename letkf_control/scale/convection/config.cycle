@@ -1,0 +1,99 @@
+#!/bin/bash
+#===============================================================================
+#
+#  Settings for cycle.sh
+#
+#===============================================================================
+
+
+# 本番の値（計画書 1.4 節）。動作確認では cycle_run.sh の引数で上書きする:
+#   ./cycle_run.sh STIME ETIME ISTEP FSTEP CONF_MODE TIME_LIMIT
+#   例: ./cycle_run.sh 20000101000000 20000101000000 1 3 static 00:30:00
+STIME='20000101000000'
+ETIME='20000103000000'   # STIME + 48 時間（48 cycle）
+TIME_LIMIT='12:00:00'
+
+ISTEP=
+FSTEP=
+CONF_MODE='static'
+
+#===============================================================================
+
+FCSTOUT=600      # history の出力間隔 [s]（10 分ごと。LTIMESLOT=3600 の約数である必要がある）
+
+ADAPTINFL=0      # Adaptive inflation
+                 #  0: OFF
+                 #  1: ON
+ADDINFL=0        # Additive inflation
+                 #  0: OFF
+                 #  1: ON
+INFL_ADD_FACT=0.1
+
+#===============================================================================
+
+MAKEINIT=0       # 0: No
+                 # 1: Yes
+
+#===============================================================================
+# Diagnostic output settings
+
+                 #      anal              gues              history
+                 #      mean/sprd members mean/sprd members mean members
+OUT_OPT=1        # 1:   o         o       o         o       o    o
+                 # 2:   o         o       o         o       o
+                 # 3:   o         o       o         o
+                 # 4:   o         o       o
+                 # 5:   o         *       o                               * = every $OUT_CYCLE_SKIP cycles and the last cycle
+                 # 6:   o         **      o                               ** = only the last cycle
+                 # 7:   o         **
+
+OUT_CYCLE_SKIP=6
+
+# Use LLIO temporary directories on Fugaku for history/boundary files
+# When HIST_LLIO_TMP(BDY_LLIO_TMP)=1, no history(boundary) files are stored after a job
+HIST_LLIO_TMP=0 # 1: 
+                # 0: 
+BDY_LLIO_TMP=0  # 1: 
+                # 0: 
+
+                 #      topo
+TOPOOUT_OPT=2    # 1:   o
+                 # 2:   (none)
+
+                 #      landuse
+LANDUSEOUT_OPT=2 # 1:   o
+                 # 2:   (none)
+
+                 #      bdy
+                 #      mean members
+BDYOUT_OPT=3     # 1:   o    o
+                 # 2:   o
+                 # 3:   (none)
+
+                 #      obsgues obsanal obsdep
+OBSOUT_OPT=3     # 1:   o       o       o
+                 # 2:   o               o
+                 # 3:                   o
+                 # 4:   (none)
+
+                 #      topo landuse bdy perturb        scale obsope letkf
+                 #      log  log     log (not finished) log   log    log
+LOG_OPT=2        # 1:   o    o       o   o              o     o      o
+                 # 2:   o    o       o                  o     o      o
+                 # 3:                                   o     o      o
+                 # 4:                                         o      o
+                 # 5:   (none)
+
+LOG_TYPE=2       # 1:   Only save the log file from the head process
+                 # 2:   Save all log files
+                 # 3:   Save all log files in an archive file
+                 # 4:   Save all log files in a compressed archive file
+
+SPRD_OUT=1       # 0: No
+                 # 1: Yes
+RTPS_INFL_OUT=0  # 0: No
+                 # 1: Yes
+NOBS_OUT=0       # 0: No
+                 # 1: Yes
+
+#===============================================================================

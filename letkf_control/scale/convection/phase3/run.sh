@@ -23,8 +23,10 @@ export SCALE_NETCDF_INCLUDE="-I//work/opt/local/aarch64/apps/fj/1.2.31/netcdf/4.
 SCALE_RM=/work/02/gv42/v42013/scale-letkc/bin/scale-rm
 CONF=/work/02/gv42/v42013/scale-letkc/letkf_control/scale/convection/phase3/run.conf
 OUT=/work/gv42/v42013/20260923_enkc_convection/result/phase3_fcst1h
+MEM=1   # member 番号（初期値は rep_asakura の 1/）
 
-mkdir -p $OUT
+# 出力は種類ごと・member ごとに分ける: history/<MEM>/, refstate/<MEM>/, restart/<MEM>/
+mkdir -p $OUT/history/$MEM $OUT/refstate/$MEM $OUT/restart/$MEM
 cp $CONF $OUT/run.conf
 cd $OUT
 

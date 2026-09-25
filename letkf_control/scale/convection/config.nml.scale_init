@@ -1,0 +1,217 @@
+#####
+#
+# SCALE-RM mkinit configulation for radiation-convection test
+#
+# convection cycle 用テンプレート（init/init.conf_base から作成、2026-09-25）。
+# BDY_FORMAT=5 では step 2・6（scale-rm_init_ens）が飛ばされるので、cycle 中には実行されない。
+# cycle_run.sh が設定ファイルを生成するときにテンプレートとして必要なので置いている。
+#
+#####
+
+&PARAM_IO
+!--IO_LOG_BASENAME--
+/
+
+&PARAM_PRC_CARTESC
+ PRC_NUM_X = 12,
+ PRC_NUM_Y = 12,
+ PRC_PERIODIC_X = .true.,
+ PRC_PERIODIC_Y = .true.,
+/
+
+&PARAM_ATMOS_GRID_CARTESC_INDEX
+ KMAX = 64,
+ IMAX = 10,
+ JMAX = 10,
+ IHALO = 2,
+ JHALO = 2,
+/
+
+&PARAM_ATMOS_GRID_CARTESC
+! DX        = 500.D0,
+! DX        = 1000.D0,
+! DX        = 1500.D0,
+! DX        = 1750.D0,
+! DX        = 1875.D0,
+ DX        = 2000.D0,
+! DX        = 3000.D0,
+! DX        = 4000.D0,
+! DY        = 500.D0,
+! DY        = 1000.D0,
+! DY        = 1500.D0,
+! DY        = 1750.D0,
+! DY        = 1875.D0,
+ DY        = 2000.D0,
+! DY        = 3000.D0,
+! DY        = 4000.D0,
+ FZ(:) = 75.0000D0, 153.4500D0, 235.5087D0, 321.3421D0, 411.1238D0,
+        505.0355D0, 603.2672D0, 706.0175D0, 813.4943D0, 925.9150D0,
+        1043.5071D0, 1166.5084D0, 1295.1678D0, 1429.7456D0, 1570.5139D0,
+        1717.7576D0, 1871.7744D0, 2032.8760D0, 2201.3882D0, 2377.6519D0,
+        2562.0237D0, 2754.8767D0, 2956.6011D0, 3167.6047D0, 3388.3145D0,
+        3619.1768D0, 3860.6587D0, 4113.2490D0, 4377.4585D0, 4653.8218D0,
+        4942.8979D0, 5245.2715D0, 5561.5542D0, 5892.3857D0, 6238.4355D0,
+        6600.4038D0, 6979.0225D0, 7375.0576D0, 7789.3105D0, 8222.6191D0,
+        8675.8604D0, 9149.9502D0, 9645.8486D0, 10164.5586D0, 10707.1289D0,
+        11274.6572D0, 11868.2920D0, 12468.2920D0, 13068.2920D0, 13668.2920D0,
+        14268.2920D0, 14868.2920D0, 15468.2920D0, 16068.2920D0, 16668.2930D0,
+        17304.7148D0, 17979.7676D0, 18695.7969D0, 19455.2891D0, 20260.8828D0,
+        21115.3770D0, 22021.7383D0, 22983.1152D0, 24000.0000D0,
+/
+
+&PARAM_MAPPROJECTION
+ MAPPROJECTION_basepoint_lon = 0.D0,
+ MAPPROJECTION_basepoint_lat = 0.D0,
+/
+
+&PARAM_LAND_GRID_CARTESC_INDEX
+ LKMAX = 7,
+/
+
+&PARAM_LAND_GRID_CARTESC
+ LDZ = 0.05D0, 0.15D0, 0.3D0, 0.5D0, 1.D0, 1.D0, 1.D0,
+/
+
+&PARAM_LANDUSE
+ LANDUSE_AllLand = .true.,
+/
+
+&PARAM_TIME
+!--TIME_STARTDATE--
+ TIME_STARTMS               = 0.D0,
+/
+
+&PARAM_RESTART
+ RESTART_OUTPUT       = .true.,
+!--RESTART_OUT_BASENAME--
+/
+
+&PARAM_STATISTICS
+ STATISTICS_checktotal     = .true.,
+ STATISTICS_use_globalcomm = .true.,
+/
+
+&PARAM_ATMOS
+ ATMOS_DYN_TYPE    = "HEVI",
+ ATMOS_PHY_MP_TYPE = "TOMITA08",
+ ATMOS_PHY_RD_TYPE = "MSTRNX",
+ ATMOS_PHY_SF_TYPE = "COUPLE",
+ ATMOS_PHY_TB_TYPE = "SMAGORINSKY",
+/
+
+! &PARAM_ATMOS_VARS
+!  ATMOS_RESTART_OUTPUT       = .true.,
+!  ATMOS_RESTART_OUT_BASENAME = "./init_R131_0.1_1_copy/init",
+! /
+
+! &PARAM_ATMOS_PHY_MP_VARS
+!  ATMOS_PHY_MP_RESTART_OUTPUT       = .true.,
+!  ATMOS_PHY_MP_RESTART_OUT_BASENAME = "./init_R131_0.1_1_copy/init",
+! /
+
+! &PARAM_ATMOS_PHY_RD_VARS
+!  ATMOS_PHY_RD_RESTART_OUTPUT       = .true.,
+!  ATMOS_PHY_RD_RESTART_OUT_BASENAME = "./init_R131_0.1_1_copy/init",
+! /
+
+! &PARAM_ATMOS_PHY_SF_VARS
+!  ATMOS_PHY_SF_RESTART_OUTPUT       = .true.,
+!  ATMOS_PHY_SF_RESTART_OUT_BASENAME = "./init_R131_0.1_1_copy/init",
+! /
+
+! &PARAM_LAND_VARS
+!  LAND_RESTART_OUTPUT       = .true.,
+!  LAND_RESTART_OUT_BASENAME = "./init_R131_0.1_1_copy/init",
+! /
+
+&PARAM_LAND
+ LAND_DYN_TYPE = "BUCKET",
+ LAND_SFC_TYPE = "SKIN",
+/
+
+&PARAM_LAND_PROPERTY
+ LAND_PROPERTY_IN_FILENAME = "/work/02/gv42/v42013/scale-letkc/letkf_control/scale/convection/dat/param.bucket.conf",
+/
+
+&PARAM_ATMOS_DYN
+ ATMOS_DYN_TINTEG_SHORT_TYPE          = "RK4",
+ ATMOS_DYN_TINTEG_TRACER_TYPE         = "RK3WS2002",
+ ATMOS_DYN_FVM_FLUX_TYPE              = "CD4",
+ ATMOS_DYN_FVM_FLUX_TRACER_TYPE       = "UD3KOREN1993",
+ ATMOS_DYN_FLAG_FCT_TRACER            = .false.,
+ ATMOS_DYN_NUMERICAL_DIFF_COEF        = 1.D-4,
+ ATMOS_DYN_NUMERICAL_DIFF_COEF_TRACER = 0.D0,
+ ATMOS_DYN_WDAMP_TAU                  = 1.5D1,
+ ATMOS_DYN_WDAMP_HEIGHT               = 18.D3,
+/
+
+&PARAM_ATMOS_PHY_RD_MSTRN
+ ATMOS_PHY_RD_MSTRN_KADD                  = 10,
+ ATMOS_PHY_RD_MSTRN_TOA                   = 100.0,
+ ATMOS_PHY_RD_MSTRN_GASPARA_IN_FILENAME   = "/work/02/gv42/v42013/scale-letkc/letkf_control/scale/convection/dat/PARAG.29",
+ ATMOS_PHY_RD_MSTRN_AEROPARA_IN_FILENAME  = "/work/02/gv42/v42013/scale-letkc/letkf_control/scale/convection/dat/PARAPC.29",
+ ATMOS_PHY_RD_MSTRN_HYGROPARA_IN_FILENAME = "/work/02/gv42/v42013/scale-letkc/letkf_control/scale/convection/dat/VARDATA.RM29",
+/
+
+&PARAM_ATMOS_PHY_RD_PROFILE
+ ATMOS_PHY_RD_PROFILE_CIRA86_IN_FILENAME    = "/work/02/gv42/v42013/scale-letkc/letkf_control/scale/convection/dat/cira.nc",
+ ATMOS_PHY_RD_PROFILE_MIPAS2001_IN_BASENAME = "/work/02/gv42/v42013/scale-letkc/letkf_control/scale/convection/dat/MIPAS",
+ ATMOS_PHY_RD_PROFILE_USE_CO2               = .true.,
+ ATMOS_PHY_RD_PROFILE_USE_O3                = .true.,
+ ATMOS_PHY_RD_PROFILE_USE_N2O               = .false.,
+ ATMOS_PHY_RD_PROFILE_USE_CO                = .false.,
+ ATMOS_PHY_RD_PROFILE_USE_CH4               = .false.,
+ ATMOS_PHY_RD_PROFILE_USE_O2                = .false.,
+ ATMOS_PHY_RD_PROFILE_USE_CFC               = .false.,
+/
+
+&PARAM_ATMOS_SOLARINS
+ ATMOS_SOLARINS_constant = 685.0,
+ ATMOS_SOLARINS_set_ve = .false.,
+ ATMOS_SOLARINS_set_ideal = .true.,
+ ATMOS_SOLARINS_obliquity = 0.0,
+ ATMOS_SOLARINS_eccentricity = 0.0,
+ ATMOS_SOLARINS_fixedlatlon = .true.,
+ ATMOS_SOLARINS_lon = 0.0,
+ ATMOS_SOLARINS_lat = 0.0,
+ ATMOS_SOLARINS_fixeddate = .true.,
+ ATMOS_SOLARINS_date = 1950,3,21,15,26,48,
+/
+
+&PARAM_ATMOS_PHY_TB_SMG
+ ATMOS_PHY_TB_SMG_implicit = .true.,
+/
+
+&PARAM_MKINIT
+ MKINIT_initname = "SQUALLLINE",
+/
+
+&PARAM_MKINIT_SOUNDING
+!--ENV_IN_SOUNDING_file--
+/
+
+&PARAM_MKINIT_SQUALLLINE
+ RANDOM_THETA         = 0.1D0,
+ OFFSET_velx          = 0.D0,
+ OFFSET_vely          = 0.D0,
+/
+
+&PARAM_MKINIT_PLANESTATE
+ SFC_THETA    =  260.0D0,
+ SFC_PRES     = 1000.0D2,
+ SFC_RH       =  100.0D0,
+ ENV_THETA    =  260.0D0,
+ ENV_TLAPS    =    6.5D-3,
+ ENV_U        =    0.4D0,
+ ENV_V        =    0.0D0,
+ ENV_RH       =  100.0D0,
+/
+
+&PARAM_MKINIT_LAND
+ LND_TEMP      = 280.0D0,
+ LND_WATER     =   0.2D0,
+ SFC_TEMP      = 280.0D0,
+ SFC_albedo_LW =   0.01D0,
+ SFC_albedo_SW =   0.20D0,
+/
+

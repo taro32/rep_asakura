@@ -137,7 +137,7 @@ cat > $jobscrp << EOF
 #!/bin/sh 
 #
 #PJM -g ${GROUP} 
-#PJM -L "rscgrp=regular-o"
+#PJM -L "rscgrp=${RSCGRP:-regular-o}"
 #PJM -L "node=${NNODES}"
 #PJM -L "elapse=${TIME_LIMIT}"
 #PJM --mpi "max-proc-per-node=${PPN}"

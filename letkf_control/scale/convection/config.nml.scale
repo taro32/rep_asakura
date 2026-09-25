@@ -1,19 +1,20 @@
 #####
 #
-# SCALE-RM run configulation
+# SCALE-RM run configulation（convection cycle 用テンプレート）
 #
-# Phase 3: 1 member × 1 時間の単独予報（実行時間の計測）
-# scale-rm/test/case/rep_asakura/run.conf からの変更点:
-#   - 開始時刻を 2000-01-01 00:00、積分時間を 1 時間にした
-#   - 初期値を rep_asakura の 1/ にした（読み取り専用なので書き込まない）
-#   - 出力を OUTDIR/phase3_fcst1h/ にした。history・refstate・restart は種類ごと・member ごとに分ける（history/1/ など）
-#   - 放射・陸面の入力を convection/dat/ の絶対パスにした
-#   - 物理設定・格子・時間ステップ・history の項目と間隔は変えていない
+# scale-rm/test/case/rep_asakura/run.conf から作成（2026-09-25）。
+# 物理設定・格子・時間ステップ・history の項目は rep_asakura と同じ。変更点:
+#   - !--XXX-- の行に cycle スクリプトが値を差し込む（時刻・入出力パス・出力間隔）
+#   - 放射・陸面の入力は convection/dat/ の絶対パス
+#   - history: LETKC・obsmake・LETKF が読む Umet, Vmet, SFC_PRES, U10m, V10m を追加。
+#     ファイル名に時刻が付かないように FILE_HISTORY_OUTPUT_SWITCH_* を外した。
+#     初期時刻も出力する（FILE_HISTORY_OUTPUT_STEP0 = .true.、case_tc と同じ）
+#   - refstate は出力しない（ATMOS_REFSTATE_OUT_BASENAME を外した）
 #
 #####
 
 &PARAM_IO
- IO_LOG_BASENAME = "/work/gv42/v42013/20260923_enkc_convection/result/phase3_fcst1h/LOG",
+!--IO_LOG_BASENAME--
 /
 
 &PARAM_PRC_CARTESC
@@ -73,10 +74,10 @@
 /
 
 &PARAM_TIME
- TIME_STARTDATE             = 2000, 1, 1, 0, 0, 0,
+!--TIME_STARTDATE--
  TIME_STARTMS               = 0.D0,
- TIME_DURATION              = 1.D0,
- TIME_DURATION_UNIT         = "HOUR",
+!--TIME_DURATION--
+ TIME_DURATION_UNIT         = "SEC",
 ! TIME_DT                    = 2.0D0,
 ! TIME_DT                    = 3.0D0,
  TIME_DT                    = 6.0D0,
@@ -107,10 +108,10 @@
  TIME_DT_ATMOS_PHY_TB_UNIT  = "SEC",
  TIME_DT_LAND               = 30.D0,
  TIME_DT_LAND_UNIT          = "SEC",
- TIME_DT_ATMOS_RESTART      = 10.0D0,
- TIME_DT_ATMOS_RESTART_UNIT = "DAY",
- TIME_DT_LAND_RESTART      = 10.0D0,
- TIME_DT_LAND_RESTART_UNIT = "DAY",
+!--TIME_DT_ATMOS_RESTART--
+ TIME_DT_ATMOS_RESTART_UNIT = "SEC",
+!--TIME_DT_LAND_RESTART--
+ TIME_DT_LAND_RESTART_UNIT = "SEC",
 /
 
 &PARAM_MAPPROJECTION
@@ -136,9 +137,11 @@
 /
 
 &PARAM_RESTART
- RESTART_IN_BASENAME = "/work/02/gv42/v42013/scale-letkc/scale-rm/test/case/rep_asakura/1/init_20000101-000000.000",
  RESTART_OUTPUT      = .true.,
- RESTART_OUT_BASENAME = "/work/gv42/v42013/20260923_enkc_convection/result/phase3_fcst1h/restart/1/restart",
+!--RESTART_IN_BASENAME--
+!--RESTART_IN_POSTFIX_TIMELABEL--
+!--RESTART_OUT_POSTFIX_TIMELABEL--
+!--RESTART_OUT_BASENAME--
 /
 
 ! &PARAM_ATMOS_VARS
@@ -151,7 +154,6 @@
 &PARAM_ATMOS_REFSTATE
  ATMOS_REFSTATE_TYPE = "INIT",
  ATMOS_REFSTATE_UPDATE_DT    = 600.D0,
- ATMOS_REFSTATE_OUT_BASENAME = "/work/gv42/v42013/20260923_enkc_convection/result/phase3_fcst1h/refstate/1/refstate",
 /
 
 &PARAM_ATMOS_DYN
@@ -230,17 +232,25 @@
 
 &PARAM_FILE_HISTORY
  FILE_HISTORY_DEFAULT_POSTFIX_TIMELABEL = .false.,
- FILE_HISTORY_DEFAULT_BASENAME  = "/work/gv42/v42013/20260923_enkc_convection/result/phase3_fcst1h/history/1/history",
- FILE_HISTORY_DEFAULT_TINTERVAL = 60.0D0,
-! FILE_HISTORY_DEFAULT_TINTERVAL = 600.0D0,
+!--FILE_HISTORY_DEFAULT_BASENAME--
+!--FILE_HISTORY_DEFAULT_TINTERVAL--
  FILE_HISTORY_DEFAULT_TUNIT     = "SEC",
  FILE_HISTORY_DEFAULT_TAVERAGE  = .false.,
  FILE_HISTORY_DEFAULT_DATATYPE  = "REAL4",
- FILE_HISTORY_OUTPUT_STEP0      = .false.,
- FILE_HISTORY_OUTPUT_SWITCH_TINTERVAL = 1.0D0,
- FILE_HISTORY_OUTPUT_SWITCH_TUNIT = "DAY",
+ FILE_HISTORY_OUTPUT_STEP0      = .true.,
+!--FILE_HISTORY_OUTPUT_WAIT--
+ FILE_HISTORY_OUTPUT_WAIT_TUNIT = "SEC",
  DEBUG                          = .true.,
 /
+
+! LETKC・obsmake・LETKF が読む変数のうち、rep_asakura の項目になかったもの
+&HISTORY_ITEM name='Umet' /
+&HISTORY_ITEM name='Vmet' /
+&HISTORY_ITEM name='SFC_PRES' /
+&HISTORY_ITEM name='U10m' /
+&HISTORY_ITEM name='V10m' /
+
+! 以下は rep_asakura/run.conf と同じ
 
 &HISTORY_ITEM name='U' /
 &HISTORY_ITEM name='V' /
@@ -354,7 +364,7 @@
 
 
 &PARAM_MONITOR
- MONITOR_OUT_BASENAME  = "/work/gv42/v42013/20260923_enkc_convection/result/phase3_fcst1h/monitor",
+!--MONITOR_OUT_BASENAME--
  MONITOR_STEP_INTERVAL = 3600,
 /
 

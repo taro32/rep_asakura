@@ -21,12 +21,12 @@
   - [x] LETKC / LETKF での陸面変数の扱い — 2026-09-25（触らない。大気 11 変数だけ）
   - [x] controltarget の入力形式 — 2026-09-25
 - [x] Phase 2 — convection/ の骨組み作成（framework・dat・init のコピー） — 2026-09-25
-- [ ] Phase 3 — 単独 forecast と実行時間の計測
+- [x] Phase 3 — 単独 forecast と実行時間の計測 — 2026-09-25
   - [x] 1 member × 1 時間の実行時間 — 2026-09-25（21 秒。`docs/phase3/fcst1h_result.md`）
-  - [ ] 1 cycle の所要時間の見積もりと `TIME_LIMIT`・ジョブ分割の方針
-- [ ] Phase 4 — 初期値を OUTDIR に取り込む（md5 一致を確認）
+  - [x] 1 cycle の所要時間の見積もりと `TIME_LIMIT`・ジョブ分割の方針 — 2026-09-25（数分／cycle。1 ジョブ・TIME_LIMIT 12 時間。debug-o を切り替え可能に）
+- [x] Phase 4 — 初期値を OUTDIR に取り込む（md5 一致を確認） — 2026-09-25（22 member、`docs/phase4/import_result.md`）
 - [ ] Phase 5 — cycle 設定の作成と ensemble forecast の接続
-  - [ ] `config.main.Wisteria`, `config.cycle`, `config.nml.*` の作成
+  - [x] `config.main.Wisteria`, `config.cycle`, `config.nml.*` の作成 — 2026-09-25（`docs/phase5/config_notes.md`）
   - [ ] step 1–3（MEMBER=2）
   - [ ] step 1–3（MEMBER=20）
 - [ ] Phase 6 — LETKC と mdet controlled forecast（**M1**）
@@ -117,7 +117,8 @@ $OUTDIR = /work/gv42/v42013/20260923_enkc_convection/result（2026-09-25 確定�
 ├── <STIME>/
 │   ├── anal/
 │   │   ├── 0001/ … 0020/   init_<STIME>.pe*.nc   ← rep_asakura の 1/–20/ から取り込み
-│   │   └── mdet/           init_<STIME>.pe*.nc   ← rep_asakura の 21/ から取り込み
+│   │   ├── mdet/           init_<STIME>.pe*.nc   ← rep_asakura の 21/ から取り込み
+│   │   └── mean/           init_<STIME>.pe*.nc   ← rep_asakura の 21/ から取り込み（mdet と同じ）
 │   └── log/scale_init/<member>/
 ├── <STIME+1h>/ gues/ hist/ anal/ log/ …          ← cycle が書く
 ├── …
@@ -137,6 +138,7 @@ letkf_control/scale/tmp/convection/               ← cycle_run.sh が毎回作�
   | --- | --- | --- |
   | `1/` – `20/` | `anal/0001/` – `anal/0020/` | env_perturb1–20 |
   | `21/` | `anal/mdet/` | env_perturb21 |
+  | `21/` | `anal/mean/` | env_perturb21（Phase 4 で追加。case_tc と同じく STIME の mean は mdet のコピー） |
 
   1 member あたり約 143 MB（144 プロセス分の `init_20000101-000000.000.pe*.nc`）で、合計約 3 GB。
 - 取り込み後、cycle が読むのは `$OUTDIR` だけとする（rep_asakura を直接参照しない）。
@@ -175,9 +177,9 @@ letkf_control/scale/tmp/convection/               ← cycle_run.sh が毎回作�
 - 100 member（3672 ノード）はどの rscgrp にも入らない。
 - 20 member は large-o に収まる。将来 member を増やす場合、large-o のままなら 30 が上限。
 - 動作確認は `MEMBER=2`（(2 + 2) × 36 = 144 ノード）にすれば debug-o / small-o で実行できる。
-- 1 cycle の実行時間の実績はまだない（rep_asakura の `LOG.pe000000` は1ステップ目で止まっている）。
-  `TIME_LIMIT` と、48 cycle を1ジョブで流せるかどうかは Phase 3 の計測で決める。
-  48 時間に収まらない場合は、STIME / ETIME を区切って複数ジョブに分ける。
+- 1 member × 1 時間の予報は 21 秒（Phase 3 で実測）。1 cycle は数分、48 cycle は数時間の見込みなので、
+  **48 cycle を 1 ジョブで流し、`TIME_LIMIT = 12:00:00` とする**（2026-09-25 決定）。
+- 動作確認（`MEMBER=2`）は debug-o で行う。`config.main.Wisteria` の `RSCGRP` で切り替える（Phase 3 の決定）。
 - 計算量は 4 km 案の約 8 倍（水平格子数 4 倍 × 時間ステップ数 2 倍）。
 
 ### 予算とディスク（2026-09-25 に `show_token`・`show_quota` で確認）
@@ -247,7 +249,7 @@ mdet       : deterministic / control（21番目の member として扱わない�
 
 | 対象 | 分類 | 内容 |
 | --- | --- | --- |
-| `cycle_run.sh`, `fcst_run.sh`, `src/`, `config.rc` | `run/` から複製 | 中身は変更しない |
+| `cycle_run.sh`, `fcst_run.sh`, `src/`, `config.rc` | `run/` から複製 | 中身は変更しない。例外: `cycle_run.sh` の rscgrp の 1 行を `${RSCGRP:-regular-o}` にした（Phase 3） |
 | `config.main.Wisteria` | 新規 | OUTDIR, OBSIN, SOUNDING, MEMBER=20, SCALE_NP_X=12, SCALE_NP_Y=12, PPN=4, THREADS=12, TMPSUBDIR=convection |
 | `config.cycle`, `config.fcst` | 新規 | STIME, ETIME（STIME + 48h）, TIME_LIMIT, OUT_OPT |
 | `config.nml.scale`, `config.nml.scale_init` | 新規 | rep_asakura の `run.conf` / `init.conf_base` に、case_tc テンプレートの `!--XXX--` マーカーを埋め込む |
@@ -386,6 +388,20 @@ cp -p $R/init.conf_base $R/init.sh_base convection/init/
 - 動作確認に debug-o（最大 144 ノード・30 分）を使うかを決める。
   1 cycle が 30 分に収まるなら、`convection/cycle_run.sh` の `rscgrp=regular-o` を `config.main.Wisteria` から切り替えられるようにする。
   収まらないなら regular-o のまま使う（`docs/phase1/dependency.md` 4.5 節）。
+
+### 結果と決定（2026-09-25）
+
+記録は `docs/phase3/fcst1h_result.md`。
+
+- 1 member × 1 時間の予報は **21 秒**で正常終了した。対流が発生し、値も妥当（図は `docs/phase3/figs/`）。
+- 1 cycle は数分、48 cycle は数時間の見込み。
+- **ジョブ分割**: 48 cycle を 1 ジョブで流す。**`TIME_LIMIT = 12:00:00`**（`config.cycle` に書く。2 cycle の試験の実績を見て調整する）。
+- **rscgrp**: debug-o を使えるようにする。`convection/cycle_run.sh` の `#PJM -L "rscgrp=regular-o"` を
+  `#PJM -L "rscgrp=${RSCGRP:-regular-o}"` に変えた（`run/` からの唯一の変更）。
+  `config.main.Wisteria` で `RSCGRP=debug-o` とすれば debug-o、書かなければ regular-o になる。
+- **単独実行の出力の置き方**: history・refstate・restart を種類ごと・member ごとに分ける
+  （例: `$OUTDIR/phase3_fcst1h/history/1/`）。cycle の出力は framework が `<time>/{anal,gues,hist}/<member>/` に分けるので、そちらは変えない。
+- **history の量**: 今の設定（60 秒ごと・108 項目）のままだと cycle 全体で約 7 TB になり、ディスクの空きを超える。Phase 5 で絞る。
 
 ### 完了条件
 
