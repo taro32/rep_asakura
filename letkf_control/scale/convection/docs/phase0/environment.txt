@@ -1,0 +1,11 @@
+# 2026-09-25 記録
+commit: b1506e943ba5894d81497675f8f67d4591bd996a
+branch: stable_202605
+tags:
+  case_tc_enkc_working -> 1b9fc86a13c013a12fe6ac2db242005cd6542ef5
+  rep_asakura_2km -> 1b9fc86a13c013a12fe6ac2db242005cd6542ef5
+
+## module list
+Currently Loaded Modulefiles:
+ 1) fjmpi/1.2.43         3) netcdf/4.7.4           5) netcdf-parallel/4.7.4  
+ 2) fj/1.2.43(default)   4) netcdf-fortran/4.5.3   6) phdf5/1.12.0           

@@ -1,0 +1,42 @@
+# 2026-09-25 記録。パスは scale-letkc/ からの相対パス
+## ls -lL (--time-style=long-iso)
+-rwxr-xr-x 1 v42013 gv42 28235168 2026-07-18 14:33 bin/scale-rm
+-rwxr-xr-x 1 v42013 gv42 28235176 2026-07-18 14:33 bin/scale-rm_init
+-rwxr-x--- 1 v42013 gv42   172832 2026-06-02 20:25 letkf_control/scale/common/datetime
+-rwxr-x--- 1 v42013 gv42   172848 2026-06-02 20:25 letkf_control/scale/common_letkc/datetime
+-rwxr-x--- 1 v42013 gv42    82112 2026-06-02 20:25 letkf_control/scale/common_letkc/pdbash
+-rwxr-x--- 1 v42013 gv42    82112 2026-06-02 20:25 letkf_control/scale/common/pdbash
+-rwxr-x--- 1 v42013 gv42 28946392 2026-06-02 20:25 letkf_control/scale/ensmodel/scale-rm_ens
+-rwxr-x--- 1 v42013 gv42 28946424 2026-06-02 20:25 letkf_control/scale/ensmodel/scale-rm_init_ens
+-rwxr-x--- 1 v42013 gv42 28946416 2026-06-02 20:25 letkf_control/scale/ensmodel/scale-rm_pp_ens
+-rwxr-x--- 1 v42013 gv42 29877616 2026-06-02 20:26 letkf_control/scale/letkc/efso
+-rwxr-x--- 1 v42013 gv42 29876232 2026-06-02 20:26 letkf_control/scale/letkc/letkc
+-rwxr-x--- 1 v42013 gv42 29876080 2026-06-02 20:26 letkf_control/scale/letkf/efso
+-rwxr-x--- 1 v42013 gv42 29874688 2026-06-02 20:26 letkf_control/scale/letkf/letkf
+-rwxr-x--- 1 v42013 gv42 29027192 2026-06-02 20:26 letkf_control/scale/obs/obsmake
+-rwxr-x--- 1 v42013 gv42 29026304 2026-06-02 20:26 letkf_control/scale/obs/obsope
+-rwxr-x--- 1 v42013 gv42 29026784 2026-06-02 20:26 letkf_control/scale/obs/obssim
+-rwxr-x--- 1 v42013 gv42 28949928 2026-07-02 15:14 letkf_control/scale/run/config/case_tc/make_obsin/controltarget/cntltargetmakein_p
+-rwxr-x--- 1 v42013 gv42 28949328 2026-06-03 01:11 letkf_control/scale/run/config/case_tc/make_obsin/obsmakein_p
+-rwxr-xr-x 1 v42013 gv42 19009744 2025-12-18 23:51 lib/libscale.a
+
+## md5sum
+6c69009e494df7738d27379fec0b86f7  bin/scale-rm
+e5dec5d847ba4874ccddc0e433d012b2  bin/scale-rm_init
+8e68c07d5df30b7d791ee3a1038494bc  lib/libscale.a
+ca232d4addb86cb284b7bbf2cb26695c  letkf_control/scale/ensmodel/scale-rm_pp_ens
+9bfc91683fa941591609529eb7e2c46e  letkf_control/scale/ensmodel/scale-rm_init_ens
+655907cef54ba7661c88588afa14e28f  letkf_control/scale/ensmodel/scale-rm_ens
+f7e4847bfcc2e3ff933e99f6ebaed690  letkf_control/scale/letkc/letkc
+41506f8a3776ba39ced5692ce36e40e5  letkf_control/scale/letkc/efso
+04581812d1f5052de87a07dab149abc3  letkf_control/scale/letkf/letkf
+bc8d602176b88a43a6a3a40cd78dc4fa  letkf_control/scale/letkf/efso
+f28d1985b0ce09a044b3c74db3f34ab0  letkf_control/scale/obs/obsmake
+e1eb778efb803d4ef9b466d0aec9599c  letkf_control/scale/obs/obsope
+03517581358554a3f3a7ffe8caf3659a  letkf_control/scale/obs/obssim
+bcc27cdd60ad8afa8751565a37ac8d81  letkf_control/scale/common/datetime
+ddb73e9129b733e55e9e7fb3d1c9d2d9  letkf_control/scale/common/pdbash
+cd7607006a197150fbb61cde0f3cd9d5  letkf_control/scale/common_letkc/datetime
+ab551017fb3e21d8e09aefe18794d301  letkf_control/scale/common_letkc/pdbash
+52fb6bd5b4ecefe4047c159464fd452a  letkf_control/scale/run/config/case_tc/make_obsin/obsmakein_p
+4d71166af7af35254ccbb8bc727dd9c8  letkf_control/scale/run/config/case_tc/make_obsin/controltarget/cntltargetmakein_p
