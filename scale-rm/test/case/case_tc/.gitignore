@@ -1,0 +1,8 @@
+# ensinit.sh が作る member ディレクトリ（1/–101/）
+/[0-9]*/
+
+# LETKF 入力の生成物
+/letkfinput/
+
+# restart の生成物
+/restart/
