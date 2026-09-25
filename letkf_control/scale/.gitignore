@@ -1,0 +1,30 @@
+# cycle_run.sh の作業領域（実行ごとに作り直される）
+/tmp/
+
+# run/ とほぼ同じ内容の作業コピー
+/run_10/
+
+# ビルドされた実行ファイル（md5 は convection/docs/phase0/ に記録）
+/common/datetime
+/common/pdbash
+/common_letkc/datetime
+/common_letkc/pdbash
+/ensmodel/scale-rm_ens
+/ensmodel/scale-rm_init_ens
+/ensmodel/scale-rm_pp_ens
+/letkc/efso
+/letkc/letkc
+/letkf/efso
+/letkf/letkf
+/obs/obsmake
+/obs/obsope
+/obs/obssim
+/run/config/*/make_obsin/obsmakein_p
+/run/config/*/make_obsin/controltarget/cntltargetmakein_p
+
+# 計算結果・ログ
+*.nc
+/run/log
+/run/sno.log
+/scripts_figures/*.png
+/scripts_figures/out.txt

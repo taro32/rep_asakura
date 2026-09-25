@@ -14,9 +14,9 @@ ALLVAR=T
 SINGLE_VAR=F
 
 tint=3600 #864000 # [second]
-tstart='2000-01-10 00:00:00'
+tstart='2000-01-07 00:00:00'
 #tend=$tstart
-tend='2000-01-11 00:00:00'
+tend='2000-01-09 23:00:00'
 . ./config.main
 RUNDIR="${TMP}_sno"
 
@@ -246,7 +246,7 @@ if [ "$PRESET" = 'Wisteria' ]; then
 cat << EOF >> $jobsh
 #!/bin/bash 
 #
-#PJM -g "jh250035o" 
+#PJM -g "gv42" 
 #PJM -L "rscgrp=regular-o"
 #PJM -L "node=${SNO_NODE}"
 #PJM -L "elapse=0:20:00"

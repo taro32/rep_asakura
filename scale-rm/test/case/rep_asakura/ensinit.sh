@@ -11,6 +11,7 @@ MEMBER=101
 
 m=1
 while [ "$m" -le "$MEMBER" ]; do
+ #後でcd initを書き加える
  mkdir -p $m
  cd $m
  cp ../init.conf_base init.conf

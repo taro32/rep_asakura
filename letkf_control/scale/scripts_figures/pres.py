@@ -5,6 +5,7 @@
 # BIAS & RMSE
 #
 from pylab import *
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
@@ -30,16 +31,21 @@ def calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day):
             else:
                 strhour = str(hour)
             print('reading..... ', strday, hour)
-            data = nc.Dataset(workdir_letkf1 + strday + strhour + '0000/hist_sno_np00032/mdet/history.pe000000.nc', 'r')
+            filepath = (
+                workdir_letkf1
+                + '200001'
+                + strday
+                + strhour
+                + '0000/hist_sno_np00032/mdet/history.pe000000.nc'
+            )
+            if not os.path.exists(filepath):
+                continue
+            data = nc.Dataset(filepath, 'r')
             pres = data.variables['MSLP']
             #pres = data.variables['PRES']
             minpres_letkf[i] = np.min(pres[0, :, :], axis=(0, 1)) / 100
             #minpres_letkf[i] = np.min(pres[0, 0, :, :], axis=(0, 1)) / 100
 
-            if day < 7:
-                data = nc.Dataset(workdir_letkf1 + strday + strhour + '0000/hist_sno_np00032/mdet/history.pe000000.nc', 'r')
-            else:
-                data = nc.Dataset(workdir_letkf2 + strday + strhour + '0000/hist_sno_np00032/mdet/history.pe000000.nc', 'r')
             pres = data.variables['MSLP']
             #pres = data.variables['PRES']
             minpres_mdet[i] = np.min(pres[0, :, :], axis=(0, 1)) / 100
@@ -50,7 +56,7 @@ def calculate_min_pressure(workdir_letkf1, workdir_letkf2, start_day, end_day):
 
 #workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20250717_tchires_letkc_baseline/result/tc_hires/200001'
 #workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20260209_tchires_letkc_baseline_revise/result/tc_hires/200001'
-workdir_letkf1 = '/work/gv42/f00019/enkc_with_TC/20260519_test/result/case_tc/200001'
+workdir_letkf1 = '/work/gv42/v42013/20260603_enkc/result_10/case_tc/'
 
 start_day = 7
 end_day = 9
@@ -103,13 +109,14 @@ labels = ['$\\lambda$ = 0']
 #labels = ['$\\lambda$ = 0.9','$\\lambda$ = 0.5','$\\lambda$ = 0.8','$\\lambda$ = 0.9','$\\lambda$ = 0.925','$\\lambda$ = 0.95'] #,'$\\lambda$ = 0.975','$\\lambda$ = 0.99']
 #labels = ['$\\lambda$ = 0','$\\lambda$ = 0.25','$\\lambda$ = 0.5','$\\lambda$ = 0.8'] #,'$\\lambda$ = 0.975','$\\lambda$ = 0.99']
 for i in range (0,numexp):
+    print(control[:,i])
     plt.plot(control[:,i],label=labels[i])
     #plt.plot(control[:,i])
 #plt.ylim(977,985)
 #plt.ylim(950,985)
 #plt.ylim(975,982)
 #plt.ylim(950,970)
-plt.ylim(990,1010)
+plt.ylim(960,1000)
 #plt.xlim(25,47)
 plt.xlim(0,23)
 #plt.ylim(980,1000)
@@ -119,7 +126,7 @@ plt.legend(fontsize='small',ncol=2)  # Increase legend font size
 plt.xlabel('Time [h]', fontsize=14) # increase axis label font size
 plt.ylabel('MSLP (hPa)', fontsize=14) # increase axis label font size
 plt.title('Minimum Sea Level Pressure', fontsize=16) # increase title font size
-plt.savefig('minslp_test.png',dpi=300)
+plt.savefig('minslp_test_nature.png',dpi=300)
 plt.show()
 
 

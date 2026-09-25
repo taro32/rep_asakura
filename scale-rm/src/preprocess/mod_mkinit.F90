@@ -479,7 +479,9 @@ contains
       case(I_SUPERCELL)
          call MKINIT_supercell
       case(I_SQUALLLINE)
+         call MKINIT_planestate
          call MKINIT_squallline
+         call MKINIT_landcouple
       case(I_WK1982)
          call MKINIT_wk1982
       case(I_DYCOMS2_RF01)
