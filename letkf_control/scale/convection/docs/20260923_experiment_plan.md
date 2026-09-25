@@ -15,11 +15,11 @@
   - [x] 0-3 既存 2 km 生成物の保全（読み取り専用化、`1/`–`21/` の md5） — 2026-09-25
   - [x] 0-4 STIME とスピンアップの確認 — 2026-09-25
   - [x] 0-5 OUTDIR とノード時間予算の確定 — 2026-09-25
-- [ ] Phase 1 — case_tc の依存関係の確定
-  - [ ] スクリプト → 実行ファイル → 設定の対応表
-  - [ ] `scale-rm_init_ens`（step 2, 6）が陸面状態を上書きしないか
-  - [ ] LETKC / LETKF での陸面変数の扱い
-  - [ ] controltarget の入力形式
+- [x] Phase 1 — case_tc の依存関係の確定 — 2026-09-25
+  - [x] スクリプト → 実行ファイル → 設定の対応表 — 2026-09-25（`docs/phase1/dependency.md`）
+  - [x] `scale-rm_init_ens`（step 2, 6）が陸面状態を上書きしないか — 2026-09-25（上書きしない。step 2・6 は飛ばされる）
+  - [x] LETKC / LETKF での陸面変数の扱い — 2026-09-25（触らない。大気 11 変数だけ）
+  - [x] controltarget の入力形式 — 2026-09-25
 - [ ] Phase 2 — convection/ の骨組み作成（framework・dat・init のコピー）
 - [ ] Phase 3 — 単独 forecast と実行時間の計測
   - [ ] 1 member × 1 時間の実行時間
@@ -380,12 +380,16 @@ cp -p $R/init.conf_base $R/init.sh_base convection/init/
 ## Phase 3 — 単独 forecast と実行時間の計測
 
 - `config.nml.scale` と同じ物理設定で、1 member（rep_asakura の `1/` の初期値）を 1 時間積分する（debug-o, 36 ノード）。
-- 1 時間積分にかかる実時間を記録し、1 cycle（ensemble forecast + mdet forecast + LETKC + LETKF）の所要時間を見積もる。
+- 1 時間積分にかかる実時間を記録し、1 cycle の所要時間を見積もる。
+  step 7 は step 3 と同じく全 member の予報をやり直すので、1 cycle は「予報 2 回 + LETKC + obsmake + LETKF」になる（`docs/phase1/dependency.md` 4.4 節）。
 - 48 cycle を1ジョブ（large-o, 最大 48 時間）で流せるかを判断し、`TIME_LIMIT` を決める。
+- 動作確認に debug-o（最大 144 ノード・30 分）を使うかを決める。
+  1 cycle が 30 分に収まるなら、`convection/cycle_run.sh` の `rscgrp=regular-o` を `config.main.Wisteria` から切り替えられるようにする。
+  収まらないなら regular-o のまま使う（`docs/phase1/dependency.md` 4.5 節）。
 
 ### 完了条件
 
-1 cycle あたりの所要時間の見積もりと、ジョブ分割の方針が決まっている。
+1 cycle あたりの所要時間の見積もり、ジョブ分割の方針、動作確認に使う rscgrp が決まっている。
 
 ---
 
