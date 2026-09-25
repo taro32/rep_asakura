@@ -14,6 +14,16 @@ md5 はファイルの中身から計算する 32 桁の番号で、中身が 1 
 | `executables.txt` | 実行ファイルの大きさ・作成日・md5 |
 | `rep_asakura_scripts.md5` | rep_asakura のスクリプト・設定・摂動ファイルの md5 |
 | `environment.txt` | 記録したときの git のコミット番号とタグ、読み込んでいた module |
+| `init_1-21.md5` | rep_asakura の初期値 `1/`–`21/`（21 member × 144 ファイル）の md5。Phase 4 で OUTDIR にコピーした後、この番号と一致するか確かめる |
+
+## rep_asakura の生成物は読み取り専用にした
+
+`scale-rm/test/case/rep_asakura/` の `1/`–`101/` と `letkfinput/` は、誤って上書き・削除しないように書き込み禁止にした（`chmod -R a-w`）。
+もう一度書き込む必要ができたときは、対象を絞って戻す。
+
+```bash
+chmod -R u+w scale-rm/test/case/rep_asakura/<対象>
+```
 
 ## 実行ファイルが変わっていないか確かめる方法
 
