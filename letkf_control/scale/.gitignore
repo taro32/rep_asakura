@@ -24,6 +24,7 @@
 
 # 計算結果・ログ
 *.nc
+!/convection/dat/cira.nc
 /run/log
 /run/sno.log
 /scripts_figures/*.png

@@ -20,9 +20,9 @@
   - [x] `scale-rm_init_ens`（step 2, 6）が陸面状態を上書きしないか — 2026-09-25（上書きしない。step 2・6 は飛ばされる）
   - [x] LETKC / LETKF での陸面変数の扱い — 2026-09-25（触らない。大気 11 変数だけ）
   - [x] controltarget の入力形式 — 2026-09-25
-- [ ] Phase 2 — convection/ の骨組み作成（framework・dat・init のコピー）
+- [x] Phase 2 — convection/ の骨組み作成（framework・dat・init のコピー） — 2026-09-25
 - [ ] Phase 3 — 単独 forecast と実行時間の計測
-  - [ ] 1 member × 1 時間の実行時間
+  - [x] 1 member × 1 時間の実行時間 — 2026-09-25（21 秒。`docs/phase3/fcst1h_result.md`）
   - [ ] 1 cycle の所要時間の見積もりと `TIME_LIMIT`・ジョブ分割の方針
 - [ ] Phase 4 — 初期値を OUTDIR に取り込む（md5 一致を確認）
 - [ ] Phase 5 — cycle 設定の作成と ensemble forecast の接続
