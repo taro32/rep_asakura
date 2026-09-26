@@ -3,7 +3,21 @@
 改訂履歴:
 - 2026-09-23: 実験ディレクトリを `letkf_control/scale/convection/` に一本化
 - 2026-09-24: 実験規模を **2 km × 20 member** に変更（4 km 案を取りやめ）
-- 2026-09-25: Phase 0 完了。STIME = 20000101000000、ETIME = 20000103000000、OUTDIR を確定
+- 2026-09-25: Phase 0–5 完了
+  - Phase 0: STIME = 20000101000000、ETIME = 20000103000000（スピンアップなし）、OUTDIR を確定
+  - Phase 1: case_tc の依存関係を調査（`docs/phase1/dependency.md`）。静的入力は `convection/dat/` にコピーする
+  - Phase 3: 1 member × 1 時間の予報が 21 秒と判明。48 cycle を 1 ジョブ・`TIME_LIMIT = 12:00:00` で流す。
+    debug-o を `config.main.Wisteria` の `RSCGRP` で切り替えられるようにした（`cycle_run.sh`）
+  - Phase 4: 初期値の取り込みで、STIME の mean にも mdet（rep_asakura の `21/`）をコピーする
+  - Phase 5: history は rep_asakura の 108 項目に同化で必要な 5 項目を加えた 113 項目、10 分ごと（`FCSTOUT = 600`）。
+    `config.rc` の `SCRP_DIR` を `$DIR/convection` にした（`run/` の設定が使われる不具合の修正）。MEMBER = 20 で step 1–3 を確認
+- 2026-09-26: Phase 6（M1）の方針と M1a
+  - M1 は制御なし（地上気圧 10 hPa の controltarget）で通し、その後に制御の中身を変える。
+    M1a（配管）と M1b（制御の本体）の 2 段階に分けた。対流性降雨の制御指標の候補を 8.1 節に整理
+  - `src/cycle.sh` の不具合（最初の cycle で LETKC が止まる。case_tc でも起きていた）を修正し、M1a に合格。
+    M1a の合格条件を「LETKC 後の mdet の初期値が元の値と丸め誤差の範囲で一致」に改めた
+  - LETKC の直前に制御前の mdet を `gues/mdet/` に取っておくようにした（`src/cycle.sh`）
+  - M1b の controltarget: 地上気圧 1000.03 hPa・誤差 0.01 hPa・高さ 0 m（アンサンブルのばらつきと同程度の大きさ）
 
 ## 進捗状況
 
