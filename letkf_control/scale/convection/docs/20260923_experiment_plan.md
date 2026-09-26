@@ -31,7 +31,7 @@
   - [x] step 1–3（MEMBER=20） — 2026-09-25（large-o、25 秒。22 本すべて正常）
 - [ ] Phase 6 — LETKC と mdet controlled forecast（**M1**）
   - [x] 2 km 格子のダミー controltarget — 2026-09-26（制御なし 10 hPa。`make_obsin/controltarget/make_controltarget.py`）
-  - [ ] M1a（配管）: 制御なしで step 1–7 正常終了、step 7 の mdet が step 3 と一致
+  - [x] M1a（配管）: 制御なしで step 1–7 正常終了、LETKC 後の mdet の初期値が元と丸め誤差の範囲で一致 — 2026-09-26（2 回目で合格。`docs/phase6/m1_notes.md`）
   - [ ] M1b（制御の本体）: 受け入れられる目標で、mdet の最下層の水蒸気が目標のまわりだけ減る
 - [ ] Phase 7 — obsmake / OBSOPE / LETKF
   - [ ] 2 km 格子用の OBSIN
@@ -257,7 +257,7 @@ mdet       : deterministic / control（21番目の member として扱わない�
 
 | 対象 | 分類 | 内容 |
 | --- | --- | --- |
-| `cycle_run.sh`, `fcst_run.sh`, `src/`, `config.rc` | `run/` から複製 | 中身は変更しない。例外: `cycle_run.sh` の rscgrp の 1 行を `${RSCGRP:-regular-o}` にした（Phase 3）。`config.rc` の `SCRP_DIR` を `$DIR/run` から `$DIR/convection` にした（Phase 5。これがないと run/ の設定が使われる） |
+| `cycle_run.sh`, `fcst_run.sh`, `src/`, `config.rc` | `run/` から複製 | 中身は変更しない。例外: `cycle_run.sh` の rscgrp の 1 行を `${RSCGRP:-regular-o}` にした（Phase 3）。`config.rc` の `SCRP_DIR` を `$DIR/run` から `$DIR/convection` にした（Phase 5。これがないと run/ の設定が使われる）。`src/cycle.sh` 468 行の `$atime` を `$time` にした（Phase 6。最初の cycle で LETKC が止まる不具合の修正）。`src/cycle.sh` の step 4 の準備に、LETKC の直前に mdet を `gues/mdet/` にコピーする処理を加えた（Phase 6。制御前の mdet を残す） |
 | `config.main.Wisteria` | 新規 | OUTDIR, OBSIN, SOUNDING, MEMBER=20, SCALE_NP_X=12, SCALE_NP_Y=12, PPN=4, THREADS=12, TMPSUBDIR=convection |
 | `config.cycle`, `config.fcst` | 新規 | STIME, ETIME（STIME + 48h）, TIME_LIMIT, OUT_OPT |
 | `config.nml.scale`, `config.nml.scale_init` | 新規 | rep_asakura の `run.conf` / `init.conf_base` に、case_tc テンプレートの `!--XXX--` マーカーを埋め込む |
@@ -463,8 +463,8 @@ cp -p $R/init.conf_base $R/init.sh_base convection/init/
 
 | 段階 | controltarget | 確かめること | 合格の条件 |
 | --- | --- | --- | --- |
-| **M1a（配管）** | 地上気圧 **10 hPa**（制御なし。必ず捨てられる） | 20 member の history・restart を 12 × 12 分割・2 km 格子で読めるか。history の必要な変数（Umet, SFC_PRES など）があるか。controltarget を読み、目標地点のモデルの値を計算して捨てる判定が働くか。mdet を書き出して step 7 で読めるか | step 1–7 が正常終了し、**step 7 の mdet の結果が step 3 と完全に一致する** |
-| **M1b（制御の本体）** | 地上気圧を **必ず受け入れられる値**（目標地点のモデルの気圧より少し高い値。例: +1 hPa） | 重みを計算して mdet の水蒸気を実際に修正するか | mdet の **最下層の水蒸気が、目標地点のまわりだけで減っている**。修正が局所化の範囲（`HORI_LOCAL` × 3.65）の外に出ていない。0001〜0020 は変わっていない |
+| **M1a（配管）** | 地上気圧 **10 hPa**（制御なし。必ず捨てられる） | 20 member の history・restart を 12 × 12 分割・2 km 格子で読めるか。history の必要な変数（Umet, SFC_PRES など）があるか。controltarget を読み、目標地点のモデルの値を計算して捨てる判定が働くか。mdet を書き出して step 7 で読めるか | step 1–7 が異常終了なしで通り、**LETKC で書き直された mdet の初期値が元の値と丸め誤差（1e-12 以下）の範囲で一致する**（当初の「step 7 の mdet が step 3 と完全に一致」は、LETKC が丸め誤差を入れるので満たせないと分かり、2026-09-26 に改めた） |
+| **M1b（制御の本体）** | 地上気圧を **必ず受け入れられる値**（目標地点のモデルの気圧より少し高い値。例: +1 hPa） | 重みを計算して mdet の水蒸気を実際に修正するか | mdet の **最下層の水蒸気が、目標地点のまわりだけで減っている**。修正が局所化の範囲（`HORI_LOCAL` × 3.65）の外に出ていない。0001〜0020 は変わっていない。制御前の mdet が `gues/mdet/` に残っている。制御による step 7 の変化が、M1a で分かった雑音（MOMZ 0.04、RHOT 0.09 K 程度）より十分大きい |
 
 - M1b の地上気圧は、指標として選んだものではなく、**コードで動作実績のある要素で制御の実装を確かめるため**に使う。
   対流性降雨の制御指標は M1 の後に決める（8.1 節）。

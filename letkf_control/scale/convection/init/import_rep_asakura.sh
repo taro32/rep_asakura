@@ -34,13 +34,13 @@ NPE=144
 if [ $# -ge 1 ]; then
   OUTDIR=$1
 elif [ -f ../config.main ]; then
-  OUTDIR=$(cd .. && . ./config.main && echo "$OUTDIR")
+  OUTDIR=$(cd .. && set +u && . ./config.main && echo "$OUTDIR")   # config.main は未定義の変数（SCALE_DB など）を使うので set +u
 else
   echo "[Error] OUTDIR を引数で指定するか、../config.main を用意してください。" >&2
   exit 1
 fi
 if [ -f ../config.cycle ]; then
-  STIME_CFG=$(cd .. && . ./config.cycle && echo "$STIME")
+  STIME_CFG=$(cd .. && set +u && . ./config.cycle && echo "$STIME")
   if [ "$STIME_CFG" != "$STIME" ]; then
     echo "[Error] config.cycle の STIME ($STIME_CFG) がコピー元の時刻 ($STIME) と違います。" >&2
     exit 1
