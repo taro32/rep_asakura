@@ -86,6 +86,11 @@ cycle の途中で初期値を作り直すことはない。
   | 7 | 観測の種類 | 1.0（ADPUPA） |
   | 8 | — | 0.0 |
 
+- **目標値 10 hPa は「制御なし」を出力するための意図的な設定**（2026-09-26 にユーザーから説明を受けた）。
+  LETKC は必ず controltarget を読む作りなので、制御なしの実験でも controltarget が必要になる。
+  LETKC は「目標値 − モデルの値」が負の目標を捨てる（`letkc/letkf_obs.f90` 513 行）ので、
+  モデルの地上気圧（約 1000 hPa）が必ず上回る 10 hPa を目標にすれば、制御は一度もかからない。
+  case_tc の `result_10`・`result_1000` の controltarget はどちらもこの制御なしの設定（3 つのファイルの md5 が同じ）。
 - 作成プログラムは `run/config/case_tc/make_obsin/controltarget/cntltargetmakein_p.f90`。
   history ファイル（`merged_history1.pe000000.nc`）から格子の経度・緯度を読む。
   2 km 格子用には、2 km 格子の history（Phase 3 の単独予報で出力される）から経度・緯度を読めば、同じ方法で作れる（Phase 6）。
