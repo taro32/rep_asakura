@@ -501,7 +501,7 @@ while ((time <= ETIME)); do
         fi
         if ((NOBS_OUT==1)); then
           for pe in $(seq -f %06g 0 $((SCALE_NP-1)) ) ;do
-            cp -r $BGDIR/anal/mean/init_$(datetime_scale $time).pe${pe}.nc $TMP/nobs.d01_$(datetime_scale $atime).pe${pe}.nc
+            cp -r $BGDIR/anal/mean/init_$(datetime_scale $time).pe${pe}.nc $TMP/nobs.d01_$(datetime_scale $time).pe${pe}.nc   # convection: $atime -> $time（LETKC の NOBS_OUT_BASENAME に合わせる）
           done
         elif ((RTPS_INFL_OUT==1)); then
           for pe in $(seq -f %06g 0 $((SCALE_NP-1)) ) ;do

@@ -107,7 +107,9 @@ OBSNAME[1]=obs
 WINDOW_S=0 #864000     # SCALE forecast time when the assimilation window starts (second)
 WINDOW_E=3600 #864000     # SCALE forecast time when the assimilation window ends (second)
 LCYCLE=3600 #864000       # Length of a DA cycle (second)
-LTIMESLOT=3600 #864000     # Timeslot interval for 4D-LETKF (second)
+LTIMESLOT=600  # Timeslot interval for 4D-LETKF (second)
+               # convection: history の間隔（FCSTOUT=600）に合わせる。LETKC は「スロット k = history の k 番目の時刻」と読むので、
+               # 3600 のままだと 60 分の目標を 10 分の予報と比べてしまう（docs/phase6/m1_notes.md）
 
 #===============================================================================
 # Parallelization settings
