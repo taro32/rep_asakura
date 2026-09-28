@@ -18,6 +18,10 @@
     M1a の合格条件を「LETKC 後の mdet の初期値が元の値と丸め誤差の範囲で一致」に改めた
   - LETKC の直前に制御前の mdet を `gues/mdet/` に取っておくようにした（`src/cycle.sh`）
   - M1b の controltarget: 地上気圧 1000.03 hPa・誤差 0.01 hPa・高さ 0 m（アンサンブルのばらつきと同程度の大きさ）
+- 2026-09-27: Phase 7 の方針と準備（`docs/phase7/phase7_notes.md`）
+  - 7a（obsmake、step 1–8）と 7b（LETKF、step 1–10）の 2 段階に分ける。制御なし（`controltarget_nocontrol`）で行う
+  - OBSIN: U, V, T・水平 4 格子おき（8 km）・鉛直 2 層おき、86,400 個（`make_obsin/obsin/make_obsin.py`）
+  - `config.nml.obsmake` の `OBSERR_Q` を 0.1 → 0.001（kg/kg）、`config.nml.letkf` の `HORI_LOCAL` を 150 km → 20 km
 
 ## 進捗状況
 
@@ -48,8 +52,9 @@
   - [x] M1a（配管）: 制御なしで step 1–7 正常終了、LETKC 後の mdet の初期値が元と丸め誤差の範囲で一致 — 2026-09-26（2 回目で合格。`docs/phase6/m1_notes.md`）
   - [x] M1b（制御の本体）: 受け入れられる目標で、mdet の最下層の水蒸気が目標のまわりだけ減る — 2026-09-27（3 回目で合格。`docs/phase6/m1_notes.md`）
 - [ ] Phase 7 — obsmake / OBSOPE / LETKF
-  - [ ] 2 km 格子用の OBSIN
-  - [ ] step 1–10 正常終了（0001–0020 の analysis）
+  - [x] 2 km 格子用の OBSIN — 2026-09-27（U, V, T・8 km・2 層おき、86,400 個。`make_obsin/obsin/make_obsin.py`）
+  - [ ] 7a（obsmake）: step 1–8 正常終了、`obs_20000101010000.dat` が mdet の 60 分の予報と合う
+  - [ ] 7b（LETKF）: step 1–10 正常終了（0001–0020 の analysis）、O−A が O−B より小さい
 - [ ] Phase 8 — cycling
   - [ ] 1 cycle
   - [ ] 2 cycle（時刻・restart の引き継ぎの整合）
@@ -243,6 +248,46 @@ cycle スクリプトはこの処理に 1〜11 の番号を付けていて、こ
 | **10** | `letkf` | **LETKF**: 観測を使って 0001〜0020 の解析値を作る。これが次の cycle の初期値になる | 実行する |
 | 11 | `efso` | 観測の影響評価 | 飛ばす（`EFSO_RUN=0`） |
 
+#### 図解: 1 cycle（t → t+1h）の流れ（convection で実行する step だけ）
+
+```text
+ 時刻 t の初期値                                                 時刻 t+1h
+ anal/{0001..0020, mean, mdet}
+        │
+        │ step 3  scale-rm_ens ─ 全 member を 1 時間予報
+        ├──────────────────────────────────────────────────▶ 予報（1 回目）
+        │                                                         │
+        │                                     controltarget ──┐   │
+        │                                                     ▼   ▼
+        │ step 4  letkc ◀──────────────────────── 1 回目の予報と目標を比べる
+        │   │
+        │   └─▶ 時刻 t の mdet の初期値を修正（制御）
+        │        （修正前の mdet は gues/mdet/ に取っておく）
+        │
+        │ step 7  scale-rm_ens ─ 修正後の mdet を含めて 1 時間予報をやり直す
+        ├──────────────────────────────────────────────────▶ 予報（2 回目）
+                                                                  │
+                                    OBSIN（観測の位置）──┐        │
+                                                        ▼        ▼
+                              step 8  obsmake ◀─ mdet の 60 分の予報から観測を作る
+                                         │
+                                         ▼
+                                   obs/obs_<t+1h>.dat
+                                         │
+                                         ▼
+                              step 10 letkf ◀─ 2 回目の予報（0001〜0020）＋ 観測
+                                         │
+                                         ▼
+                         anal/{0001..0020, mean}（t+1h）─▶ 次の cycle の初期値
+                         （mdet は LETKF では変えない。DET_RUN_UPDATE=2）
+```
+
+- **予報は 1 cycle に 2 回**走る。1 回目（step 3）は LETKC が「このままだとどうなるか」を見るため、
+  2 回目（step 7）は制御後の mdet を含めた本番の予報。
+- **制御（step 4）が触るのは時刻 t の mdet だけ**。0001〜0020 は制御されない。
+- **観測（step 8）は制御後の mdet の予報から作る**。LETKF（step 10）はその観測を 0001〜0020 に同化する。
+- 途中の step から再開する（`ISTEP > 3`）と `gues/` の扱いで失敗するので、毎回 step 1 から流す（`docs/phase7/phase7_notes.md`）。
+
 入出力のファイルなど詳しいことは `docs/phase1/dependency.md` の 2 節にある。
 
 この構造は変更しない。
@@ -281,7 +326,7 @@ mdet       : deterministic / control（21番目の member として扱わない�
 | `config.nml.letkc`, `config.nml.letkf`, `config.nml.obsmake`, `config.nml.ensmodel`, `config.obsmake` | case_tc から複製して変更 | 格子・分割数・メンバー数に依存する項目のみ |
 | `init/*` | 新規 | 1.3 節のとおり |
 | `dat/*` | rep_asakura からコピー | |
-| `make_obsin/`（controltarget, OBSIN） | 作り直し | case_tc 格子（25 km, 8 × 4）用なので流用不可。M1 用には 2 km 格子のダミーを作る |
+| `make_obsin/`（controltarget, OBSIN） | 作り直し | case_tc 格子（25 km, 8 × 4）用なので流用不可。controltarget は `make_obsin/controltarget/make_controltarget.py`、OBSIN は `make_obsin/obsin/make_obsin.py`（Phase 7） |
 | 実行ファイル（`scale-rm_*_ens`, `letkc`, `letkf`, `obsmake`, `obsope`） | そのまま使う | letkf_control でビルド済みのもの |
 
 case_tc の namelist は物理設定が大きく異なる（25 km, KMAX = 20, 陸面・放射なし, SF = BULK）。
@@ -494,6 +539,19 @@ cp -p $R/init.conf_base $R/init.sh_base convection/init/
 - `make_obsin/` で 2 km 格子用の `OBSIN` を作る。
 - `FSTEP=10` まで実行し、`0001–0020` の analysis が出ることを確認する。
 
+### 決定（2026-09-27）
+
+| 項目 | 決定 | 理由 |
+| --- | --- | --- |
+| 進め方 | 7a（obsmake、step 1–8）→ 7b（LETKF、step 1–10） | M1 と同じく、観測の作成と同化を切り分ける |
+| controltarget | 制御なし（`controltarget_nocontrol`） | Phase 7 は配管の確認。制御と切り分ける |
+| OBSIN | U, V, T・水平 4 格子おき（8 km）・鉛直 2 層おき（気圧で指定）、86,400 個 | case_tc（144,000 個）と同程度。2 格子おき・4 要素だと 46 万個で LETKF が重くなる |
+| `OBSERR_Q`（`config.nml.obsmake`） | 0.1 → 0.001 kg/kg | obsmake は観測にこの大きさのノイズを足して 0 以上に切り詰める。0.1 では観測値が失われる |
+| `HORI_LOCAL`（`config.nml.letkf`） | 150 km → 20 km | 150 km（打ち切り約 550 km）では領域全体が 1 つの局所領域になる。LETKC と同じ値から始める |
+
+- 途中の step（ISTEP = 9, 10）からの再開はできない（`gues/` に mdet しか残らない）。毎回 STIME の初期値を取り込み直して 1 から流す。
+- 詳しい記録は `docs/phase7/phase7_notes.md`。
+
 ---
 
 ## Phase 8 — 1 cycle → 2 cycle → 48 時間
@@ -603,6 +661,9 @@ M1 が通った後に、controltarget と制御の中身を変えていく。
 | 上昇流・CAPE など | 対流の強さ・起こりやすさ | 演算子がない | 追加の実装が必要 |
 
 ### 制御の仕組みについて分かったこと（2026-09-26〜27）
+
+- **LETKC のログの「OBSERVATIONAL DEPARTURE STATISTICS」は当てにならない:** LETKC では、目標の時刻の予報ではなく「時刻 t（0 分）の初期値の平均」に観測演算子をかけた値が出る（`letkc/letkf.f90` 157 行の `monit_step=1`）。制御がかかったか・どれだけかは、`gues/mdet` と `anal/mdet` の差（修正量）で確かめる。LETKC が実際に使った目標との差を見るには確認用の LETKC（`convection/debug_letkc/`、`docs/phase6/debug_letkc.patch`）が要る（`docs/phase6/m1_notes.md`）。
+- **`LTIMESLOT` は history の出力間隔（`FCSTOUT`）と同じにする:** スロット k は history の k 番目の時刻として読まれる。今は両方 600 秒。history の初期時刻出力（`FILE_HISTORY_OUTPUT_STEP0 = .true.`）が前提。
 
 - **場所同士の相関:** LETKC は「0 分の各格子の値」と「60 分の目標地点の値」の member 間の相関から、どこをどれだけ直すかを決める。
   20 member では、本当は無関係でも相関が偶然 ±0.23 程度（約 1/√19）出る。

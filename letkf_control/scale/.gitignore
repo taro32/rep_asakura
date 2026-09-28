@@ -29,3 +29,6 @@
 /run/sno.log
 /scripts_figures/*.png
 /scripts_figures/out.txt
+
+# 確認用の LETKC のビルド一式（中身は run 側のコピー。変更点は convection/docs/phase6/debug_letkc.patch）
+/convection/debug_letkc/

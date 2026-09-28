@@ -51,7 +51,7 @@ INFL_ADD_REF_ONLY = .true.,
 /
 
 &PARAM_LETKF_OBS
- HORI_LOCAL =   1.5D5 !8.0D3,
+ HORI_LOCAL =   2.0D4 !1.5D5, ! convection: 20 km（LETKC と同じ。約 73 km で打ち切り）。150 km では領域全体が 1 つの局所領域になる（Phase 7）
  VERT_LOCAL =   0.3D0,
 ! TIME_LOCAL = 3.0D0,
 ! MAX_NOBS_PER_GRID = 100,

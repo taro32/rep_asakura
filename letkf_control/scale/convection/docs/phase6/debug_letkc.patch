@@ -1,0 +1,68 @@
+--- common_letkc/common_scale.f90	2025-12-18 23:46:22.000000000 +0900
++++ convection/debug_letkc/common_letkc/common_scale.f90	2026-09-27 17:15:52.000000000 +0900
+@@ -1005,10 +1005,25 @@
+   integer :: step_
+ 
+   integer :: ncid, varid, istat
+- 
++  real(r_size) :: dbg_time(1)          ! convection DEBUG
++  integer :: dbg_nt, dbg_dimid         ! convection DEBUG
++
+   write (filesuffix(4:9),'(I6.6)') PRC_myrank
+   if ( LOG_OUT ) write (6,'(A,I6.6,2A)') 'MYRANK ',myrank,' is reading a file ',trim(filename) // filesuffix
+ 
++  ! convection DEBUG (2026-09-27): 渡された step と、そのファイルの step 番目の時刻を出す（目標地点を受け持つ subdomain 65 だけ）
++  if ( PRC_myrank == 65 ) then
++    call ncio_open(trim(filename) // filesuffix, NF90_NOWRITE, ncid)
++    istat = nf90_inq_dimid(ncid, 'time', dbg_dimid)
++    istat = nf90_inquire_dimension(ncid, dbg_dimid, len=dbg_nt)
++    istat = nf90_inq_varid(ncid, 'time', varid)
++    dbg_time(1) = -999.0d0
++    if ( step >= 1 .and. step <= dbg_nt ) istat = nf90_get_var(ncid, varid, dbg_time, start=(/step/), count=(/1/))
++    call ncio_close(ncid)
++    write (6,'(A,I6,A,I4,A,I4,A,F10.1,2A)') '[DEBUG read_history] myrank=', myrank, ' step=', step, ' ntime=', dbg_nt, &
++          ' time(step)=', dbg_time(1), ' file=', trim(filename) // filesuffix
++  end if
++
+   ! 3D variables
+   !-------------
+   v3dg_RP(:,:,:,:) = UNDEF
+--- obs/obsope_tools.f90	2025-12-18 23:46:22.000000000 +0900
++++ convection/debug_letkc/obs/obsope_tools.f90	2026-09-27 17:16:15.000000000 +0900
+@@ -429,6 +429,11 @@
+               call Trans_XtoY(obs(iof)%elm(n), ril, rjl, rk, &
+                               obs(iof)%lon(n), obs(iof)%lat(n), v3dg, v2dg, obsda%val(nn), obsda%qc(nn), typ=obs(iof)%typ(n))
+             end if
++            ! convection DEBUG (2026-09-27): スロット・目標の時刻のずれ・計算されたモデル値を出す
++            write (6,'(A,I6,A,I4,A,I4,A,I4,A,F9.1,A,2F9.3,A,F14.4,A,F14.4,A,I4)') &
++                  '[DEBUG obsope_cal] myrank=', myrank, ' it=', it, ' islot=', islot, ' nn=', nn, &
++                  ' dif=', obs(iof)%dif(n), ' ril,rjl=', ril, rjl, ' Hx=', obsda%val(nn), &
++                  ' ps(nearest)=', v2dg(nint(ril),nint(rjl),iv2dd_ps), ' qc=', obsda%qc(nn)
+           !=====================================================================
+           case (obsfmt_radar, obsfmt_radar_nc)
+           !---------------------------------------------------------------------
+--- letkc/letkf_obs.f90	2025-12-18 23:46:22.000000000 +0900
++++ convection/debug_letkc/letkc/letkf_obs.f90	2026-09-27 17:30:12.000000000 +0900
+@@ -443,6 +443,14 @@
+ !    end if
+ !!!###### end RADAR assimilation ######
+ 
++    ! convection DEBUG (2026-09-27): obsope から受け取った member ごとのモデル値（判定の直前）
++    if (LOG_OUT) then
++      write (6,'(A,3I6,A,F9.1,A,F12.2,A,3F12.3,A,F12.3,A,F12.3)') '[DEBUG letkf_obs] n,iof,iidx=', n, iof, iidx, &
++            ' dif=', obs(iof)%dif(iidx), ' dat=', obs(iof)%dat(iidx), &
++            ' ensval(1,2,MEMBER)=', obsda%ensval(1,n), obsda%ensval(2,n), obsda%ensval(MEMBER,n), &
++            ' mean=', sum(obsda%ensval(1:MEMBER,n))/real(MEMBER,r_size), ' mdet=', obsda%ensval(mmdetobs,n)
++    end if
++
+     obsda%val(n) = obsda%ensval(1,n)
+     DO i=2,MEMBER
+       obsda%val(n) = obsda%val(n) + obsda%ensval(i,n)
+--- configure	2025-12-18 23:46:22.000000000 +0900
++++ convection/debug_letkc/configure	2026-09-27 17:15:33.000000000 +0900
+@@ -1,4 +1,4 @@
+-TOPDIR    = ../../..
++TOPDIR    = ../../../../..
+ include $(TOPDIR)/sysdep/Makedef.$(SCALE_SYS)
+ include $(TOPDIR)/Mkinclude
+ 

@@ -345,3 +345,127 @@ M1b の 1・2 回目（`LTIMESLOT=3600`、高さ 0 m）では制御がかから�
   かからなければ、高さ 0 m が原因。
 - 診断用の設定は戻してある（`LOG_LEVEL=1`、`NOBS_OUT=0`）。判定には、ログの統計（目標とモデル平均の差）と mdet の修正量を使う。
 - STIME の初期値を取り込み直した（22 member すべて md5 一致）。
+
+### 高さ 0 m の確認（2026-09-27 16:28、ジョブ 9738665）— 高さは原因ではなかった
+
+`LTIMESLOT=600`、`controltarget_ctltest`（1000.03 hPa・高さ 0 m）。ジョブは 3 分 11 秒で正常終了。
+
+| 確認したこと | 結果 |
+| --- | --- |
+| LETKC の設定 | `SLOT_START=1, SLOT_END=7, SLOT_BASE=7, SLOT_TINTERVAL=600`（`$OUTDIR/config/letkc_20000101000000.conf`） |
+| 目標とモデル平均の差 | 3.288 Pa（ログの統計。1・2 回目と同じ値） |
+| **mdet の修正量** | **制御がかかった**。最下層の QV が目標から 73 km 以内で一様に −0.0093 g/kg。DENS 6.4e-6、RHOT 0.0019 |
+
+→ 高さ 0 m でも制御がかかったので、1・2 回目に制御がかからなかった原因は高さではなく `LTIMESLOT`（3600）。
+
+**残る疑問: LETKC が本当に 60 分と比べているか。**
+今回の step 7 の予報から「目標 − 20 member 平均」を history の時刻ごとに計算すると
+0 分 5.05、10 分 3.27、20 分 3.27、30 分 3.41、40 分 3.46、50 分 3.28、60 分 3.52 Pa で、
+ログの 3.288 Pa は 60 分の値と合わない。3 回目（高さ 37.5 m）の 4.39 Pa も、60 分の見込み 3.47 Pa とずれている。
+ただしこの表は、LETKC が member の最下層を修正した後の予報（step 7）から計算したもので、LETKC が使った step 3 の予報とはわずかに違う。
+
+→ 初期値を取り込み直して step 3 だけを回し、修正の入らない予報から、2 種類の目標（0 m・37.5 m）について
+「目標 − 平均」を時刻ごとに計算し、ログの値（3.288 Pa・4.386 Pa）と合う時刻を探す。
+
+### どの時刻と比べているかの確認（2026-09-27）
+
+**修正の入らない予報（step 3 だけ、ジョブ 9738731）から計算した「目標 − 20 member 平均」[Pa]:**
+
+| 時刻 | 0 分 | 10 分 | 20 分 | 30 分 | 40 分 | 50 分 | 60 分 | LETKC のログ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 高さ 0 m（目標 100003.0 Pa） | 5.05 | 3.28 | 3.27 | 3.42 | 3.46 | 3.26 | 3.51 | 3.288 |
+| 高さ 37.5 m（目標 99579.5 Pa） | 10.85 | 4.30 | 4.06 | 4.04 | 3.89 | 3.49 | 3.47 | 4.386 |
+
+目標地点のまわり 16 格子で見ると、60 分は 0 m で 2.91〜3.86、37.5 m で 3.07〜3.91、
+10 分は 0 m で 2.99〜3.30、37.5 m で 4.04〜4.33。
+37.5 m のログの値 4.386 は 60 分ではどこでも出ない値で、10 分の値に近い。
+
+**一方、LETKC のログでは目標はスロット 7 で処理されている**（`Slot #  7: time window ( -300.0, 300.0] sec`、`# obs in the slot = 1`。
+スロット 1〜6 は `no observations found in this time slot`）。ソース（`obs/obsope_tools.f90` 203・556–570 行）でも、
+`dif = 0` ならスロット 7 に入り、`read_ens_history_iter(1, islot, ...)` で history の 7 番目（60 分）を読むはず。
+**ログと計算値が食い違っていて、説明がついていない。**
+
+**切り分けの試験（準備）:** controltarget に同じ地点・高さ 37.5 m・目標値 995.795 hPa の目標を 2 つ書き、時刻のずれ `dif` だけを変える
+（`controltarget_slotcheck`。1 つ目 `dif = 0` → スロット 7（60 分）、2 つ目 `dif = -3600` s → スロット 1（0 分））。
+0 分は差が 10.85 Pa と、ほかの時刻（3〜4 Pa）と大きく違うので区別しやすい。一時的に `LOG_LEVEL = 3` にして、目標ごとの値をログに出す。
+- 2 つ目が約 10.85 Pa → スロットごとに history を正しく読み分けている（食い違いの原因は別にある）
+- 2 つの値が同じ → スロットに関係なく同じ時刻を読んでいる
+
+step 3 だけの実行では STIME の初期値は書き換わらないので、取り込み直さずに使う（22 member すべて md5 一致を確認）。
+`make_controltarget.py` を、複数の目標と時刻のずれを書けるように拡張した（既存の 3 つの controltarget は同じ中身で作られることを確認）。
+
+### スロットの確認の結果（2026-09-27 17:04、ジョブ 9738899）— スロットに関係なく同じ値
+
+`controltarget_slotcheck`（`dif = 0` と `dif = -3600` s の 2 つ）、`LOG_LEVEL = 3`。ジョブは 4 分 16 秒で正常終了。
+
+- LETKC のログでは、1 つ目はスロット 7、2 つ目はスロット 1 でそれぞれ処理された（各スロット `# obs in the slot = 1`）。
+- **2 つの目標の「目標 − モデル平均」は、どちらも −4.386 Pa**（ログの目標ごとの行が 4 行とも同じ）。0 分なら約 10.85 Pa になるはず。
+- → **LETKC は、スロットに関係なく history の同じ時刻の値を使っている。** 値は 10 分（history の 2 番目）に近い。
+- 仮説: 「常に history の 2 番目の時刻を読んでいる」。case_tc は history が 0・60 分の 2 回だけなので、2 番目 = 60 分となり、問題が表に出なかった。
+- ソース上は、スロット番号はそのまま `step` として `read_ens_history_iter` → `read_history` → SCALE の `FILE_read(step=)` に渡っていて、
+  SCALE 側も `step` 番目を読む作り（`scalelib/src/file/scale_file.F90`）。ソースを読むだけでは原因が分からない。
+- 気づいた点: `obs/obsope_tools.o` は LETKF 用の `common/` を前提にコンパイルされ、LETKC は `common_letkc/` の部品と組み合わせている。
+  2 つの `common_mpi_scale.f90` の違い（42 行）は主に MPI のコミュニケーターの扱いで、history の読み込みには関係しない部分。
+
+## 確認用の LETKC で原因を調べる（2026-09-27 準備、ユーザーの選択 (a)）
+
+case_tc と共有している LETKC には手を付けず、convection の中に確認用の実行ファイルを作った。
+
+- `convection/debug_letkc/` に `letkc/`・`common_letkc/`・`obs/`・`common/` をコンパイル済みのファイルごとコピーし、
+  `configure` の `TOPDIR` を `../../../../..` に直した（`arch` は `../../arch` へのリンク）。git には入れない（`.gitignore`）。
+- 確認用の出力を 2 か所に加えた（目標地点を受け持つ subdomain 65 だけ）。変更点は `docs/phase6/debug_letkc.patch`。
+  - `common_letkc/common_scale.f90` の `read_history`: 渡された `step`、ファイルの時刻の数、`step` 番目の時刻
+  - `obs/obsope_tools.f90` の `obsope_cal`: スロット、目標の時刻のずれ、計算されたモデル値、最寄り格子の地上気圧
+- ビルド: `obs/obsope_tools.o` と `letkc/` の各ファイルは `make letkc` でコンパイルし直された。
+  `common_letkc/common_scale.o` は、`common_letkc/Makefile` が `../../common/`（letkf_control/common）を相対パスで参照していて
+  コピー先では make が通らないので、元の Makefile と同じオプション（`make -n` で確認）で直接コンパイルした。
+- **注意:** 確認用の実行ファイルは、元の実行ファイル（2026-06-02 ビルド）と違い、今のソースと今の SCALE の部品
+  （`scale-rm/src/.libs`、2026-07-18 ビルド）でリンクされている。確認用で問題が起きなければ、「元の実行ファイルがソースと食い違っている」可能性もある。
+- cycle が使うように、`convection/config.rc` の `LETKC_DIR` を一時的に `$DIR/convection/debug_letkc/letkc` にした。調査が終わったら戻す。
+- controltarget は `controltarget_slotcheck` のまま、`LOG_LEVEL = 3` のまま。STIME の初期値を取り込み直した。
+
+### 確認用の LETKC の 1 回目（2026-09-27 17:21、ジョブ 9739016）— history の読み分けは正しかった
+
+| 確認したこと | 結果 |
+| --- | --- |
+| history を読む部分 | スロット 1 では `step=1`（`time=0`）、スロット 7 では `step=7`（`time=3600`）を読んでいた。**正しい** |
+| obsope が計算したモデル値（mdet を含む 21 本の平均） | スロット 1（0 分）: 99569.37 Pa（目標 − 平均 = 10.13 Pa）、スロット 7（60 分）: 99576.03 Pa（3.47 Pa）。**事前の計算と合う** |
+| 目標の位置 | subdomain 65 の中の格子番号（12, 12）。想定した格子点（全体の 60, 60）と一致 |
+| その後の判定（`letkf_obs.f90`）の値 | **2 つの目標とも −4.386**（元の実行ファイルと同じ） |
+
+→ history の読み込みとスロットの割り当ては原因ではない。**obsope が正しく計算した値が、その後の `letkf_obs.f90` での判定に正しく渡っていない。**
+（確認用の実行ファイルは今のソースで作り直したものだが、判定の値は元の実行ファイルと同じ −4.386 なので、ビルドの食い違いが原因ではない。）
+
+**次の確認（準備）:** `letkf_obs.f90` の判定の直前（`obsda%val(n) = obsda%ensval(1,n)` の前）に、
+目標ごとに member 1・2・20 の値、20 member の平均、mdet の値を出す出力を加えた。
+`letkf_obs.o` をコンパイルし直してリンクし直した（変更点は `docs/phase6/debug_letkc.patch`）。STIME の初期値を取り込み直した。
+
+### 確認用の LETKC の 2 回目（2026-09-27 17:34、ジョブ 9739095）— 原因が判明
+
+`letkf_obs.f90` の判定の直前に入れた出力（`[DEBUG letkf_obs]`）は 1 行も出ず、判定の処理にある目標ごとの出力（527 行）も出ていなかった。
+ログの目標ごとの行（`14593 ... -4.3860 0`）は、**`common_letkc/common_obs_scale.f90` 1748 行（統計の出力のための `monit_obs` の処理）**から出ていた。
+
+**統計の処理が何と比べているか:** `letkc/letkf.f90` 157 行の `write_ensmean(GUES_MEAN_INOUT_BASENAME, gues3d, gues2d, ..., monit_step=1)`。
+`gues3d` は `read_ens_mpi` で読んだ **時刻 t（cycle の始まり、0 分）の各 member の初期値**で、その平均の状態に観測演算子をかけている。
+LETKF では解析時刻が予報の終わり（60 分）なので意味のある統計になるが、LETKC では解析時刻が 0 分なので、
+**目標の時刻の予報とは関係のない「0 分の初期値の平均」との差になる。**
+
+## 調査の結論（2026-09-27）
+
+1. **LETKC は目標を正しい時刻の予報と比べている**（`LTIMESLOT=600` のとき）。確認用の出力で、
+   60 分の目標（`dif=0`、スロット 7）は history の 7 番目（`time=3600`）から計算され、「目標 − 平均」は 3.47 Pa（事前計算 3.47 Pa と一致）。
+   0 分の目標（`dif=-3600`、スロット 1）は history の 1 番目（`time=0`）から計算されていた。
+2. **ログの「OBSERVATIONAL DEPARTURE STATISTICS」と目標ごとの行は、LETKC では目標の時刻の比較を表さない**（上記）。
+   M1b の 1〜3 回目・高さ 0 m の確認・スロットの確認で「LETKC は 10 分と比べている」と推測したのは、この値を根拠にした誤り。
+   LETKC の判定に実際に使われる値を見るには、確認用の出力が必要。
+3. **`LTIMESLOT` は history の出力間隔（`FCSTOUT`）と同じにする必要がある。** LETKC（と obsope を使う LETKF・obsmake）は
+   スロット k を history の k 番目の時刻として読む（`read_ens_history_iter(it, islot, ...)`）。history の初期時刻出力
+   （`FILE_HISTORY_OUTPUT_STEP0 = .true.`）が前提。`LTIMESLOT=3600` のままだと、60 分の目標を 10 分の予報と比べる。
+4. **未解決:** `LTIMESLOT=3600` のとき（M1b の 1・2 回目）に修正がゼロになった理由。今後使わない設定なので、そのままにする。
+
+## 後始末（2026-09-27）
+
+- `convection/config.rc` の `LETKC_DIR` を `$DIR/letkc`（元の LETKC）に戻した。確認用のビルド一式（`convection/debug_letkc/`）は
+  今後の調査用に残す（git には入れない。変更点は `docs/phase6/debug_letkc.patch`）。
+- `config.nml.letkc` の `LOG_LEVEL` を 1 に戻した。
+- `$OUTDIR/obs/controltarget` を `controltarget_ctltest_lev1`（M1b で制御がかかったもの）に戻した。

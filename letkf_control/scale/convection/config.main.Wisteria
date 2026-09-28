@@ -34,9 +34,9 @@ DATA_BDY_NICAM=              # Directory of the boundary data in NICAM format (n
 DATA_BDY_GRADS=""
 
 OBS="$OUTDIR/obs"
-# 仮: case_tc（25 km 格子）用の観測地点。cycle_run.sh がこのファイルをコピーするので、存在するものを置いている。
-#     step 8 以降は 2 km 格子用に作り直したものに差し替える（Phase 7）。
-OBSIN=/work/02/gv42/v42013/scale-letkc/letkf_control/scale/run/config/case_tc/make_obsin/test_obs_3d_intv2_xyp.dat
+# 2 km 格子用の観測地点（Phase 7）。U, V, T・水平 4 格子おき（8 km）・鉛直 2 層おき、86,400 個。
+# make_obsin/obsin/make_obsin.py で作る。cycle_run.sh がジョブの開始時に $TMP/obsin/obsin.dat にコピーする。
+OBSIN=$DIR/convection/make_obsin/obsin/obsin_uvt_intv4
 OBS_IN_FORMAT="PREPBUFR" # YSaw 20240702
 
 #===============================================================================

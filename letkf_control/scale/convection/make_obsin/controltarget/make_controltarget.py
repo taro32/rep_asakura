@@ -49,6 +49,11 @@ TARGETS = {
     # 目標値も換算後の値で決める。60 分の目標地点の換算値は 20 member 平均 99576.03 Pa（ばらつき 1.26 Pa）、mdet 99574.35 Pa。
     # 目標は平均 + 約 3.5 Pa（mdet + 5.2 Pa）。
     "ctltest_lev1": (14593, 995.795, 0.01, 1.0, "lev1"),
+    # スロットの確認（2026-09-27）: 同じ目標を 2 つ書き、8 番目の数値（時刻のずれ dif [s]。スロットの割り当てに使われる）だけを変える。
+    #   dif = 0     → スロット 7（60 分）、dif = -3600 → スロット 1（0 分）
+    # 値のリストを渡すと複数レコードを書く。6 番目の要素が dif（省略時 0）。
+    "slotcheck": [(14593, 995.795, 0.01, 1.0, "lev1", 0.0),
+                  (14593, 995.795, 0.01, 1.0, "lev1", -3600.0)],
 }
 
 
@@ -72,18 +77,22 @@ def main():
     p.add_argument("--install", action="store_true", help="$OUTDIR/obs/controltarget に置く")
     a = p.parse_args()
 
-    elm, val, err, typ, hgt = TARGETS[a.name]
+    entries = TARGETS[a.name]
+    if not isinstance(entries, list):
+        entries = [entries]
     lon, lat, z1 = center_point()
-    z = z1 if hgt == "lev1" else float(hgt)
-    wk = [float(elm), lon, lat, z, val, err, typ, 0.0]
-    body = struct.pack("<8f", *wk)
-    rec = struct.pack("<i", len(body)) + body + struct.pack("<i", len(body))
 
     here = os.path.dirname(os.path.abspath(__file__))
     out = os.path.join(here, f"controltarget_{a.name}")
     with open(out, "wb") as f:
-        f.write(rec)
-    print(f"{out}: elm={elm} lon={lon:.6f} lat={lat:.6f} z={z} val={val} err={err} typ={typ}")
+        for e in entries:
+            elm, val, err, typ, hgt = e[:5]
+            dif = e[5] if len(e) > 5 else 0.0
+            z = z1 if hgt == "lev1" else float(hgt)
+            wk = [float(elm), lon, lat, z, val, err, typ, dif]
+            body = struct.pack("<8f", *wk)
+            f.write(struct.pack("<i", len(body)) + body + struct.pack("<i", len(body)))
+            print(f"{out}: elm={elm} lon={lon:.6f} lat={lat:.6f} z={z} val={val} err={err} typ={typ} dif={dif}")
 
     if a.install:
         dst = f"{OUTDIR}/obs/controltarget"
