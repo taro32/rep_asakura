@@ -453,6 +453,18 @@ while ((time <= ETIME)); do
       if ((s == 4)); then
         logd=$OUTDIR/$time/log/letkc
         BGDIR=$OUTDIR/$time
+        # convection: 前の cycle の LETKF が書いた第一推定の平均・ばらつき（$time/gues/{mean,sprd}）は、
+        #             このあとの cp と LETKC 自身の出力（GUES_MEAN_INOUT_BASENAME）で解析の値に上書きされるので、
+        #             LETKC の前に gues_letkf/ に取っておく（2 cycle 目以降。docs/phase7/phase7_notes.md 7c）
+        if ((loop > 1)); then
+          for mem in mean sprd; do
+            if [ -d $OUTDIR/$time/gues/$mem ]; then
+              mkdir -p $OUTDIR/$time/gues_letkf/$mem
+              echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...saving LETKF first guess $mem to gues_letkf/$mem" >&2
+              cp $OUTDIR/$time/gues/$mem/* $OUTDIR/$time/gues_letkf/$mem/
+            fi
+          done
+        fi
         if ((ANAL_LLIO_TMP==1)) && ((atime <= ETIME)) ;then
           BGDIR=/local/$time
           mkdir -p $OUTDIR/$time/anal/mean

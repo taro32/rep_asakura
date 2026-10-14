@@ -8,6 +8,13 @@
 #
 #   OUTDIR を省略すると ../config.main から読む。
 #
+#   作り直した初期値（ensinit.sh）を取り込むときは、取り込み元と md5 の記録を環境変数で指定する:
+#     SRC=/work/gv42/v42013/20260923_enkc_convection/init_20261003 \
+#     MD5_LIST=/work/gv42/v42013/20260923_enkc_convection/init_20261003/md5.txt ./import_rep_asakura.sh
+#   土壌水分摂動の初期値（init/perturb_soil.py、Phase 7d）は開始時刻が違うので STIME も指定する:
+#     STIME=20000131000000 SRC=/work/gv42/v42013/20260923_enkc_convection/init_soil_20261003 \
+#     MD5_LIST=/work/gv42/v42013/20260923_enkc_convection/init_soil_20261003/md5.txt ./import_rep_asakura.sh
+#
 # member の対応（ここだけで定義する）:
 #   rep_asakura 1/ – 20/  →  anal/0001/ – anal/0020/
 #   rep_asakura 21/       →  anal/mdet/
@@ -24,10 +31,10 @@ set -eu
 cd "$(dirname "$0")"
 INIT_DIR=$(pwd)
 
-SRC=/work/02/gv42/v42013/scale-letkc/scale-rm/test/case/rep_asakura
-MD5_LIST=$INIT_DIR/../docs/phase0/init_1-21.md5
-STIME=20000101000000                      # コピー元のファイル名の時刻に合わせて固定
-LABEL=init_20000101-000000.000            # コピー元・コピー先のファイル名
+SRC=${SRC:-/work/02/gv42/v42013/scale-letkc/scale-rm/test/case/rep_asakura}
+MD5_LIST=${MD5_LIST:-$INIT_DIR/../docs/phase0/init_1-21.md5}
+STIME=${STIME:-20000101000000}            # コピー元のファイル名の時刻。Phase 7d の土壌水分摂動の初期値は STIME=20000131000000
+LABEL=init_${STIME:0:8}-${STIME:8:6}.000  # コピー元・コピー先のファイル名
 NMEM=20
 NPE=144
 
@@ -49,6 +56,7 @@ fi
 
 DEST=$OUTDIR/$STIME/anal
 echo "コピー元: $SRC"
+echo "md5 の記録: $MD5_LIST"
 echo "コピー先: $DEST"
 
 # コピー元 → コピー先 の対応
