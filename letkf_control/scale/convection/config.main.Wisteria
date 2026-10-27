@@ -13,7 +13,7 @@ DIR="$(cd "$(pwd)/.." && pwd)"    # Root directory of the SCALE-LETKF
 
 DATADIR=${SCALE_DB}          # Directory of the SCALE database
 
-OUTDIR=/work/gv42/v42013/20260923_enkc_convection/result  ### EDIT HERE ###
+OUTDIR=${SENS_OUTDIR:-/work/gv42/v42013/20260923_enkc_convection/result}  ### EDIT HERE ###（感度実験は SENS_OUTDIR で上書き。sens/submit.sh）
 INDIR="$OUTDIR"
 
 #===============================================================================
@@ -33,7 +33,9 @@ DATA_BDY_NICAM=              # Directory of the boundary data in NICAM format (n
 
 DATA_BDY_GRADS=""
 
-OBS="$OUTDIR/obs"
+OBS="${SENS_OBS:-$OUTDIR/obs}"   # 感度実験は基準の観測を読む（SENS_OBS。sens/submit.sh）
+OBSMAKE_RUN=${SENS_OBSMAKE_RUN:-1}
+HIST_CLEAN=${SENS_HIST_CLEAN:-0}   # 1: 各 cycle の LETKF の後に member の history を消す（長い感度実験でディスクを節約）   # 0: obsmake（step 8）を飛ばし、$OBS にある観測を使う（観測を固定する感度実験用）
 # 2 km 格子用の観測地点（Phase 7）。U, V, T・水平 4 格子おき（8 km）・鉛直 2 層おき、86,400 個。
 # make_obsin/obsin/make_obsin.py で作る。cycle_run.sh がジョブの開始時に $TMP/obsin/obsin.dat にコピーする。
 OBSIN=$DIR/convection/make_obsin/obsin/obsin_uvt_intv4
@@ -105,22 +107,22 @@ OBSNAME[1]=obs
 # Cycling settings
 
 WINDOW_S=0 #864000     # SCALE forecast time when the assimilation window starts (second)
-WINDOW_E=3600 #864000     # SCALE forecast time when the assimilation window ends (second)
-LCYCLE=3600 #864000       # Length of a DA cycle (second)
-LTIMESLOT=600  # Timeslot interval for 4D-LETKF (second)
+WINDOW_E=${SENS_LCYCLE:-3600} #864000     # SCALE forecast time when the assimilation window ends (second)（convection: = LCYCLE。感度実験は SENS_LCYCLE）
+LCYCLE=${SENS_LCYCLE:-3600} #864000       # Length of a DA cycle (second)（感度実験は SENS_LCYCLE）
+LTIMESLOT=${SENS_LTIMESLOT:-600}  # Timeslot interval for 4D-LETKF (second)（感度実験は SENS_LTIMESLOT。FCSTOUT と同じにする）
                # convection: history の間隔（FCSTOUT=600）に合わせる。LETKC は「スロット k = history の k 番目の時刻」と読むので、
                # 3600 のままだと 60 分の目標を 10 分の予報と比べてしまう（docs/phase6/m1_notes.md）
 
 #===============================================================================
 # Parallelization settings
 
-MEMBER=20            # Ensemble size
+MEMBER=${SENS_MEMBER:-20}            # Ensemble size（感度実験は SENS_MEMBER）
                      #   動作確認: 2（(2+2) × 36 = 144 ノード、debug-o）
                      #   本番:     20（(20+2) × 36 = 792 ノード、regular-o → large-o）
 
-PPN=4               # Number of processes per node
+PPN=${SENS_PPN:-4}               # Number of processes per node（感度実験は SENS_PPN。実行ファイルは -Kinstance=12 でスレッド 12 に固定なので、PPN・THREADS は変えられない）
 
-THREADS=12          # Number of threads per process
+THREADS=${SENS_THREADS:-12}          # Number of threads per process（感度実験は SENS_THREADS。PPN × THREADS = 48）
 
 SCALE_NP_X=12       # = PRC_NUM_X
 SCALE_NP_Y=12       # = PRC_NUM_Y
@@ -133,6 +135,7 @@ elif (( DET_RUN == 1 || EFSO_RUN == 1));then
 else
   NNODES=$(( ( MEMBER + 1 ) * ( SCALE_NP / PPN ) ))
 fi
+NNODES=${SENS_NNODES:-$NNODES}   # 感度実験は SENS_NNODES で減らせる（member を何回かに分けて順に流す。80 member は 41 × 36 = 1476 で 2 回）
 
 RSCGRP=regular-o    # ジョブの rscgrp（convection/cycle_run.sh が使う。空なら regular-o）
                     #   動作確認: debug-o（最大 144 ノード・30 分）
@@ -147,7 +150,7 @@ DISK_MODE=0      # Disk I/O mode
                  # 2: staging -- copy files to/from $TMP 
                  # 3: staging -- copy files to/from $TMPL for each node (effective only on Fugaku)
  
-TMPSUBDIR="convection"  # (used to identify multiple runs in the same time)
+TMPSUBDIR="${SENS_TMPSUBDIR:-convection}"  # (used to identify multiple runs in the same time)
 
 TMP="$DIR/tmp/$TMPSUBDIR" # Temporary directory shared among all nodes
 TMPS="$TMP"  # Temporary directory only on the server node

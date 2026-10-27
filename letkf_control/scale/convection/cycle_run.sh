@@ -75,7 +75,21 @@ echo "[$(datetime_now)] Determine the staging list"
 
 cat $TMP/config.main.${PRESET} | \
     sed -e "/\(^DIR=\| DIR=\)/c DIR=\"$DIR\"" \
+        -e "/^OUTDIR=/c OUTDIR=$OUTDIR" \
+        -e "/^OBS=/c OBS=\"$OBS\"" \
+        -e "/^OBSMAKE_RUN=/c OBSMAKE_RUN=$OBSMAKE_RUN" \
+        -e "/^HIST_CLEAN=/c HIST_CLEAN=$HIST_CLEAN" \
+        -e "/^TMPSUBDIR=/c TMPSUBDIR=\"$TMPSUBDIR\"" \
+        -e "/^WINDOW_E=/c WINDOW_E=$WINDOW_E" \
+        -e "/^LCYCLE=/c LCYCLE=$LCYCLE" \
+        -e "/^LTIMESLOT=/c LTIMESLOT=$LTIMESLOT" \
+        -e "/^MEMBER=/c MEMBER=$MEMBER" \
+        -e "/^PPN=/c PPN=$PPN" \
+        -e "/^THREADS=/c THREADS=$THREADS" \
+        -e "/^NNODES=\${SENS_NNODES/c NNODES=$NNODES" \
     > $TMP/config.main
+sed -i -e "/^FCSTOUT=/c FCSTOUT=$FCSTOUT" $TMP/config.cycle
+# convection: 環境変数（SENS_*）で上書きした値を、ジョブが読む config.main に書き込む（ジョブには環境変数が渡らないため）
 
 echo "SCRP_DIR=\"\$TMPROOT\"" >> $TMP/config.main
 echo "RUN_LEVEL=4" >> $TMP/config.main
@@ -85,6 +99,18 @@ echo "PARENT_REF_TIME=$PARENT_REF_TIME" >> $TMP/config.main
 safe_init_tmpdir $STAGING_DIR || exit $?
 staging_list_static || exit $?
 config_file_list $TMPS/config || exit $?
+
+# convection: 感度実験（sens/submit.sh）。LETKF の設定ファイル（step 10）の値だけを上書きする。LETKC（step 4）は変えない
+for v in HORI_LOCAL INFL_MUL RELAX_ALPHA GROSS_ERROR; do
+  val=$(eval echo "\${SENS_${v}:-}")
+  if [ -n "$val" ]; then
+    for f in $TMPS/config/letkf_*.conf; do
+      grep -q "^ *${v} *=" $f || { echo "[Error] ${v} が $f にありません。" >&2; exit 1; }
+      sed -i -e "s/^ *${v} *=.*/ ${v} = ${val}, ! convection: SENS_${v} で上書き/" $f
+    done
+    echo "[$(datetime_now)] LETKF の ${v} を ${val} に上書きした（$TMPS/config/letkf_*.conf）"
+  fi
+done
 
 # obsmake YSaw 20240702
 mkdir -p $TMP/obsin

@@ -441,6 +441,15 @@ while ((time <= ETIME)); do
 
 
       if (( DET_RUN_UPDATE == 2)) ; then # letkc
+      # convection: 観測を固定する感度実験（OBSMAKE_RUN=0）では obsmake を飛ばし、$OBS にある観測を使う
+      if ((s == 8)) && ((${OBSMAKE_RUN:-1} == 0)); then
+        if [ ! -s $OBS/${OBSNAME[1]}_${atime}.dat ]; then
+          echo "[Error] OBSMAKE_RUN=0 ですが、観測 $OBS/${OBSNAME[1]}_${atime}.dat がありません。" >&2
+          exit 1
+        fi
+        echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...skipped (OBSMAKE_RUN=0: use $OBS/${OBSNAME[1]}_${atime}.dat)" >&2
+        continue
+      fi
       if ((s == 9)); then
         logd=$OUTDIR/$atime/log/letkf
         if ((OBSOPE_RUN == 0)) && ((PAWR_DECODE != 1)) ; then
@@ -657,6 +666,13 @@ while ((time <= ETIME)); do
 	
         echo "[$(datetime_now)] ${time}: ${stepname[$s]}: $it: end" >&2
       done
+
+      # convection: 長い感度実験（HIST_CLEAN=1）では、LETKF が終わったらこの cycle の member の history と、予報の初期値に使った
+      #             member の restart（$time/anal/0001〜）を消す（mdet・mean・sprd は残す。20 member で 1 cycle 約 30 GB）
+      if (( DET_RUN_UPDATE == 2 && s == 10 && ${HIST_CLEAN:-0} == 1 )); then
+        rm -rf $OUTDIR/$time/hist/0[0-9][0-9][0-9] $OUTDIR/$time/anal/0[0-9][0-9][0-9]
+        echo "[$(datetime_now)] ${time}: member の history と restart を削除（HIST_CLEAN=1）" >&2
+      fi
 
       if [ "$PRESET" = 'FUGAKU' ] ; then
         if (( s == 6 && HIST_LLIO_TMP == 1)) ; then

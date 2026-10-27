@@ -1,0 +1,98 @@
+% 1. [dvipdfmx] をここに書く
+\documentclass[dvipdfmx,a4paper,10.5pt]{jarticle}
+
+% --- 数式関連 ---
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{empheq}
+
+% --- 図・色・レイアウト ---
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{siunitx}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage[most]{tcolorbox}
+
+% --- TikZ関連 ---
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, decorations.pathreplacing, decorations.markings, patterns}
+\usepackage{pgfplots}
+\usepgfplotslibrary{statistics} % boxplotに必須
+\pgfplotsset{compat=1.18}
+
+% --- その他 ---
+\usepackage{listings,jvlisting}
+\usepackage{otf}
+\usepackage{ascmac}
+\usepackage[margin=20mm]{geometry}
+
+% --- ハイパーリンク ---
+\usepackage[
+  dvipdfmx,
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=black
+]{hyperref}
+\urlstyle{same}
+
+\newcommand{\marker}[2]{%
+  \text{%
+    \begingroup
+    \setlength{\fboxsep}{1.5pt}%
+    \colorbox{#1!20}{$\displaystyle #2$}%
+    \endgroup
+  }%
+}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    showspaces=false,
+    showtabs=false,
+}
+
+\newcommand{\prob}[1]{\section*{\,\bm{\fbox{#1}}\,}}
+\numberwithin{equation}{section}
+
+% --- レジュメ用 ---
+% 要点をまとめる枠
+\newtcolorbox{point}[1][]{colback=blue!3, colframe=blue!50!black, boxrule=0.6pt, arc=2pt, fonttitle=\bfseries, #1}
+% 講義スライドの切り出し（上段・下段のスライド）
+\newcommand{\slidetop}[3]{\includegraphics[page=#2,trim=32 383 31 70,clip,width=#3]{figs/#1.pdf}}
+\newcommand{\slidebot}[3]{\includegraphics[page=#2,trim=32 70 31 383,clip,width=#3]{figs/#1.pdf}}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Pd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\DDt}{\frac{D}{Dt}}
+\renewcommand{\div}{\operatorname{div}}
+\newcommand{\grad}{\operatorname{grad}}
+\newcommand{\rot}{\operatorname{rot}}
+
+\title{}
+\author{}
+\date{}
+\setlength{\headheight}{15pt}
+\addtolength{\topmargin}{-3pt}
+\pagestyle{fancy}
+\lhead{}
+\rhead{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\clearpage
+
+\end{document}

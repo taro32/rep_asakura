@@ -1,0 +1,355 @@
+% 1. [dvipdfmx] をここに書く
+\documentclass[dvipdfmx,a4paper,10.5pt]{jarticle}
+
+% --- 数式関連 ---
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{empheq}
+
+% --- 図・色・レイアウト ---
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{siunitx}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage[most]{tcolorbox}
+
+% --- TikZ関連 ---
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, decorations.pathreplacing, decorations.markings, patterns}
+\usepackage{pgfplots}
+\usepgfplotslibrary{statistics} % boxplotに必須
+\pgfplotsset{compat=1.18}
+
+% --- その他 ---
+\usepackage{listings,jvlisting}
+\usepackage{otf}
+\usepackage{ascmac}
+\usepackage[margin=20mm]{geometry}
+
+% --- ハイパーリンク ---
+\usepackage[
+  dvipdfmx,
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=black
+]{hyperref}
+\urlstyle{same}
+
+\newcommand{\marker}[2]{%
+  \text{%
+    \begingroup
+    \setlength{\fboxsep}{1.5pt}%
+    \colorbox{#1!20}{$\displaystyle #2$}%
+    \endgroup
+  }%
+}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    showspaces=false,
+    showtabs=false,
+}
+
+\newcommand{\prob}[1]{\section*{\,\bm{\fbox{#1}}\,}}
+\numberwithin{equation}{section}
+
+% --- レジュメ用 ---
+% 要点をまとめる枠
+\newtcolorbox{point}[1][]{colback=blue!3, colframe=blue!50!black, boxrule=0.6pt, arc=2pt, fonttitle=\bfseries, #1}
+% 講義スライドの切り出し（上段・下段のスライド）
+\newcommand{\slidetop}[3]{\includegraphics[page=#2,trim=32 383 31 70,clip,width=#3]{figs/#1.pdf}}
+\newcommand{\slidebot}[3]{\includegraphics[page=#2,trim=32 70 31 383,clip,width=#3]{figs/#1.pdf}}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Pd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\DDt}{\frac{D}{Dt}}
+\renewcommand{\div}{\operatorname{div}}
+\newcommand{\grad}{\operatorname{grad}}
+\newcommand{\rot}{\operatorname{rot}}
+
+\title{対流スケール双子実験におけるLETKFの精度の確認\\{\large Phase 7d のまとめ（2026年10月14日--17日）}}
+\author{}
+\date{2026年10月17日}
+\setlength{\headheight}{15pt}
+\addtolength{\topmargin}{-3pt}
+\pagestyle{fancy}
+\lhead{Phase 7d：データ同化の精度の確認}
+\rhead{\today}
+
+\newcommand{\x}{\bm{x}}
+\newcommand{\y}{\bm{y}}
+\newcommand{\Hop}{\mathcal{H}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Xb}{\mathbf{X}^{\mathrm b}}
+\newcommand{\Yb}{\mathbf{Y}^{\mathrm b}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\Pt}{\tilde{\mathbf{P}}^{\mathrm a}}
+\newcommand{\figdir}{../phase7d}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\clearpage
+
+%======================================================================
+\section{目的と結論}
+%======================================================================
+
+指導教員の指示（2026年10月14日）により，Phase 9（対流性降雨の制御）に進む前に，
+LETKF による同化が正しく，十分に効いているかを確かめた．
+双子実験（OSSE）なので真値が分かっており，解析の誤差を直接評価できる．
+
+\begin{point}[title=結論]
+\begin{enumerate}
+  \item LETKF は理論どおりに動いている．1点観測試験で，観測点での $(y-\Hop(\bar\x^{\mathrm a}))/(y-\Hop(\bar\x^{\mathrm b}))$ が
+        カルマンゲインから決まる理論値と3桁一致した（\S\ref{sec:single}）．
+  \item 全格子点の RMSE で見た同化の効果は小さい（同化なしに対して 7--18\%）．
+        しかし誤差を水平の波長で分けると，\textbf{観測網で捉えられる波長 32\,km 以上では同化なしの 0.43--0.78 倍}まで下がり，
+        \textbf{波長 16\,km 未満ではまったく下がらない}（\S\ref{sec:scale}）．
+        全体の数字は，観測網（8\,km 間隔）で捉えられない対流スケールの誤差で決まっている．
+  \item 24時間回すと，同化あり・なしとも 7--10 時間で誤差が横ばいになり，同化ありは同化なしより低い所で止まる．
+        カルマンフィルタの定常状態と，予報誤差の飽和の理論で説明できる（\S\ref{sec:long}，\S\ref{sec:theory}）．
+  \item 効果を上げるのは，アンサンブル数を増やすこと（20→80）と局所化を狭めること（20→10\,km）．
+        inflation・RTPP・QC・同化間隔の変更の効果は小さい（\S\ref{sec:sens}）．
+  \item 新たな問題：同化ありの実験で，領域平均の気圧が時間とともに下がる（24時間で $-0.1$ から $-0.2$\,hPa）（\S\ref{sec:pbias}）．
+\end{enumerate}
+\end{point}
+
+%======================================================================
+\section{実験設定}
+%======================================================================
+
+\subsection{モデルと真値}
+\begin{itemize}
+  \item モデル：SCALE-RM，水平格子 $\Delta x = 2$\,km，$120\times120$ 格子（240\,km 四方），鉛直 64 層，\textbf{水平二重周期}．
+  \item 30日のスピンアップ後（1月31日 00 時）から開始．アンサンブルの摂動は最上層の土壌水分のみ（一様乱数，振幅 0.01\,m$^3$/m$^3$）．
+  \item 真値 $\x^{\mathrm t}$：同じ作り方で別の乱数から作った決定論予報（mdet）．同化では更新しない．
+\end{itemize}
+
+\subsection{観測}
+\begin{itemize}
+  \item 要素：$U, V, T$．水平 4 格子おき（8\,km），鉛直 2 層おき．1時刻あたり 85\,344 個．
+  \item 観測は真値から作る：$\y = \Hop(\x^{\mathrm t}) + \bm{\varepsilon}^{\mathrm o}$，$\bm{\varepsilon}^{\mathrm o}\sim N(\bm 0,\sigma_{\mathrm o}^2\mathbf I)$，$\sigma_{\mathrm o}=0.1$．
+  \item $\Hop$：最も近い格子点の鉛直柱を取り，$\ln p$ で線形内挿する．
+\end{itemize}
+
+\subsection{同化（LETKF）の基準設定}
+\begin{center}
+\begin{tabular}{ll}\toprule
+アンサンブル数 $K$ & 20 \\
+同化間隔 & 1 時間 \\
+水平局所化 \texttt{HORI\_LOCAL} $L$ & 20\,km（ガウス関数の長さ．$2\sqrt{10/3}\,L \approx 3.65L$ で打ち切り） \\
+鉛直局所化 & 0.3（$\ln p$） \\
+乗法的 inflation $\rho$ (\texttt{INFL\_MUL}) & 1.45 \\
+RTPP $\alpha$ (\texttt{RELAX\_ALPHA}) & 0.8 \\
+QC (\texttt{GROSS\_ERROR}) & $|y-\Hop(\bar\x^{\mathrm b})| > 5\sigma_{\mathrm o}$ の観測を捨てる \\ \bottomrule
+\end{tabular}
+\end{center}
+
+%======================================================================
+\section{LETKF の式}
+%======================================================================
+
+$K$ 個のメンバーの第一推定 $\x^{\mathrm b(k)}$ から，平均 $\bar\x^{\mathrm b}$，摂動行列
+$\Xb = [\x^{\mathrm b(1)}-\bar\x^{\mathrm b},\dots,\x^{\mathrm b(K)}-\bar\x^{\mathrm b}]$，
+観測空間の摂動 $\Yb = [\Hop(\x^{\mathrm b(k)}) - \bar{\y}^{\mathrm b}]_k$（$\bar\y^{\mathrm b}$ はその平均）を作る．
+各格子点で局所化した観測だけを使い（Hunt et al., 2007），
+\begin{align}
+  \Pt &= \left[\frac{K-1}{\rho}\mathbf I + (\Yb)^{\top}\R_{\mathrm{loc}}^{-1}\Yb\right]^{-1}, \label{eq:pa}\\
+  \bar{\bm w} &= \Pt (\Yb)^{\top}\R_{\mathrm{loc}}^{-1}\left(\y - \bar\y^{\mathrm b}\right), \qquad
+  \bar\x^{\mathrm a} = \bar\x^{\mathrm b} + \Xb\bar{\bm w}, \label{eq:mean}\\
+  \mathbf W &= \left[(K-1)\Pt\right]^{1/2}, \qquad \mathbf X^{\mathrm a} = \Xb\mathbf W .
+\end{align}
+局所化は観測誤差を距離の重み $w(d) = \exp\!\left[-\tfrac12\left(d_h^2/L^2 + d_v^2/L_v^2\right)\right]$ で割って行う：
+$\R_{\mathrm{loc}} = \mathrm{diag}(\sigma_{\mathrm o}^2/w)$．
+RTPP は解析の摂動を第一推定の摂動の方へ戻す：
+\begin{equation}
+  \mathbf X^{\mathrm a} \leftarrow (1-\alpha)\,\mathbf X^{\mathrm a} + \alpha\,\sqrt{\rho}\,\Xb
+  \quad(\text{\texttt{RELAX\_TO\_INFLATED\_PRIOR}}).
+\end{equation}
+inflation と RTPP は摂動（ばらつき）を変えるが，平均の更新 \eqref{eq:mean} には $\rho$ を通してしか効かない．
+
+%======================================================================
+\section{評価の指標}
+%======================================================================
+
+\subsection{全格子点の RMSE}
+解析時刻ごとに，変数 $\phi\in\{U,V,W,T,P,Q_v,Q_{\mathrm{hyd}}\}$ について
+\begin{equation}
+  \mathrm{RMSE}^{\mathrm{a}} = \sqrt{\frac1N\sum_{i=1}^N\left(\bar\phi^{\mathrm a}_i-\phi^{\mathrm t}_i\right)^2},\qquad N = 120\times120\times64 .
+\end{equation}
+第一推定も同様（$\mathrm{RMSE}^{\mathrm b}$）．同化の効き目を $1-\mathrm{RMSE}^{\mathrm a}/\mathrm{RMSE}^{\mathrm b}$（1回の同化での縮み）で表す．
+アンサンブルの一貫性は「誤差／ばらつき」$=\mathrm{RMSE}^{\mathrm b}/\sqrt{\overline{\sigma_{\mathrm b}^2}}$（理想は 1）で見る．
+
+\subsection{観測点での，ノイズを除いたずれ}
+$y - \Hop(\bar\x^{\mathrm a})$（O$-$A）には観測ノイズが入る．真値が分かるので，観測ごとに
+\begin{equation}
+  d^{\mathrm b} = \Hop(\bar\x^{\mathrm b}) - \Hop(\x^{\mathrm t}),\qquad d^{\mathrm a} = \Hop(\bar\x^{\mathrm a}) - \Hop(\x^{\mathrm t})
+\end{equation}
+を計算した（\texttt{check\_obspoint.py}）．自前の $\Hop$ と LETKF の O$-$B・O$-$A の差は 0.3\% 以下．
+
+\subsection{誤差の波長ごとの分解}
+領域は二重周期なので，誤差の場 $e(x,y) = \bar\phi-\phi^{\mathrm t}$ を各層で 2 次元離散フーリエ変換し，
+\begin{equation}
+  \frac{1}{N_xN_y}\sum_{x,y} e^2 = \frac{1}{(N_xN_y)^2}\sum_{\bm k}|\hat e(\bm k)|^2 \qquad (\text{パーセバル})
+\end{equation}
+の右辺を波長 $\lambda = 240\,\text{km}/|\bm k|$ の帯（$\ge 32$，16--32，8--16，$<8$\,km）に分けて足した（\texttt{check\_scales.py}）．
+帯ごとの分散を足すと全体の分散に戻る（数値で確認）．観測間隔 8\,km で形を捉えられる最短波長は 16\,km（標本化定理）．
+
+%======================================================================
+\section{結果}
+%======================================================================
+
+\subsection{観測点でも解析は観測に寄っていなかった}
+基準設定の 6 cycle で，QC を通った観測点での $|d|$ の RMS（$U$，cycle 6）は $0.217\to0.200$（8\%）．
+観測点のばらつき（0.35）は誤差（0.22）より大きく，「ばらつきが小さすぎて予報を信用しすぎている」では説明できなかった．
+
+\subsection{感度実験}\label{sec:sens}
+基準から1つずつ変えた 6 cycle の実験（観測は全実験で同じファイルを使用）．全格子点の解析 RMSE（cycle 3--6 平均）の基準に対する比：
+\begin{center}
+\begin{tabular}{lcccc}\toprule
+実験 & $U$ & $T$ & $Q_v$ & 備考\\ \midrule
+$L=10$\,km & 0.980 & 0.967 & 0.996 & \\
+$L=50$\,km & 1.037 & 1.044 & 1.032 & \\
+$\rho=1.0$ / $2.0$ & 1.002 / 1.023 & 1.000 / 1.016 & 1.007 / 1.026 & ほぼ効かない\\
+$\alpha=0$（RTPP なし） & 1.223 & 1.231 & 1.276 & ばらつきがつぶれる\\
+$\alpha=0.5$ & 1.020 & 1.014 & 1.057 & \\
+QC を緩める（$10\sigma_{\mathrm o}$） & 0.985 & 0.983 & 0.995 & \\
+同化間隔 15 分 & 0.961 & 0.973 & 0.979 & 1回の縮みは 2\% に減る\\
+$K=40$ & 0.958 & 0.946 & 0.974 & \\
+$K=80$，$L=10$\,km & \textbf{0.921} & \textbf{0.898} & \textbf{0.923} & 最良\\
+同化なし & 1.074 & 1.092 & 1.044 & \\ \bottomrule
+\end{tabular}
+\end{center}
+効くのはアンサンブル数と局所化で，効果はおおむね足し算で伸びた（図\ref{fig:comb}）．
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{\figdir/sens/compare_grid_comb.png}
+\caption{アンサンブル数と局所化の組み合わせ（6 cycle）．灰色の一点鎖線は同化なし．}\label{fig:comb}
+\end{figure}
+
+\subsection{1点観測試験}\label{sec:single}
+5時の解析から1時間予報し，6時の LETKF を互いに 120\,km 離れた（打ち切り 73\,km より遠い）4つの観測だけで行った．
+各点の局所解析には観測1つだけが効くので，スカラーのカルマンフィルタ（\S\ref{sec:theory}）がそのまま成り立つはずで，
+\begin{equation}
+  \frac{y-\Hop(\bar\x^{\mathrm a})}{y-\Hop(\bar\x^{\mathrm b})} = 1-K_{\mathrm{gain}} = \frac{\sigma_{\mathrm o}^2}{\rho\,\sigma_{\mathrm b}^2+\sigma_{\mathrm o}^2}
+\end{equation}
+となる（$\sigma_{\mathrm b}$ は観測点でのアンサンブルの標準偏差）．結果は $U$ で 0.182（理論 0.182），$T$ で 0.374（理論 0.374）．
+\textbf{LETKF は理論どおりに動いている}．一方，必要な修正（真値$-$第一推定）は格子1--2個の斑点で，1つの観測による滑らかな修正（半径 20\,km 程度）とは相関がなかった（$-0.02$--0.11）．
+
+\subsection{誤差の波長ごとの分解（6 時間）}\label{sec:scale}
+解析 RMSE の同化なしに対する比（cycle 4--6 平均）：
+\begin{center}
+\begin{tabular}{llcccc}\toprule
+実験 & 変数 & $\ge32$\,km & 16--32\,km & 8--16\,km & $<8$\,km\\ \midrule
+$K=20$，$L=20$\,km & $U$ & 0.78 & 0.92 & 0.97 & 0.99\\
+                    & $T$ & 0.71 & 0.89 & 0.96 & 1.00\\
+$K=80$，$L=10$\,km & $U$ & \textbf{0.54} & 0.78 & 0.92 & 1.00\\
+                    & $T$ & \textbf{0.45} & 0.69 & 0.88 & 1.00\\ \midrule
+誤差の分散の割合 & $U$ & 20\% & 19\% & 27\% & 34\%\\ \bottomrule
+\end{tabular}
+\end{center}
+同化は波長の長い成分だけを直している．8\,km 未満の成分は同化なしと同じ大きさで，アンサンブル平均では消える真値の対流セルの模様そのものである．
+
+\subsection{24 時間の実験}\label{sec:long}
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{\figdir/sens/scales_long.png}
+\caption{24時間の実験の，波長ごとの解析 RMSE．黒：$K=20,L=20$\,km，青：$K=80,L=10$\,km，灰：同化なし．}\label{fig:long}
+\end{figure}
+\begin{itemize}
+  \item $U,V,T,Q_v$ は 7--10 時間で横ばい．19--24 時の平均 RMSE は同化なしに対して $U$ で $-11\%$（$K=20$）・$-17\%$（$K=80,L=10$），$T$ で $-17\%$・$-27\%$．
+  \item 波長の短い成分から順に飽和する（$<8$\,km は約5時間，8--16\,km は約7時間）．波長 32\,km 以上では，同化なしは24時間後も育ち続け，同化ありは約半分の高さで横ばい（図\ref{fig:long}）．
+  \item 16\,km 未満では同化の効果はない．
+\end{itemize}
+
+\subsection{同化ありで気圧の領域平均がずれる}\label{sec:pbias}
+\begin{center}
+\begin{tabular}{lccc}\toprule
+時刻 & $K=20,L=20$\,km & $K=80,L=10$\,km & 同化なし\\ \midrule
+6 時 & $-0.007$ & $-0.021$ & $-0.010$\\
+12 時 & $-0.013$ & $-0.068$ & $+0.003$\\
+24 時 & $\bm{-0.115}$ & $\bm{-0.215}$ & $-0.015$\\ \bottomrule
+\end{tabular}\\[2pt]
+{\small 解析の気圧の領域平均の偏り $\overline{P^{\mathrm a}-P^{\mathrm t}}$ [hPa]}
+\end{center}
+同化ありでは大気の質量が少しずつ減る（最下層ほど大きい）．$P$ は観測しておらず，$U,V,T$ の観測から共分散を通して修正される．
+二重周期の領域では外から質量が戻らないため，修正の領域平均が 0 でないと蓄積すると考えられる（未確認）．
+
+%======================================================================
+\section{理論による解釈}\label{sec:theory}
+%======================================================================
+
+\subsection{スカラーのカルマンフィルタと定常状態}
+1変数で，予報誤差の分散 $P^{\mathrm f}$，観測誤差の分散 $R$ とする．解析 $x^{\mathrm a} = x^{\mathrm f} + K_{\mathrm{gain}}(y-x^{\mathrm f})$ の誤差分散
+$P^{\mathrm a}=(1-K_{\mathrm{gain}})^2P^{\mathrm f}+K_{\mathrm{gain}}^2R$ を最小にすると
+\begin{equation}
+  K_{\mathrm{gain}} = \frac{P^{\mathrm f}}{P^{\mathrm f}+R},\qquad
+  P^{\mathrm a} = \frac{P^{\mathrm f}R}{P^{\mathrm f}+R}\quad\Longleftrightarrow\quad \frac{1}{P^{\mathrm a}} = \frac{1}{P^{\mathrm f}}+\frac1R .
+\end{equation}
+予報で誤差（標準偏差）が1 cycle に $a$ 倍になるとすると $P^{\mathrm f}_{n+1} = a^2P^{\mathrm a}_n$ なので
+\begin{equation}
+  P^{\mathrm f}_{n+1} = g(P^{\mathrm f}_n),\qquad g(P) = \frac{a^2PR}{P+R}.
+\end{equation}
+解析で減る量 $P-P^{\mathrm a} = P^2/(P+R)$ は $P$ について2次で増え，予報で増える量（$P$ に比例）にいずれ追いつく．固定点は
+\begin{empheq}[box=\fbox]{equation}
+  P^{\mathrm f}_* = (a^2-1)R,\qquad P^{\mathrm a}_* = \frac{(a^2-1)R}{a^2}
+\end{empheq}
+で，$g'(P^{\mathrm f}_*) = a^2R^2/(P^{\mathrm f}_*+R)^2 = 1/a^2 < 1$ より安定．
+初期の誤差が $R$ より小さいうちは同化しても誤差は育つ（6 cycle の結果が右肩上がりでも失敗とは限らない）．
+
+\subsection{多変数：可観測性}
+多変数では $\mathbf K = \mathbf P^{\mathrm f}\mathbf H^\top(\mathbf H\mathbf P^{\mathrm f}\mathbf H^\top+\mathbf R)^{-1}$，
+$\mathbf P^{\mathrm a} = (\mathbf I-\mathbf K\mathbf H)\mathbf P^{\mathrm f}$，$\mathbf P^{\mathrm f}_{n+1} = \mathbf M\mathbf P^{\mathrm a}_n\mathbf M^\top$（離散リッカチ方程式）．
+これが定常状態に収束するには，\textbf{成長する誤差の成分がすべて観測で見えていること}（可検出性）が要る．
+観測で見えない成分は解析で減らず，成長し続ける．
+
+\subsection{非線形性と飽和}
+誤差が大きくなると予報と真値は互いに無関係な状態になり，誤差は $\sqrt2\,\sigma_{\mathrm{clim}}$ 程度で飽和する．
+対流スケールでは誤差は小さいスケールで速く育って飽和し，大きいスケールへ広がる（Lorenz 1969；Zhang et al. 2003）．
+したがって同化なしでもいずれ横ばいになる．\textbf{横ばいになること自体ではなく，その高さを同化なしと比べることに意味がある}．
+
+\subsection{見える成分と見えない成分}
+誤差の分散のうち観測で見える割合を $f$ とすると，長時間後の解析誤差は
+\begin{equation}
+  P^{\mathrm a}_{\mathrm{total}} \approx P^{\mathrm a}_{*,\mathrm{visible}} + (1-f)\,\sigma_{\mathrm{sat}}^2 \quad(\text{同化なしは } \sigma_{\mathrm{sat}}^2).
+\end{equation}
+本実験では観測間隔 8\,km で形を捉えられるのは波長 16\,km 以上で，それより短い成分が誤差の分散の約 6 割（$U$，6 時）を占める．
+24時間の結果（\S\ref{sec:long}）は，見える成分（長い波長）が同化で低く抑えられ，見えない成分（短い波長）が同化なしと同じ高さで飽和する，というこの描像と一致する．
+
+%======================================================================
+\section{まとめと今後}
+%======================================================================
+\begin{itemize}
+  \item LETKF は正しく動いており，観測網で捉えられるスケールでは同化なしの半分程度まで誤差を抑えて定常状態に達する．
+        Phase 7d の終了の基準案 B-1・B-2 は満たしたと考える（基準は指導教員と確定する）．
+  \item 全体の RMSE は，観測網で捉えられない対流スケール（波長 16\,km 未満）の誤差で決まっている．
+        これを直すには密な観測（2--4\,km 間隔，レーダーなど）が要る．
+  \item 同化ありでの気圧の領域平均のずれ（\S\ref{sec:pbias}）の原因と扱いを決める必要がある．
+  \item Phase 9 への示唆：アンサンブルが真値に合っているのは長い波長だけなので，制御の目標は格子点の値ではなく，
+        16--32\,km 以上の範囲で平均した量（例：30\,km 四方の降水量）にするのがよい．
+\end{itemize}
+
+\section*{参考文献}
+\begin{itemize}
+  \item Hunt, B.~R., E.~J. Kostelich, and I. Szunyogh, 2007: Efficient data assimilation for spatiotemporal chaos: A local ensemble transform Kalman filter. \textit{Physica D}, \textbf{230}, 112--126.
+  \item Kalnay, E., 2003: \textit{Atmospheric Modeling, Data Assimilation and Predictability}. Cambridge University Press.
+  \item Lorenz, E.~N., 1969: The predictability of a flow which possesses many scales of motion. \textit{Tellus}, \textbf{21}, 289--307.
+  \item Zhang, F., C. Snyder, and R. Rotunno, 2003: Effects of moist convection on mesoscale predictability. \textit{J. Atmos. Sci.}, \textbf{60}, 1173--1185.
+  \item Zhang, F., C. Snyder, and J. Sun, 2004: Impacts of initial estimate and observation availability on convective-scale data assimilation with an ensemble Kalman filter. \textit{Mon. Wea. Rev.}, \textbf{132}, 1238--1253.
+\end{itemize}
+
+\end{document}

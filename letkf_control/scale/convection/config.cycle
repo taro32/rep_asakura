@@ -19,7 +19,7 @@ CONF_MODE='static'
 
 #===============================================================================
 
-FCSTOUT=600      # history の出力間隔 [s]（10 分ごと。LTIMESLOT=3600 の約数である必要がある）
+FCSTOUT=${SENS_FCSTOUT:-600}      # 感度実験は SENS_FCSTOUT。 history の出力間隔 [s]（10 分ごと。LTIMESLOT=3600 の約数である必要がある）
 
 ADAPTINFL=0      # Adaptive inflation
                  #  0: OFF

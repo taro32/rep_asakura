@@ -1,5 +1,9 @@
 # Phase 7 — obsmake / LETKF
 
+> 2026-10-16: 水蒸気の摂動の初期値による実験のデータ（`result/20000101*`、`init_20261003/`、`result/obs/obs_2000010*`・`result/obsdep/*_2000010*`、約 0.2 TB）は、ディスク整理のため削除した（ユーザーの了承済み）。この記録・図・`.out` は残っている。
+> 2026-10-14: この記録のスクリプト（`docs/phase7/*.py`・`docs/phase7d/*.py`）は `convection/analysis/` に移し、共通部品を `analysis/common.py` にまとめた。
+> 以下の `cd docs/phase7 && python3 …` などは `cd analysis && … python3 …` と読み替える（図を出すものは `FIGDIR` が必須。`analysis/README.md`）。
+
 ## 方針（2026-09-27 決定）
 
 - M1 と同じく 2 段階に分ける。
@@ -267,7 +271,7 @@ QC を通った U の観測から無作為に 400 点を選び、その地点で
 
 | スクリプト | 内容 | 出力 |
 | --- | --- | --- |
-| `check_truth.py` | 全格子点・層ごとの RMSE（平均 − 真値）とばらつき | `check_truth.out`、`figs/truth_profiles.png`・`figs/truth_maps.png` |
+| `check_truth.py` | 全格子点・層ごとの RMSE（平均 − 真値）とばらつき | `check_truth.out`、`truth_profiles.png`・`truth_maps.png`（9/28 の初期値の結果は `run_20260928/`） |
 | `check_members.py` | 0 分・60 分で、各 member・平均と mdet の距離 | `check_members.out` |
 | `check_onset.py` | member ごとの領域平均の QHYD（雲・降水）の時間変化 | `check_onset.out` |
 
@@ -285,7 +289,7 @@ QC を通った U の観測から無作為に 400 点を選び、その地点で
 
 - **U, V, W は、すべての層で解析のほうが真値から遠い**（1.3〜1.5% 悪化）。観測のある柱でも、観測の間の柱でも同じ。
 - T, P は 8〜10% 良くなっているが、多くは領域全体の偏りが減った分（T の偏り −0.083 → −0.070 K、P −0.076 → −0.069 hPa。P の RMSE の大部分は偏り）。
-- 誤差は高さ 4 km より下（対流の層）に集中している（`figs/truth_profiles.png`）。
+- 誤差は高さ 4 km より下（対流の層）に集中している（`run_20260928/truth_profiles.png`）。
 - **すべての変数で、第一推定の誤差がばらつきの 2.2〜3.4 倍ある。** 真値がアンサンブルと同じ分布から来ていれば約 1 になるはず。
   LETKF は誤差をばらつきの大きさだと思っているので、第一推定を信用しすぎ、誤差の形もとらえられていない。
 
@@ -478,7 +482,7 @@ cd docs/phase7 && python3 check_onset.py && python3 check_members.py && python3 
 
 #### 検証スクリプト `check_cycles.py`
 
-各 cycle の解析時刻で、`check_truth.py` と同じ量（全格子点の RMSE とばらつき）を計算し、のこぎり型の時系列の図（`figs/cycles_timeseries.png`）を作る。
+各 cycle の解析時刻で、`check_truth.py` と同じ量（全格子点の RMSE とばらつき）を計算し、のこぎり型の時系列の図（`run_6cycle/cycles_timeseries.png`）を作る。
 
 - 真値: `<t>/gues/mdet`（LETKC が書き換える前の mdet）。最後の時刻は `<t>/anal/mdet`。
 - 第一推定: `<t>/gues_letkf/{mean,sprd}`。最後の時刻は `<t>/gues/{mean,sprd}`。

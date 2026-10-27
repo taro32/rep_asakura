@@ -35,7 +35,8 @@ SRC=${SRC:-/work/02/gv42/v42013/scale-letkc/scale-rm/test/case/rep_asakura}
 MD5_LIST=${MD5_LIST:-$INIT_DIR/../docs/phase0/init_1-21.md5}
 STIME=${STIME:-20000101000000}            # コピー元のファイル名の時刻。Phase 7d の土壌水分摂動の初期値は STIME=20000131000000
 LABEL=init_${STIME:0:8}-${STIME:8:6}.000  # コピー元・コピー先のファイル名
-NMEM=20
+NMEM=${NMEM:-20}                          # member 数（40 member の初期値は NMEM=40）
+MDET_SRC=${MDET_SRC:-21}                  # mdet・mean のコピー元の番号（40 member の初期値は 41）
 NPE=144
 
 if [ $# -ge 1 ]; then
@@ -64,7 +65,7 @@ declare -a SRC_MEM DEST_MEM
 for m in $(seq 1 $NMEM); do
   SRC_MEM+=("$m");  DEST_MEM+=("$(printf %04d $m)")
 done
-SRC_MEM+=(21 21);   DEST_MEM+=(mdet mean)
+SRC_MEM+=($MDET_SRC $MDET_SRC);   DEST_MEM+=(mdet mean)
 
 # 事前確認: コピー元がそろっていること、コピー先が空であること
 for i in "${!SRC_MEM[@]}"; do

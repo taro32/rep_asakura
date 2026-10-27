@@ -58,7 +58,7 @@ restart の 2 つのプロセス分（pe000000, pe000077）で、NaN がない�
 
 ### 図
 
-`convection/phase3/plot_fcst1h.py` で作成した（144 プロセス分の history をつなげて 120 × 120 格子に戻して描いている）。
+`convection/phase3/plot_fcst1h.py`（2026-10-14 に `convection/analysis/plot_fcst1h.py` へ移動）で作成した（144 プロセス分の history をつなげて 120 × 120 格子に戻して描いている）。
 
 ![水平分布](figs/fcst1h_maps.png)
 
