@@ -58,6 +58,39 @@
     16 km 未満は同化で減らないが、これは今の観測網（8 km おき）の限界で、同化の仕組みの問題ではない
   - **同化ありで P の領域平均がずれていく問題は、仕様として受け入れる**（指導教員）。直さずに先へ進む
   - 観測ネットワークの見直し（(4)）は行わない。精度をさらに上げたくなったときの手段として残す
+  - **同化の設定は 80 member・`HORI_LOCAL` 10 km にする**（指導教員と合意）。感度実験でいちばん良く、24 時間で同化なしに対して U −17%・T −27%（20 member・20 km は −11%・−18%）。
+    計算量は 24 cycle で約 3 倍（1,955 → 5,811 トークン）、P の領域平均のずれは約 2 倍（24 時で −0.115 → −0.215 hPa）だが、上の決定どおり受け入れる。
+    `INFL_MUL` 1.45・`RELAX_ALPHA` 0.8・`GROSS_ERROR` 5・同化の間隔 60 分は変えない
+    - 流し方（2026-10-28 決定）: 感度実験と同じく 1,476 ノード（41 × 36）で、member を 2 回に分けて順に流す。
+      (80 + 2) × 36 = 2,952 ノードは最大の x-large-o（2,304 ノード）にも入らないため。rscgrp は `regular-o` のまま（ノード数で x-large-o に振り分けられる。最大 24 時間）。
+      24 cycle で 3:56 だった（感度実験 M80L10_24、`HIST_CLEAN=1`）
+    - LETKC（制御）の局所化半径（`config.nml.letkc` の `HORI_LOCAL`、今は仮の 20 km）は、**制御を実施する際に考える**（2026-10-28 決定）。
+      LETKF とは別の設定ファイルで、連動しない。同化の局所化（偶然の相関を切る）と制御半径（修正を許す範囲）は役割が違うので、
+      LETKF の 10 km にそろえるとは限らない。Phase 9-1 の「制御半径」で扱う
+    - 設定ファイルを変更した（2026-10-28）: `config.main.Wisteria` の `MEMBER` の既定を 20 → 80。`NNODES` は x-large-o の最大（2,304）を超えるときだけ
+      半分（切り上げ）にする式を足した（80 member → 1,476 ノード。20 member は 792 のまま）。`config.nml.letkf` の `HORI_LOCAL` を 2.0D4 → 1.0D4。
+      感度実験（`sens/submit.sh`）は `SENS_MEMBER` を毎回渡すので影響しない。`config.nml.letkc` は変えていない
+    - **本番の OUTDIR を `result/` → `result_m80/` に変えた**（2026-10-28、`config.main.Wisteria`）。`result/` は 20 member・6 cycle の基準実験（ジョブ 9844986）で、
+      感度実験の観測（`result/obs`）と評価の真値（`result/` の mdet）に使っているので残す。`analysis/common.py` の `OUTDIR` の既定は `result/` のまま
+    - 80 member の初期値 `init_soil_m80` を `result_m80/20000131000000/anal/` に取り込んだ（2026-10-28、ジョブ 10081978、9:50。`$BASE/import_m80_job.sh`、出力 `$BASE/import_m80.out`）。
+      **82 個（0001〜0080・mdet・mean）× 144 ファイル、すべて md5 が一致**。`result_m80/` は約 17 GB。
+      `init/import_rep_asakura.sh` を `NMEM=80 MDET_SRC=81` で使い、md5 を照合。controltarget（制御なし）も `result/obs` から `result_m80/obs/` にコピーする。
+      `init_soil_m80` の 1〜20 番と mdet（81 番）は、20 member の初期値（`init_soil_20261003` の 1〜20・21 番）と同じファイル
+    - 未定: 本番を流す前に、ディスク（グループの空き約 4.9 TB、2026-10-28）に収まるかを見積もる。収まらなければ `HIST_CLEAN=1`（member の history を各 cycle の後に消す）にする。
+      ただし member ごとの降水を見るには member の history が要る（下の 2026-10-28 の項）
+- 2026-10-28: **本番の cycle 期間を 48 時間 → 24 時間（24 cycle）に短くする**（ユーザー）。
+  - 理由: 誤差は 7〜10 時間で横ばいになり（B-1、`docs/phase7d/sens/compare_obspoint_long.png`）、24 時間で十分。介入（制御）には 6〜9 時間あたりがよさそうで、
+    12 時間以降はだいぶ落ち着いている。実行時間（80 member で約 4 時間）とディスクも半分で済む
+  - 本番のジョブの最初の確認: **member ごとの降水がばらけているか**（「すべての道が豪雨に通じていないか」）。
+    member を領域平均の積算降水 ΣP（12〜24 時間）で並べ、大きい・真ん中・小さい member を 2 つずつ、地図で比べる（ユーザー）。
+    色の段は全 member の格子点の積算降水の分布（分位点）から決める。`analysis/plot_member_prec.py`（`member_prec_<H0>-<H1>h.png`・`_sorted.png`）。
+    基準実験（`result/`、20 member・0〜6 時間）で動くことを確かめた（読み込みに約 5 分半）
+  - 2 cycle のテスト（ジョブ 10083036）は、開始前に取り消した。ステージングで `result_m80/20000131010000`・`20000131020000` などの空のディレクトリができたが、0 時の初期値は変わっていない
+  - **本番を投入した**（2026-10-28 19:34、ジョブ 10083341、x-large-o、開始予定 10/29 7:00）。tmux `run24`（wisteria05）で
+    `cycle_run.sh 20000131000000 20000131230000 1 10 static 08:00:00`。`HIST_CLEAN=0`（member の history を残す。約 2.6 TB）。ログ `result_m80/run24_cycle_run.log`。
+    `config.cycle` の `ETIME` を `20000131230000`（最後の cycle の開始時刻。前の `20000202000000` は 49 cycle になる値だった）、`TIME_LIMIT` を 08:00:00 にした
+  - 終わったら `result_m80/after_run24.sh`（このセッションのバックグラウンド）が 24 cycle がそろったかを確かめ、図のジョブ（`analysis/plot_member_prec_job.sh`、Aquarius）を投げる。
+    出力は `docs/phase8/run24_m80/`。Wisteria は 2026-10-30（金）9:00 から計画停止なので、図は停止前にこのセッションから `SendUserFile` でユーザーに送る
 
 ## 進捗状況
 
@@ -127,7 +160,7 @@
 - [ ] Phase 8 — cycling
   - [x] 1 cycle — 2026-10-03（step 1–10 全体。ジョブ 9804836 など）
   - [x] 2 cycle（時刻・restart の引き継ぎの整合）— 2026-10-03（6 cycle で確認。ジョブ 9805795）
-  - [ ] 48 時間（Phase 7d の初期値で。ディスク約 1.5 TB になるので `OUT_OPT` を見直す）
+  - [ ] 24 時間（80 member・10 km、`result_m80/`。2026-10-28 に 48 時間から変更）
 - [ ] Phase 9 — 対流性降雨の制御の設計と実装（制御目標は指導教員と協議して決める）
   - [ ] 9-1 制御目標・修正する変数・時間窓・制御半径・評価方法を協議して決める
   - [ ] 9-2 決まった内容に応じたコード変更・設定変更（Phase 9 の表）
@@ -154,7 +187,7 @@ rep_asakura の初期値・物理設定（2 km のまま）を convection/ に�
         ↓
 case_tc と同じ経路で EnKC を実行
         ↓
-1 cycle → 2 cycle → 48 時間
+1 cycle → 2 cycle → 24 時間
 ```
 
 ---
@@ -257,9 +290,9 @@ letkf_control/scale/tmp/convection/               ← cycle_run.sh が毎回作�
 | 鉛直 | KMAX = 64 | 同じ | |
 | 時間ステップ | `TIME_DT=6s`, `TIME_DT_ATMOS_DYN=3s` | 同じ | |
 | アンサンブル | 101 | **20 + mdet** | |
-| cycle 期間 | — | **48 時間**（LCYCLE = 3600 s で 48 cycle） | `STIME = 20000101000000`, `ETIME = 20000103000000`（2026-09-25 決定、スピンアップなし） |
+| cycle 期間 | — | **24 時間**（LCYCLE = 3600 s で 24 cycle） | `STIME = 20000131000000`（Phase 7d、30 日スピンアップ後）。2026-10-28 に 48 時間から変更（§1） |
 | 必要ノード数 | — | (20 + 2) × 36 = **792 ノード** | `DET_RUN=1`, `PPN=4`, `THREADS=12` |
-| rscgrp | — | **large-o**（577–1152 ノード、最大 48 時間） | |
+| rscgrp | — | `regular-o` で投げ、80 member・1,476 ノードは **x-large-o**（最大 2,304 ノード・24 時間）に振り分けられる | 20 member（792 ノード）なら large-o（2026-10-28 に更新） |
 
 ### 資源の上限（Wisteria-O、`pjstat --rsc -x` で 2026-09-24 に確認）
 
@@ -273,8 +306,8 @@ letkf_control/scale/tmp/convection/               ← cycle_run.sh が毎回作�
 - 100 member（3672 ノード）はどの rscgrp にも入らない。
 - 20 member は large-o に収まる。将来 member を増やす場合、large-o のままなら 30 が上限。
 - 動作確認は `MEMBER=2`（(2 + 2) × 36 = 144 ノード）にすれば debug-o / small-o で実行できる。
-- 1 member × 1 時間の予報は 21 秒（Phase 3 で実測）。1 cycle は数分、48 cycle は数時間の見込みなので、
-  **48 cycle を 1 ジョブで流し、`TIME_LIMIT = 12:00:00` とする**（2026-09-25 決定）。
+- 1 member × 1 時間の予報は 21 秒（Phase 3 で実測）。80 member・10 km の 24 cycle は 3:56（感度実験 M80L10_24）なので、
+  **24 cycle を 1 ジョブで流す**（2026-10-28 に更新。`TIME_LIMIT` は x-large-o の上限 24 時間以内で、余裕を見て決める）。
 - 動作確認（`MEMBER=2`）は debug-o で行う。`config.main.Wisteria` の `RSCGRP` で切り替える（Phase 3 の決定）。
 - 計算量は 4 km 案の約 8 倍（水平格子数 4 倍 × 時間ステップ数 2 倍）。
 
@@ -282,8 +315,8 @@ letkf_control/scale/tmp/convection/               ← cycle_run.sh が毎回作�
 
 | 項目 | 状況 | 本実験の見込み |
 | --- | --- | --- |
-| ノード時間（gv42 グループ） | 上限 648,000、使用 453,416（69%）、残り約 195,000。期限 2027-03-31 | 792 ノード × 48 cycle × 1 cycle の時間。1 cycle = 30 分なら約 19,000（残りの約 10%）、1 時間なら約 38,000（約 20%） |
-| ディスク（`/work/gv42` グループ全体） | 上限約 301 TB、使用約 294 TB、**残り約 6.7 TB** | restart だけで 1 cycle あたり約 6 GB（22 member × gues/anal × 143 MB）、48 cycle で約 300 GB。history の量は Phase 3 で確認する |
+| ノード時間（gv42 グループ） | 上限 648,000、使用 453,416（69%）、残り約 195,000。期限 2027-03-31 | 80 member・10 km の 24 cycle は 1,476 ノード × 3:56 で約 5,800（感度実験 M80L10_24 の実績、2026-10-28 に更新） |
+| ディスク（`/work/gv42` グループ全体） | 上限約 301 TB、使用約 294 TB、**残り約 6.7 TB** | restart だけで 1 cycle あたり約 23 GB（82 個 × gues/anal × 143 MB）、24 cycle で約 0.6 TB。member の history も残すと 20 member で 1 cycle 約 30 GB だったので、80 member の 24 cycle で約 3 TB（2026-10-28 に更新） |
 
 - ノード時間の見込みは Phase 3 で 1 cycle の実行時間を測ってから確定する。
 - グループ全体のディスクの空きが少ないので、history の出力変数・間隔は必要なものに絞る。
@@ -394,7 +427,7 @@ mdet       : deterministic / control（21番目の member として扱わない�
 | --- | --- | --- |
 | `cycle_run.sh`, `fcst_run.sh`, `src/`, `config.rc` | `run/` から複製 | 中身は変更しない。例外: `cycle_run.sh` の rscgrp の 1 行を `${RSCGRP:-regular-o}` にした（Phase 3）。`config.rc` の `SCRP_DIR` を `$DIR/run` から `$DIR/convection` にした（Phase 5。これがないと run/ の設定が使われる）。`src/cycle.sh` 468 行の `$atime` を `$time` にした（Phase 6。最初の cycle で LETKC が止まる不具合の修正）。`src/cycle.sh` の step 4 の準備に、LETKC の直前に mdet を `gues/mdet/` にコピーする処理を加えた（Phase 6。制御前の mdet を残す）。`src/cycle.sh` 504 行の `nobs` のコピー先の `$atime` を `$time` にした（Phase 6。`NOBS_OUT=1` で LETKC が止まる不具合の修正） |
 | `config.main.Wisteria` | 新規 | OUTDIR, OBSIN, SOUNDING, MEMBER=20, SCALE_NP_X=12, SCALE_NP_Y=12, PPN=4, THREADS=12, TMPSUBDIR=convection |
-| `config.cycle`, `config.fcst` | 新規 | STIME, ETIME（STIME + 48h）, TIME_LIMIT, OUT_OPT |
+| `config.cycle`, `config.fcst` | 新規 | STIME, ETIME（24 cycle。2026-10-28 に 48 時間から変更）, TIME_LIMIT, OUT_OPT |
 | `config.nml.scale`, `config.nml.scale_init` | 新規 | rep_asakura の `run.conf` / `init.conf_base` に、case_tc テンプレートの `!--XXX--` マーカーを埋め込む |
 | `config.nml.letkc`, `config.nml.letkf`, `config.nml.obsmake`, `config.nml.ensmodel`, `config.obsmake` | case_tc から複製して変更 | 格子・分割数・メンバー数に依存する項目のみ |
 | `init/*` | 新規 | 1.3 節のとおり |
@@ -455,7 +488,7 @@ md5sum bin/scale-rm bin/scale-rm_init >> $D/executables.txt
   - (a) スピンアップ後の時刻を STIME とする。スピンアップ済みの restart が 21 member 分あればそれを取り込む。
     なければ 21 member × 30 日のスピンアップが必要になる（2 km のため計算量が大きい）。
   - (b) 20000101 の既存初期値から直接 cycle を始める（`STIME=20000101000000`）。
-- `ETIME = STIME + 48h` とする。
+- 本番は 24 cycle とする（2026-10-28 に 48 時間から変更。§1）。
 
 **決定（2026-09-25）: (b) を採用する。** `STIME = 20000101000000`、`ETIME = 20000103000000`。
 
@@ -527,7 +560,7 @@ cp -p $R/init.conf_base $R/init.sh_base convection/init/
 - `config.nml.scale` と同じ物理設定で、1 member（rep_asakura の `1/` の初期値）を 1 時間積分する（debug-o, 36 ノード）。
 - 1 時間積分にかかる実時間を記録し、1 cycle の所要時間を見積もる。
   step 7 は step 3 と同じく全 member の予報をやり直すので、1 cycle は「予報 2 回 + LETKC + obsmake + LETKF」になる（`docs/phase1/dependency.md` 4.4 節）。
-- 48 cycle を1ジョブ（large-o, 最大 48 時間）で流せるかを判断し、`TIME_LIMIT` を決める。
+- 24 cycle を 1 ジョブ（80 member は x-large-o、最大 24 時間）で流せるかを判断し、`TIME_LIMIT` を決める。
 - 動作確認に debug-o（最大 144 ノード・30 分）を使うかを決める。
   1 cycle が 30 分に収まるなら、`convection/cycle_run.sh` の `rscgrp=regular-o` を `config.main.Wisteria` から切り替えられるようにする。
   収まらないなら regular-o のまま使う（`docs/phase1/dependency.md` 4.5 節）。
@@ -537,8 +570,8 @@ cp -p $R/init.conf_base $R/init.sh_base convection/init/
 記録は `docs/phase3/fcst1h_result.md`。
 
 - 1 member × 1 時間の予報は **21 秒**で正常終了した。対流が発生し、値も妥当（図は `docs/phase3/figs/`）。
-- 1 cycle は数分、48 cycle は数時間の見込み。
-- **ジョブ分割**: 48 cycle を 1 ジョブで流す。**`TIME_LIMIT = 12:00:00`**（`config.cycle` に書く。2 cycle の試験の実績を見て調整する）。
+- 80 member・10 km の 1 cycle は約 10 分（24 cycle で 3:56）。
+- **ジョブ分割**: 24 cycle を 1 ジョブで流す。**`TIME_LIMIT = 12:00:00`**（`config.cycle` に書く。2 cycle の試験の実績を見て調整する）。
 - **rscgrp**: debug-o を使えるようにする。`convection/cycle_run.sh` の `#PJM -L "rscgrp=regular-o"` を
   `#PJM -L "rscgrp=${RSCGRP:-regular-o}"` に変えた（`run/` からの唯一の変更）。
   `config.main.Wisteria` で `RSCGRP=debug-o` とすれば debug-o、書かなければ regular-o になる。
@@ -830,12 +863,12 @@ cp -p $R/init.conf_base $R/init.sh_base convection/init/
 
 ---
 
-## Phase 8 — 1 cycle → 2 cycle → 48 時間
+## Phase 8 — 1 cycle → 2 cycle → 24 時間
 
 1. `ETIME = STIME + 1h` で 1 cycle 全体。
 2. `ETIME = STIME + 2h` で 2 cycle。analysis → 次 cycle の restart、mdet の引き継ぎ、
    観測・controltarget・history・LETKC 入出力の時刻の整合を確認する。
-3. `ETIME = STIME + 48h` で本実行。`TIME_LIMIT` は Phase 3 と 2 cycle の実績から設定する
+3. 24 cycle で本実行（2026-10-28 に 48 時間から変更）。`TIME_LIMIT` は Phase 3 と 2 cycle の実績から設定する
    （必要なら複数ジョブに分割する）。
 
 ---
@@ -863,7 +896,8 @@ M1（Phase 6）と Phase 7（obsmake・LETKF）まで通して cycle 全体が�
   - (C) 修正する場所を任意の領域に限る
 - 修正する変数（土壌水分にするか。どの層か）。向きは決定済み（土壌水分は増やす向きだけ）
 - 制御の時間窓（今は 1 時間。土壌水分が降水に効くには、より長い窓が要る可能性がある）
-- 制御半径（局所化）の扱い（領域を覆うほど大きくする＝実質オフにするか）
+- 制御半径（局所化）の扱い（領域を覆うほど大きくする＝実質オフにするか）。
+  `config.nml.letkc` の `HORI_LOCAL`（今は仮の 20 km）。同化（LETKF）は 10 km に決めたが（§1 の 2026-10-21）、制御半径はそれと別に、制御を実施する際に決める
 - 制御あり・なしの比較方法と評価指標（8 節）
 
 ### 9-2. 決まった内容に応じて必要になる作業
@@ -897,7 +931,7 @@ LETKC の実行ファイルは case_tc と共有しているので、作り直�
 | 6 | OBSOPE / LETKF | MEMBER=20 | 7 |
 | 7 | 1 cycle | MEMBER=20 | 8 |
 | 8 | 2 cycle | MEMBER=20 | 8 |
-| 9 | 48 時間 | MEMBER=20, 792 ノード | 8 |
+| 9 | 24 時間 | MEMBER=80, 1,476 ノード（member を 2 回に分ける） | 8 |
 
 ---
 
@@ -974,7 +1008,7 @@ M1 が通った後に、controltarget と制御の中身を変えていく。
 
 第一段階: M1（Phase 6）。
 
-最終的には、次の cycle を convection/ の設定で 48 時間実行できる状態にする。
+最終的には、次の cycle を convection/ の設定で 24 時間実行できる状態にする。
 
 ```text
                     cycle n

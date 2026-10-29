@@ -13,7 +13,8 @@ DIR="$(cd "$(pwd)/.." && pwd)"    # Root directory of the SCALE-LETKF
 
 DATADIR=${SCALE_DB}          # Directory of the SCALE database
 
-OUTDIR=${SENS_OUTDIR:-/work/gv42/v42013/20260923_enkc_convection/result}  ### EDIT HERE ###（感度実験は SENS_OUTDIR で上書き。sens/submit.sh）
+OUTDIR=${SENS_OUTDIR:-/work/gv42/v42013/20260923_enkc_convection/result_m80}  ### EDIT HERE ###（感度実験は SENS_OUTDIR で上書き。sens/submit.sh）
+                     #   2026-10-28 に result → result_m80（80 member の本番用）。result/ は 20 member・6 cycle の基準実験（感度実験の真値・観測）として残す
 INDIR="$OUTDIR"
 
 #===============================================================================
@@ -116,9 +117,10 @@ LTIMESLOT=${SENS_LTIMESLOT:-600}  # Timeslot interval for 4D-LETKF (second)（�
 #===============================================================================
 # Parallelization settings
 
-MEMBER=${SENS_MEMBER:-20}            # Ensemble size（感度実験は SENS_MEMBER）
+MEMBER=${SENS_MEMBER:-80}            # Ensemble size（感度実験は SENS_MEMBER）
                      #   動作確認: 2（(2+2) × 36 = 144 ノード、debug-o）
-                     #   本番:     20（(20+2) × 36 = 792 ノード、regular-o → large-o）
+                     #   本番:     80（2026-10-28 に 20 から変更。計画書 §1 の 2026-10-21）。
+                     #             (80+2) × 36 = 2952 ノードは x-large-o（最大 2304）にも入らないので、下で 1476 ノードにして member を 2 回に分ける
 
 PPN=${SENS_PPN:-4}               # Number of processes per node（感度実験は SENS_PPN。実行ファイルは -Kinstance=12 でスレッド 12 に固定なので、PPN・THREADS は変えられない）
 
@@ -135,7 +137,11 @@ elif (( DET_RUN == 1 || EFSO_RUN == 1));then
 else
   NNODES=$(( ( MEMBER + 1 ) * ( SCALE_NP / PPN ) ))
 fi
-NNODES=${SENS_NNODES:-$NNODES}   # 感度実験は SENS_NNODES で減らせる（member を何回かに分けて順に流す。80 member は 41 × 36 = 1476 で 2 回）
+MAX_NNODES=2304     # x-large-o の最大ノード数（2026-09-24 に pjstat --rsc -x で確認）
+if (( NNODES > MAX_NNODES )); then   # 入らないときは半分（切り上げ）にして、member を 2 回に分けて順に流す（80 member: 41 × 36 = 1476）
+  NNODES=$(( ( NNODES / ( SCALE_NP / PPN ) + 1 ) / 2 * ( SCALE_NP / PPN ) ))
+fi
+NNODES=${SENS_NNODES:-$NNODES}   # 感度実験は SENS_NNODES で指定できる
 
 RSCGRP=regular-o    # ジョブの rscgrp（convection/cycle_run.sh が使う。空なら regular-o）
                     #   動作確認: debug-o（最大 144 ノード・30 分）
