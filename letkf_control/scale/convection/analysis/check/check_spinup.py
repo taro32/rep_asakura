@@ -7,10 +7,11 @@
 - 20000131 の restart の土壌水分（全層）の分布。
 
 出力: 表（標準出力）と FIGDIR/spinup_timeseries.png
-使い方: FIGDIR=… python3 check_spinup.py
+使い方: FIGDIR=… python3 check/check_spinup.py
 """
 import glob
 import os
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
@@ -18,6 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from netCDF4 import Dataset
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 
 O = "/work/gv42/v42013/20260923_enkc_convection/spinup_20261003"

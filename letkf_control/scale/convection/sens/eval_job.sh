@@ -26,8 +26,8 @@ for NAME in ${NAMES:-$NAME}; do
   export FIGDIR=$CONV/docs/phase7d/sens/$NAME
   mkdir -p $FIGDIR
   echo "[$(date '+%F %T')] $NAME: 開始（$(hostname)、$(uname -m)）"
-  $PY check_cycles.py --fast > $FIGDIR/check_cycles_fast.out 2>&1
+  $PY check/check_cycles.py --fast > $FIGDIR/check_cycles_fast.out 2>&1
   echo "[$(date '+%F %T')] $NAME: check_cycles.py 終了"
-  $PY check_obspoint.py > $FIGDIR/check_obspoint.out 2>&1
+  $PY check/check_obspoint.py > $FIGDIR/check_obspoint.out 2>&1
   echo "[$(date '+%F %T')] $NAME: check_obspoint.py 終了"
 done

@@ -11,10 +11,13 @@
 - 評価: QC を通った U の観測から無作為に選んだ点で、O−B・O−A と、実際の LETKF の A−B（restart から）を比べる。
   まず既定の設定で実際の LETKF と合うことを確かめ、そのあと設定を 1 つずつ変える。
 
-使い方: STIME=… OUTDIR=… python3 offline_letkf.py
+使い方: STIME=… OUTDIR=… python3 check/offline_letkf.py
 """
 import numpy as np
+import os
+import sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from check_letkf import read_restart
 

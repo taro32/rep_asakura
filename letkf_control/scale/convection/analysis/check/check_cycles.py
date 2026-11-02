@@ -11,7 +11,7 @@
   U, V, W は member から直接（第一推定は前の時刻の hist/<member> の 60 分、解析は anal/<member>）。--fast で U, V, W のばらつきを省く。
 
 出力: 表（標準出力）と FIGDIR/cycles_timeseries.png
-使い方: STIME=… OUTDIR=… FIGDIR=… python3 check_cycles.py [--fast] [解析時刻の数（既定: あるだけ）]
+使い方: STIME=… OUTDIR=… FIGDIR=… python3 check/check_cycles.py [--fast] [解析時刻の数（既定: あるだけ）]
 """
 import glob
 import os
@@ -22,6 +22,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import physical, physical_sprd, rms, tstr
 

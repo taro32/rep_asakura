@@ -8,10 +8,13 @@
 - OBSIN にあって出力にない観測を、「最下層だけ」「柱ごと」「その他」に分け、
   最下層で落ちたものが「60 分の最下層の気圧より地面側」で説明できるかを調べる。
 
-使い方: STIME=… OUTDIR=… python3 check_obsmake.py
+使い方: STIME=… OUTDIR=… python3 check/check_obsmake.py
 """
 import numpy as np
+import os
+import sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import ELMS, interp_logp, nearest_column, read_obs
 

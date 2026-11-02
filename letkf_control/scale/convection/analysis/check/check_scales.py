@@ -8,9 +8,9 @@
 
 読むもの: <OUTDIR>/<t>/{gues_letkf,gues}/mean・anal/mean（各実験）、<TRUTHDIR>/<t>/{gues,anal}/mdet（真値）
 出力: 表（標準出力）と FIGDIR/scales_<組>.png・scales_<組>.npz
-使い方: STIME=20000131000000 FIGDIR=… python3 check_scales.py <組の名前> <真値の場所> <実験名>[=<結果の場所>] ...
-        図だけ描き直す: FIGDIR=… python3 check_scales.py --plot <組の名前>（FIGDIR/scales_<組>.npz を読む）
-  例:  python3 check_scales.py short /work/gv42/v42013/20260923_enkc_convection/result Cp L10 M40L10 M80L10 NoDA
+使い方: STIME=20000131000000 FIGDIR=… python3 check/check_scales.py <組の名前> <真値の場所> <実験名>[=<結果の場所>] ...
+        図だけ描き直す: FIGDIR=… python3 check/check_scales.py --plot <組の名前>（FIGDIR/scales_<組>.npz を読む）
+  例:  python3 check/check_scales.py short /work/gv42/v42013/20260923_enkc_convection/result Cp L10 M40L10 M80L10 NoDA
        （<結果の場所> を省くと /work/gv42/v42013/20260923_enkc_convection/sens/<実験名>）
 """
 import os
@@ -21,6 +21,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import NX, NY, physical, tstr
 

@@ -6,7 +6,7 @@
 - 全格子点: 解析の RMSE（cycle 3〜6 の平均。long は 19〜24 時）、C' に対する比、同化での縮み、第一推定の 誤差 / ばらつき
 - 観測の点（QC を通った観測）: 解析のずれ d_a と縮み、QC を通った観測の割合（cycle 6）
 
-使い方: cd analysis && python3 compare_sens.py [組（既定 round1）]
+使い方: cd analysis && python3 check/compare_sens.py [組（既定 round1）]
   round1: 1 回目（HORI_LOCAL・INFL_MUL・RELAX_ALPHA）
   noda:   1 回目 ＋ 同化なし（NoDA）
   comb:   組み合わせ（member 数 × HORI_LOCAL）と同化なし
@@ -16,6 +16,7 @@
   all:    6 時間の感度実験すべてを、種類ごとの小さな図に分けて 1 枚に並べる（compare_all.png。縦軸は行ごとにそろえる）
 比は各組の先頭の実験に対する比。
 """
+import os
 import re
 import sys
 
@@ -24,6 +25,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 
 SENS = f"{cm.DOCS}/phase7d/sens"

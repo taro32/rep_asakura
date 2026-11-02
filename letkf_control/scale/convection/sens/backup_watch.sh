@@ -42,7 +42,7 @@ for t in ["20000131010000", "20000131060000"]:
     a = cm.physical(cm.read_restart(f"{B}/{t}/anal/mean", t))
     print(t, "解析 − 第一推定 の最大絶対値: " + "  ".join(f"{k.split()[0]} {np.abs(a[k] - g[k]).max():.2e}" for k in g))
 EOP
-      $PY compare_sens.py noda > ../docs/phase7d/sens/compare_sens_noda.out 2>&1
+      $PY check/compare_sens.py noda > ../docs/phase7d/sens/compare_sens_noda.out 2>&1
       cd ../sens
       echo "[$(date '+%F %T')] NoDA: 同化していないことの確認（docs/phase7d/sens/NoDA/noda_increment.out）と比較図（compare_grid_noda.png）を作成"
     fi

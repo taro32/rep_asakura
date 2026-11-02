@@ -6,10 +6,13 @@
 - 真値がアンサンブルと同じ分布から来ていれば、RMS(member − mdet) は RMS(member − mean) と同じくらいになり、
   RMS(mean − mdet) はばらつきと同じくらいになる。
 
-使い方: STIME=… OUTDIR=… python3 check_members.py
+使い方: STIME=… OUTDIR=… python3 check/check_members.py
 """
 import numpy as np
+import os
+import sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import rms
 

@@ -10,8 +10,9 @@ S1U・S1T は、C' の 5 時の解析から 1 時間予報し、6 時の LETKF �
 2. まわり: 観測に近い層で、LETKF の修正（解析 − 第一推定）と必要な修正（真値 − 第一推定）の水平分布を並べる（観測のまわり ±60 km）。
 
 出力: 表（標準出力）と docs/phase7d/sens/single_obs_<実験名>.png
-使い方: cd analysis && python3 check_single_obs.py S1U [S1T …]
+使い方: cd analysis && python3 check/check_single_obs.py S1U [S1T …]
 """
+import os
 import sys
 
 import matplotlib
@@ -19,6 +20,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import NX, NY, OBSERR, physical
 

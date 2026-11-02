@@ -5,7 +5,7 @@
 1 時間の降水量にし、時間窓 [H0, H1) 時間の分を積算する（0 s は前の cycle の 3600 s と重なるので除く。10 分ごとの瞬間値からの近似）。
 member の領域平均の積算降水 ΣP で並べ、大きい 2 つ・真ん中の 2 つ・小さい 2 つの地図を描く。色の段は、全 member の格子点の積算降水の分布から決める。
 
-使い方: cd analysis && STIME=20000131000000 OUTDIR=… FIGDIR=… python3 plot_member_prec.py [H0（既定 12）] [H1（既定 24）] [member 数（既定 80）]
+使い方: cd analysis && STIME=20000131000000 OUTDIR=… FIGDIR=… python3 plot/plot_member_prec.py [H0（既定 12）] [H1（既定 24）] [member 数（既定 80）]
 出力: FIGDIR/member_prec_<H0>-<H1>h.png（地図 6 枚）・member_prec_<H0>-<H1>h_sorted.png（全 member の ΣP）・.npz（積算降水の地図）
 """
 import os
@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import BoundaryNorm
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import DX, NX, NY, tstr
 

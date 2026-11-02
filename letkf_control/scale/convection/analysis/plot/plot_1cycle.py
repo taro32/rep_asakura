@@ -10,16 +10,18 @@
 計算結果は OUTDIR/plot_1cycle_cache.npz に保存し、2 回目からは図だけ描き直す（作り直すときは消す）。
 
 使い方（退避した結果を読む）:
-  cd analysis && STIME=20000131000000 OUTDIR=/work/gv42/v42013/20260923_enkc_convection/result/bak_soil_1cycle_9829615 python3 plot_1cycle.py
+  cd analysis && STIME=20000131000000 OUTDIR=/work/gv42/v42013/20260923_enkc_convection/result/bak_soil_1cycle_9829615 python3 plot/plot_1cycle.py
 図は docs/phase7d/run_soil_1cycle/ に出る（この実行の記録の場所に固定）。
 """
 import os
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import C1, C2, C3, GRAY, NX, NY, OBSERR, physical, physical_sprd, rms
 

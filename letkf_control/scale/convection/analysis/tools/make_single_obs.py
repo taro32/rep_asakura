@@ -9,7 +9,7 @@
 目標の気圧 PTARGET にいちばん近いもの。観測の値・誤差は基準の観測そのまま（レコードをそのままコピー）。
 
 出力: <OUTDIR>/obs_<T>.dat（4 レコード）・controltarget（基準のコピー）・single_obs.txt（選んだ観測の一覧）
-使い方: python3 make_single_obs.py <要素 U|T> <出力ディレクトリ> [時刻（既定 20000131060000）]
+使い方: python3 tools/make_single_obs.py <要素 U|T> <出力ディレクトリ> [時刻（既定 20000131060000）]
 """
 import os
 import shutil
@@ -17,6 +17,7 @@ import sys
 
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 
 COLS = [(28, 28), (28, 88), (88, 28), (88, 88)]

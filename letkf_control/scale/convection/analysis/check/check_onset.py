@@ -2,13 +2,16 @@
 """7c の ①: member ごとに、対流がいつ始まったかを領域平均の QHYD（雲・降水の合計）の時間変化で比べる（Phase 7）。
 step 7 の history（0–60 分、10 分ごと）を使う。
 
-使い方: STIME=… OUTDIR=… python3 check_onset.py
+使い方: STIME=… OUTDIR=… python3 check/check_onset.py
 """
 import glob
+import os
+import sys
 
 import numpy as np
 from netCDF4 import Dataset
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 
 

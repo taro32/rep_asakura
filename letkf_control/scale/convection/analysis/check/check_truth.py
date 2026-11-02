@@ -11,13 +11,16 @@
 - 誤差の改善の水平分布: 観測のある柱（4 格子おき）とない柱とで、改善の割合を比べる。
 
 出力: 表（標準出力）と FIGDIR/truth_profiles.png・truth_maps.png
-使い方: STIME=… OUTDIR=… FIGDIR=… python3 check_truth.py
+使い方: STIME=… OUTDIR=… FIGDIR=… python3 check/check_truth.py
 """
+import os
+import sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import NX, NY, physical, physical_sprd, rms, rmsz
 

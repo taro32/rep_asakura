@@ -9,17 +9,19 @@ fig6 の O−B は check_obsmake.py と同じ観測演算子（common.py）で�
 計算結果は OUTDIR/plot_6cycle_cache.npz に保存する（作り直すときは消す）。
 
 使い方:
-  cd analysis && STIME=20000131050000 python3 plot_6cycle.py
+  cd analysis && STIME=20000131050000 python3 plot/plot_6cycle.py
   （STIME は cycle 6 の第一推定を作った時刻。観測は STIME + 1h）
 """
 import os
 import re
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import C1, C2, C3, GRAY, GROSS, NX, NY, OBSERR
 

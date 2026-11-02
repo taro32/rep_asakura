@@ -3,13 +3,14 @@
 
 各時刻で、誤差 = 解析の平均 − 真値 の、全格子点の平均（偏り）、RMSE、偏りを除いた RMSE（標準偏差）を、P・T・U・QV について出す。
 P は層ごとの領域平均の偏りも、最下層・中層・最上層で出す。
-使い方: STIME=20000131000000 python3 check_bias.py <真値の場所> <実験名>=<結果の場所> ...
+使い方: STIME=20000131000000 python3 check/check_bias.py <真値の場所> <実験名>=<結果の場所> ...
 """
 import os
 import sys
 
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import physical, tstr
 

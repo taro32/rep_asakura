@@ -6,9 +6,10 @@
 2. 見えない成分がある場合: 誤差を「観測で見える成分」と「見えない成分」に分ける。見えない成分は解析で減らず、
    予報の非線形性で飽和の大きさまで育つ（飽和に近づくほど伸びが鈍る形で近似）。全体の誤差の時間変化を、同化あり・なしで描く。
 
-使い方: python3 toy_kf.py [a（1 cycle の成長率、既定 2.0）] [観測誤差 σ_o（既定 0.1）] [見える成分の割合（既定 0.4）]
+使い方: python3 check/toy_kf.py [a（1 cycle の成長率、既定 2.0）] [観測誤差 σ_o（既定 0.1）] [見える成分の割合（既定 0.4）]
 出力: 表（標準出力）と toy_kf.png（カレントディレクトリ）
 """
+import os
 import sys
 
 import matplotlib
@@ -16,6 +17,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 
 cm.use_japanese_font()

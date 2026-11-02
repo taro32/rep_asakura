@@ -9,10 +9,13 @@
 4. 観測地点での O−B・O−A を restart から自分で計算し、LETKF のログの統計と比べる（U, V）。
    鉛直の内挿には mdet の 60 分の PRES を使う（check_obsmake.py と同じ）。
 
-使い方: STIME=… OUTDIR=… python3 check_letkf.py
+使い方: STIME=… OUTDIR=… python3 check/check_letkf.py
 """
 import numpy as np
+import os
+import sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import GROSS, NX, NY, center, rms
 

@@ -15,7 +15,7 @@
 
 出力: 表（標準出力）と FIGDIR/obspoint_cycles.png・obspoint_levels.png
 真値と観測は TRUTHDIR（既定 OUTDIR）から読む。同化の間隔が 1 時間でない実験は LCYCLE [s] を指定する（評価は 1 時間ごとの解析時刻）。感度実験は TRUTHDIR=…/result OUTDIR=…/sens/<実験名>。
-使い方: STIME=20000131000000 FIGDIR=… python3 check_obspoint.py [解析時刻の数（既定: あるだけ）]
+使い方: STIME=20000131000000 FIGDIR=… python3 check/check_obspoint.py [解析時刻の数（既定: あるだけ）]
 """
 import os
 import sys
@@ -25,6 +25,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 from common import ELMS, OBSERR, physical, rms, tstr
 from check_cycles import first

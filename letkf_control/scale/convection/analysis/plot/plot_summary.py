@@ -2,12 +2,15 @@
 """2026-10-07 のミーティング用の 1 枚: 制御なしの 6 cycle で、同化が効く大きさと、QC で捨てられる観測。
 
 数値は run_soil_6cycle/check_cycles_fast.out・ジョブ 9844986 の標準出力・plot_6cycle_cache.npz（plot_6cycle.py）から読む。
-使い方: cd analysis && STIME=20000131050000 python3 plot_summary.py
+使い方: cd analysis && STIME=20000131050000 python3 plot/plot_summary.py
 図は docs/phase7d/meeting_20261007/summary.png に出る。
 """
+import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))   # analysis/common.py
 import common as cm
 import plot_6cycle as p6                           # 日本語フォントの設定も読み込まれる
 

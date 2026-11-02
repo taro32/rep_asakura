@@ -8,7 +8,7 @@
   fcst1h_timeseries.png  : 領域平均・最大値の時間変化
   fcst1h_profiles.png    : 領域平均の鉛直分布（1 分と 60 分）
 
-使い方: python3 plot_fcst1h.py [member 番号（既定 1）]
+使い方: python3 plot/plot_fcst1h.py [member 番号（既定 1）]
 """
 import glob
 import os
@@ -23,7 +23,7 @@ from netCDF4 import Dataset
 MEM = sys.argv[1] if len(sys.argv) > 1 else "1"
 OUT = "/work/gv42/v42013/20260923_enkc_convection/result/phase3_fcst1h"
 HIST = f"{OUT}/history/{MEM}"
-FIGDIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "phase3", "figs")   # Phase 3 の記録の場所に固定
+FIGDIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "docs", "phase3", "figs")   # Phase 3 の記録の場所に固定
 DX = 2000.0          # 格子間隔 [m]
 NX = NY = 120        # 全体の格子数
 Z_W = 2000.0         # 鉛直流を描く高さ [m]
