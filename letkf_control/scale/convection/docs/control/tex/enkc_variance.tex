@@ -1,0 +1,490 @@
+% 1. [dvipdfmx] をここに書く
+\documentclass[dvipdfmx,a4paper,10.5pt]{jarticle}
+
+% --- 数式関連 ---
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{empheq}
+
+% --- 図・色・レイアウト ---
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{siunitx}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage[most]{tcolorbox}
+
+% --- TikZ関連 ---
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, decorations.pathreplacing, decorations.markings, patterns}
+\usepackage{pgfplots}
+\usepgfplotslibrary{statistics} % boxplotに必須
+\pgfplotsset{compat=1.18}
+
+% --- その他 ---
+\usepackage{listings,jvlisting}
+\usepackage{otf}
+\usepackage{ascmac}
+\usepackage[margin=20mm]{geometry}
+
+% --- ハイパーリンク ---
+\usepackage[
+  dvipdfmx,
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=black
+]{hyperref}
+\urlstyle{same}
+
+\newcommand{\marker}[2]{%
+  \text{%
+    \begingroup
+    \setlength{\fboxsep}{1.5pt}%
+    \colorbox{#1!20}{$\displaystyle #2$}%
+    \endgroup
+  }%
+}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    showspaces=false,
+    showtabs=false,
+}
+
+\newcommand{\prob}[1]{\section*{\,\bm{\fbox{#1}}\,}}
+\numberwithin{equation}{section}
+
+% --- レジュメ用 ---
+% 要点をまとめる枠
+\newtcolorbox{point}[1][]{colback=blue!3, colframe=blue!50!black, boxrule=0.6pt, arc=2pt, fonttitle=\bfseries, #1}
+% 講義スライドの切り出し（上段・下段のスライド）
+\newcommand{\slidetop}[3]{\includegraphics[page=#2,trim=32 383 31 70,clip,width=#3]{figs/#1.pdf}}
+\newcommand{\slidebot}[3]{\includegraphics[page=#2,trim=32 70 31 383,clip,width=#3]{figs/#1.pdf}}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Pd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\DDt}{\frac{D}{Dt}}
+\renewcommand{\div}{\operatorname{div}}
+\newcommand{\grad}{\operatorname{grad}}
+\newcommand{\rot}{\operatorname{rot}}
+
+\newcommand{\x}{\bm{x}}
+\newcommand{\cov}{\operatorname{cov}}
+\newcommand{\Var}{\operatorname{var}}
+\newcommand{\corr}{\operatorname{corr}}
+\newcommand{\figdir}{..}
+
+\title{EnKC の仕組みと「ばらつき（分散）」の役割\\[2pt]
+\large 土壌水分による対流性降雨の制御で，いま何が起きているか}
+\author{}
+\date{2026年11月2日}
+\setlength{\headheight}{15pt}
+\addtolength{\topmargin}{-3pt}
+\pagestyle{fancy}
+\lhead{EnKC と分散}
+\rhead{制御の実験}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\clearpage
+
+%======================================================================
+\section{結論}
+%======================================================================
+
+\begin{point}[title=この解説で示すこと]
+\begin{enumerate}
+  \item EnKC の修正量は，\textbf{member どうしの違い（アンサンブル摂動）の重ね合わせ}でしか作れない．
+        member の間でばらついていない変数は，EnKC には一切変えられない（\S\ref{sec:span}）．
+  \item 目標が 1 つのとき，変数 $\theta$ の修正量は
+        $\Delta\theta = \rho\,\dfrac{\sigma_\theta}{\sigma_Y}\,\alpha\,(y^*-\bar Y)$ と書ける（$\rho$：相関，$\alpha$：詰める割合）．
+        「回帰の傾き × どれだけ詰めるか × 目標までの差」である（\S\ref{sec:reg}）．
+  \item 応答を $Y = \bar Y + g(\theta-\bar\theta) + \varepsilon$（$g$：本当の効き方，$\varepsilon$：カオスの揺れ）と分けると，
+        カオスの揺れが大きい目標（雨）では\textbf{修正量は $\sigma_\theta^2$ に比例する}．$\theta$ のばらつきが 10 分の 1 なら，修正量は 100 分の 1 になる（\S\ref{sec:decomp}）．
+  \item 逆に，$\theta$ に近くカオスの揺れが小さい量（ボーエン比など）を目標にすると，$\sigma_\theta$ が小さくても修正量は必要な量に届く．
+        \textbf{介入する量（状態量）と目標にする量（診断量）は別でよい}（\S\ref{sec:proxy}）．
+  \item 有限の member 数では相関に標本誤差がある（80 member で $\pm 0.22$ 程度は偶然で出る）．
+        本当の相関がそれより小さいと，修正の\textbf{向きまで}でたらめになる（\S\ref{sec:sample}）．
+  \item 今回は $\sigma_\theta \approx 0.001$\,m$^3$/m$^3$ で，上の 3・4 の両方に当たる．修正量は約 $2\times10^{-5}$\,m$^3$/m$^3$ で，
+        物理的に意味のある量（$\sim 0.02$）より 3 桁小さい（\S\ref{sec:ours}）．
+\end{enumerate}
+\end{point}
+
+%======================================================================
+\section{EnKC の手順}\label{sec:steps}
+%======================================================================
+
+EnKC（Ensemble Kalman Control；Sawada 2024）は，データ同化の仕組みをそのまま制御に使う．
+「目標を疑似観測として与え，スムーザーで今の状態の修正を逆算する」という説明を，手順に分けると次のようになる．
+
+\begin{enumerate}
+  \item \textbf{今の状態を推定する}：観測を同化して，時刻 $t$ の解析アンサンブル $\x_t^{a(i)}$（$i=1,\dots,N$）を得る．
+        member どうしの違いは「今の状態の不確かさ」を表す．
+  \item \textbf{先まで予報する}：各 member を，予測のホライズン $T_c$ だけ先まで予報する．
+        各 member の未来の目標の量 $Y^{(i)} = H^c(\x^{(i)}_{t+T_c})$（例：目標領域の雨）が得られる．
+  \item \textbf{目標を疑似観測として「同化」する}：未来の目標 $y^*$ を，時刻 $t+T_c$ の観測のように扱い，
+        \textbf{時刻 $t$ の状態}を更新する．観測より前の時刻の状態を更新するので，スムーザーである．
+  \item \textbf{修正を真値に加える}：更新量 $\Delta\x = \x_t^{c}-\bar\x_t^{a}$ を，真値（mdet）の時刻 $t$ の状態に足す．
+  \item \textbf{繰り返す}：次の時刻に 1 からやり直す（モデル予測制御 MPC の後退ホライズン）．
+\end{enumerate}
+
+Sawada et al.\ (2026) の式で書くと，手順 3 は次の最小化である．
+\begin{equation}
+  J^c(\x_t) = \frac12(\x_t-\bar\x_t^a)^{\mathsf T}\mathbf P^{a\,-1}(\x_t-\bar\x_t^a)
+            + \frac12\bigl(y^*-H^c(\x_{t+T_c})\bigr)^{\mathsf T}\mathbf R_c^{-1}\bigl(y^*-H^c(\x_{t+T_c})\bigr),
+  \qquad \x_{t+k+1}=M(\x_{t+k}).
+  \label{eq:J}
+\end{equation}
+第 1 項は「今の状態からあまり離れない（修正は小さく）」，第 2 項は「未来の目標に近づける」．
+$\mathbf R_c$ は目標の重みで，小さいほど強く目標に寄せる．同化の式とまったく同じ形をしている．
+
+%======================================================================
+\section{修正量の式：アンサンブルでの解}\label{sec:span}
+%======================================================================
+
+\subsection{行列で書いた解}
+時刻 $t$ の状態の摂動と，未来の目標の量の摂動を，member を並べた行列にする．
+\begin{equation}
+  \mathbf X' = \bigl[\x_t^{(1)}-\bar\x_t,\ \dots,\ \x_t^{(N)}-\bar\x_t\bigr],\qquad
+  \mathbf Y' = \bigl[Y^{(1)}-\bar Y,\ \dots,\ Y^{(N)}-\bar Y\bigr].
+\end{equation}
+式 \eqref{eq:J} をアンサンブルで解くと（EnKF と同じ導出），修正量は
+\begin{equation}
+  \Delta\x
+  = \underbrace{\frac{\mathbf X'\mathbf Y'^{\mathsf T}}{N-1}}_{\cov(\x_t,\,Y)}
+    \Bigl(\underbrace{\frac{\mathbf Y'\mathbf Y'^{\mathsf T}}{N-1}}_{\Var(Y)}+\mathbf R_c\Bigr)^{-1}
+    \bigl(y^*-\bar Y\bigr).
+  \label{eq:dx}
+\end{equation}
+ここで $\cov(\x_t,Y)$ は「時刻 $t$ の状態」と「時刻 $t+T_c$ の目標の量」の，\textbf{時刻をまたいだ共分散}である．
+これがスムーザーの中身で，予報モデル $M$ を逆向きに解く代わりに，member の並びから「今と未来のつながり」を読み取っている．
+
+\subsection{修正はアンサンブル摂動の重ね合わせ}
+式 \eqref{eq:dx} は，次のように書き直せる．
+\begin{equation}
+  \Delta\x = \mathbf X'\,\bm w,\qquad
+  \bm w = \frac{\mathbf Y'^{\mathsf T}}{N-1}\Bigl(\frac{\mathbf Y'\mathbf Y'^{\mathsf T}}{N-1}+\mathbf R_c\Bigr)^{-1}(y^*-\bar Y)
+  \quad(\text{長さ } N \text{ のベクトル}).
+  \label{eq:span}
+\end{equation}
+
+\begin{point}[title=いちばん大事な性質]
+修正量 $\Delta\x$ は，member の摂動 $\x^{(i)}-\bar\x$ に重み $w_i$ をかけて足したものである．
+したがって，\textbf{どの member でもほぼ同じ値の変数（ばらつきのない変数）は，ほぼ修正されない}．
+EnKC は「member の違いとして実際に起きたこと」の組み合わせでしか，介入を作れない．
+\end{point}
+
+重み $\bm w$ は「目標に近い結果になった member ほど大きい」ように決まる．
+直感的には，\textbf{目標に近い未来になった member の今の状態に，真値を寄せる}操作である．
+
+%======================================================================
+\section{目標が 1 つのとき：回帰としての読み方}\label{sec:reg}
+%======================================================================
+
+目標の量 $Y$ が 1 つ（例：目標領域の 13〜17 時の雨）のとき，$\Var(Y)=\sigma_Y^2$，$\mathbf R_c=\sigma_R^2$ はただの数になる．
+ある格子の土壌水分 $\theta$（状態ベクトルの 1 成分）の修正量は
+\begin{equation}
+  \Delta\theta = \frac{\cov(\theta,Y)}{\sigma_Y^2+\sigma_R^2}\,(y^*-\bar Y).
+  \label{eq:scalar}
+\end{equation}
+これを 3 つの因子に分ける．相関 $\rho = \cov(\theta,Y)/(\sigma_\theta\sigma_Y)$ を使うと
+\begin{equation}
+  \boxed{\;
+  \Delta\theta
+  = \underbrace{\rho\,\frac{\sigma_\theta}{\sigma_Y}}_{\text{(a) 回帰の傾き}}
+    \times\underbrace{\frac{\sigma_Y^2}{\sigma_Y^2+\sigma_R^2}}_{\text{(b) 詰める割合 }\alpha}
+    \times\underbrace{(y^*-\bar Y)}_{\text{(c) 目標までの差}}
+  \;}
+  \label{eq:three}
+\end{equation}
+
+\begin{description}
+  \item[(a) 回帰の傾き] $\rho\,\sigma_\theta/\sigma_Y = \cov(\theta,Y)/\sigma_Y^2$ は，\textbf{$\theta$ を $Y$ で回帰した傾き}である．
+        「雨が 1\,mm 少なかった member は，この格子の土壌水分がどれだけ違ったか」．
+        向き（符号）と大きさの両方を，member の並びから読み取る．
+  \item[(b) 詰める割合] $\sigma_R=\sigma_Y$ なら $\alpha=1/2$（差の半分を詰めにいく）．$\sigma_R\to0$ で $\alpha\to1$（全部詰めにいく）．
+        線形の近似が使えるのはばらつきの範囲までなので，全部詰めにいくと外挿になる．
+  \item[(c) 目標までの差] 制御者は真値の未来を知らないので，アンサンブル平均の予報 $\bar Y$ との差を使う．
+\end{description}
+
+%======================================================================
+\section{相関を決めるもの：ばらつきは 2 乗で効く}\label{sec:decomp}
+%======================================================================
+
+\subsection{効き方とカオスに分ける}
+未来の目標の量を，$\theta$ で決まる部分と，それ以外（大気のカオスなど）に分ける．
+\begin{equation}
+  Y^{(i)} = \bar Y + g\,\bigl(\theta^{(i)}-\bar\theta\bigr) + \varepsilon^{(i)},
+  \qquad \varepsilon \text{ は } \theta \text{ と無関係．}
+  \label{eq:model}
+\end{equation}
+$g$ は\textbf{本当の効き方}（土壌水分を $1$\,m$^3$/m$^3$ 増やすと雨が何 mm 変わるか），
+$\varepsilon$ は\textbf{カオスの揺れ}（予測のホライズン $T_c$ が長いほど大きい）である．このとき
+\begin{align}
+  \cov(\theta,Y) &= g\,\sigma_\theta^2, &
+  \sigma_Y^2 &= g^2\sigma_\theta^2+\sigma_\varepsilon^2, &
+  \rho^2 &= \frac{g^2\sigma_\theta^2}{g^2\sigma_\theta^2+\sigma_\varepsilon^2}.
+  \label{eq:rho}
+\end{align}
+$\rho^2$ は「$Y$ のばらつきのうち，$\theta$ で説明できる割合」である．
+
+\begin{point}[title=相関が小さくなる 3 つの理由]
+\begin{enumerate}
+  \item $\sigma_\theta$ が小さい：member の間で $\theta$ がほとんど違わない（\textbf{今回の主な原因}）
+  \item $g$ が小さい：$\theta$ が本当に $Y$ に効かない
+  \item $\sigma_\varepsilon$ が大きい：カオスの揺れが大きい（ホライズンが長い）
+\end{enumerate}
+1 と 3 は「効くかどうか」とは別の理由で相関を小さくする．
+\end{point}
+
+\subsection{カオスの揺れが大きいとき：修正量は $\sigma_\theta^2$ に比例する}
+式 \eqref{eq:rho} を式 \eqref{eq:scalar} に入れると
+\begin{equation}
+  \Delta\theta = \frac{g\,\sigma_\theta^2}{g^2\sigma_\theta^2+\sigma_\varepsilon^2+\sigma_R^2}\,(y^*-\bar Y).
+  \label{eq:sq}
+\end{equation}
+雨のようにカオスの揺れが大きく，分母が $\sigma_\varepsilon^2$ で決まる（$\sigma_\varepsilon^2 \gg g^2\sigma_\theta^2,\ \sigma_R^2$）とき，
+$\Delta\theta \approx g\sigma_\theta^2(y^*-\bar Y)/\sigma_\varepsilon^2$ で，
+$g$ が同じでも，\textbf{$\sigma_\theta$ が 10 分の 1 なら修正量は約 100 分の 1} になる．
+「$\sigma_\theta\to0$ なら $\Delta\theta\to0$」は \S\ref{sec:span} の性質（ばらつきのない変数は変えられない）の，1 変数版である．
+
+比べるために，カオスがなく（$\sigma_\varepsilon=0$），効き方 $g$ が分かっているときの「必要な修正」は $(y^*-\bar Y)/g$ である．
+EnKC の修正との比は
+\begin{equation}
+  \frac{\Delta\theta}{(y^*-\bar Y)/g} = \frac{g^2\sigma_\theta^2}{g^2\sigma_\theta^2+\sigma_\varepsilon^2+\sigma_R^2}
+  = \rho^2\,\alpha .
+\end{equation}
+EnKC は，\textbf{$Y$ のばらつきのうち $\theta$ で説明できる割合（$\rho^2$）の分しか，目標に寄せにいかない}．
+$\theta$ で説明できない部分は「$\theta$ を動かしても変わらない」とみなす．これは EnKC の慎重さで，式としては正しい振る舞いである．
+
+\subsection{カオスの揺れが小さい目標なら：介入する量と目標にする量は別でよい}\label{sec:proxy}
+EnKC には，もともと 2 種類の量がある．
+\begin{itemize}
+  \item \textbf{状態量 $\x$}：restart に入っている変数．修正 $\Delta\x$ はここに足す（今回は土壌水分）．
+  \item \textbf{目標の演算子 $H^c(\x)$}：状態や予報から計算する診断量．状態量として持つ必要はない．
+        台風の例では，介入は最下層の水蒸気，目標は最低気圧だった．今回も，介入は土壌水分，目標は 20\,km 格子の降水である．
+\end{itemize}
+目標を，因果の鎖
+\[
+  \text{土壌水分}\ \to\ \text{潜熱・顕熱（ボーエン比）}\ \to\ \text{境界層}\ \to\ \text{対流}\ \to\ \text{雨}
+\]
+の前のほうの量（例：目標領域のボーエン比）にすると，その量は土壌水分でほぼ決定論的に決まり，カオスの揺れ $\sigma_\varepsilon$ が小さい
+（実際，雨の前のボーエン比は 80 member でほとんどばらつかなかった）．
+$\sigma_\varepsilon^2,\ \sigma_R^2 \ll g^2\sigma_\theta^2$ なら，式 \eqref{eq:sq} は
+\begin{equation}
+  \Delta\theta \approx \frac{y^*-\bar Y}{g}
+\end{equation}
+となり，\textbf{$\sigma_\theta$ が小さくても，必要な修正量に届く}（相関も 1 に近い）．
+$\sigma_\theta$ は「効き方 $g$ を推定するための材料」として要るだけで，修正量の大きさを縛らない．
+ただし $\sigma_R$ も $g\sigma_\theta$ より小さく取る必要があり，また推定の精度は，$\sigma_\theta$ が小さいほど標本誤差や非線形性に弱くなる．
+
+この使い方では，雨そのものは目標にせず，「ボーエン比を変えれば雨が減る」という鎖の後半の関係に頼る．
+その関係は別に確かめる必要があり，制御の評価は雨（20\,km 格子の和）で行う．
+
+%======================================================================
+\section{有限の member 数：標本誤差}\label{sec:sample}
+%======================================================================
+
+\subsection{偶然でも出る相関}
+$N$ 個の member から推定した相関 $\hat\rho$ は，本当の相関 $\rho$ のまわりに，標準偏差 およそ $(1-\rho^2)/\sqrt{N}$ でばらつく．
+$\rho=0$ でも，$N=80$ なら $|\hat\rho|$ が $0.22$（両側 5\%）程度までは偶然で出る．
+本当の相関がこれより小さいと，推定した傾き（式 \eqref{eq:three} の (a)）は\textbf{符号まで当てにならない}．
+
+\subsection{例：ばらつきが小さいと，傾きの向きも逆になる}
+図 \ref{fig:scatter} は，同じ効き方 $g=-100$\,mm/(m$^3$/m$^3$)（湿らせると雨が減る），
+同じカオスの揺れ $\sigma_\varepsilon=3$\,mm で，$\sigma_\theta$ だけを変えて 80 member を作った例である（乱数による模式）．
+\begin{itemize}
+  \item (a) $\sigma_\theta=0.001$（今回の値）：点は縦に細長く並び，推定した相関は $\hat\rho=+0.06$，効き方の推定（$Y$ を $\theta$ で回帰した傾き）は $+176$．\textbf{符号が逆}．
+  \item (b) $\sigma_\theta=0.02$：推定した相関は $\hat\rho=-0.52$，効き方の推定は $-92$ で，本当の値 $-100$ に近い．
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[name=a, width=0.46\textwidth, height=0.36\textwidth,
+  xmin=-5, xmax=5, ymin=0, ymax=18, xlabel={$\theta-\bar\theta$ [$10^{-2}$\,m$^3$/m$^3$]}, ylabel={$Y$ [mm]},
+  title={(a) $\sigma_\theta=0.001$：$\hat\rho=+0.06$}, title style={font=\small}, label style={font=\small}, tick label style={font=\scriptsize}]
+\addplot[only marks, mark=*, mark size=1.1pt, blue!70!black] coordinates {
+(0.204,13.59) (-0.256,11.26) (0.042,10.97) (-0.057,12.22) (-0.045,9.84) (-0.022,6.85) (-0.202,6.55) (-0.023,6.37) (-0.087,12.95) (0.332,4.04) (0.023,6.94) (-0.035,7.82) (-0.028,9.45) (-0.067,10.54) (-0.106,5.11) (-0.039,3.60) (0.048,8.69) (-0.024,12.41) (0.096,10.93) (-0.020,9.42) (0.002,7.80) (0.155,9.48) (0.055,7.97) (-0.051,11.25) (-0.018,6.38) (0.054,9.10) (0.194,8.22) (-0.027,10.41) (-0.024,9.45) (0.100,16.30) (-0.089,13.33) (-0.029,13.27) (0.088,2.54) (0.058,7.67) (0.009,6.92) (0.067,10.28) (-0.283,2.20) (0.102,12.17) (-0.096,12.05) (-0.167,5.01) (0.028,5.79) (0.070,6.28) (-0.044,8.92) (-0.108,10.78) (0.003,14.89) (-0.005,8.16) (0.141,10.91) (0.075,9.14) (0.019,14.01) (0.111,10.87) (-0.021,12.88) (-0.093,5.61) (0.058,8.11) (0.058,6.25) (-0.021,13.29) (-0.078,10.80) (0.023,7.81) (-0.249,7.64) (0.069,10.13) (0.049,6.60) (-0.164,6.12) (0.006,10.19) (-0.096,16.24) (0.076,7.94) (-0.203,7.29) (-0.091,5.33) (0.071,4.67) (0.116,10.21) (-0.216,11.52) (-0.050,8.83) (0.033,9.71) (-0.061,9.16) (0.159,9.01) (-0.119,4.29) (0.035,7.34) (-0.105,9.19) (0.141,6.26) (-0.002,7.32) (-0.037,6.33) (-0.172,7.92)};
+\addplot[domain=-5:5, samples=2, gray, dashed] {8.75-1.0*x};
+\end{axis}
+\begin{axis}[at={(a.east)}, anchor=west, xshift=12mm, width=0.46\textwidth, height=0.36\textwidth,
+  xmin=-5, xmax=5, ymin=0, ymax=18, xlabel={$\theta-\bar\theta$ [$10^{-2}$\,m$^3$/m$^3$]},
+  title={(b) $\sigma_\theta=0.02$：$\hat\rho=-0.52$}, title style={font=\small}, label style={font=\small}, tick label style={font=\scriptsize}]
+\addplot[only marks, mark=*, mark size=1.1pt, red!70!black] coordinates {
+(1.706,6.80) (-0.813,7.87) (-0.308,14.29) (1.627,7.75) (1.290,4.43) (3.390,3.00) (-4.181,12.76) (1.714,13.92) (-0.965,9.18) (0.269,8.86) (1.675,8.62) (2.167,6.46) (2.079,13.51) (0.310,6.85) (3.219,7.76) (-0.566,9.80) (-0.282,10.90) (1.599,3.62) (-1.103,15.16) (4.322,4.06) (2.038,6.81) (4.351,1.59) (-0.053,6.61) (-0.766,11.21) (0.334,11.38) (1.469,9.54) (-1.175,13.55) (0.759,10.13) (-0.034,8.87) (3.231,8.03) (-1.325,11.86) (2.092,6.36) (-1.288,12.22) (-1.921,14.53) (-1.421,10.87) (-2.380,10.06) (0.293,10.61) (2.063,12.39) (0.329,7.79) (1.249,7.22) (3.264,5.08) (0.540,11.88) (0.390,2.85) (-0.550,10.40) (-3.216,15.54) (1.519,4.79) (-3.513,16.73) (1.305,9.05) (-0.029,7.13) (2.254,7.11) (-0.136,4.28) (-1.646,8.70) (0.716,13.51) (-1.120,7.19) (-0.362,14.65) (0.084,8.42) (-0.269,12.00) (-0.378,9.26) (-1.665,3.69) (-0.378,7.41) (-4.277,13.60) (-0.315,5.61) (-2.396,7.10) (2.241,7.61) (2.540,4.26) (-3.902,7.56) (0.290,6.41) (-0.253,11.58) (-2.093,9.42) (1.063,10.49) (-0.923,14.26) (-3.535,12.38) (-0.533,5.89) (-0.297,5.14) (0.213,8.46) (-2.462,13.86) (1.231,8.33) (1.471,8.92) (-2.292,9.71) (-1.318,10.97)};
+\addplot[domain=-5:5, samples=2, gray, dashed] {8.75-1.0*x};
+\end{axis}
+\end{tikzpicture}
+\caption{同じ効き方（破線：$g=-100$\,mm/(m$^3$/m$^3$)）とカオスの揺れ（$\sigma_\varepsilon=3$\,mm）で，
+$\theta$ のばらつきだけを変えた 80 member の模式．(a) では効き方が見えず，推定した傾きの符号も逆になる．}
+\label{fig:scatter}
+\end{figure}
+
+\subsection{雑音の修正を避ける工夫}
+同化では局所化（遠くの偶然の相関を切る）を使う．Sawada et al.\ (2026) は，さらに
+「修正量 / 解析のばらつき」（信号対雑音比）が大きい格子だけを修正する仕組み（閾値 $\Lambda$）を入れている．
+どちらも「ばらつきに比べて確かな修正だけを使う」ための工夫である．以下，閾値の仕組みがなぜ局所化と同じ働きをするかを見る．
+
+\subsection{閾値で切る仕組みは，相関で切る局所化}\label{sec:threshold}
+式 \eqref{eq:dx} で計算した修正量の第 $i$ 成分を $\Delta x_i$，その成分のアンサンブルのばらつきを $\sigma_i$ として，
+\begin{equation}
+  T(\Delta x_i)=
+  \begin{cases}
+    0 & \bigl(|\Delta x_i|/\sigma_i<\Lambda\bigr)\\[2pt]
+    \Delta x_i & (\text{それ以外})
+  \end{cases}
+  \label{eq:threshold}
+\end{equation}
+を実際に足す修正量とする．
+
+\paragraph{目標が 1 つのとき}
+式 \eqref{eq:three} を $\sigma_i$ で割ると，
+\begin{equation}
+  \frac{\Delta x_i}{\sigma_i}
+  = \rho_i\times\underbrace{\frac{\sigma_Y}{\sigma_Y^2+\sigma_R^2}\,(y^*-\bar Y)}_{c\ (\text{全成分で共通})},
+  \qquad \rho_i=\corr(x_i,Y).
+  \label{eq:snr}
+\end{equation}
+$c$ はどの成分でも同じ数なので，式 \eqref{eq:threshold} の条件は
+\begin{equation}
+  \boxed{\;|\Delta x_i|/\sigma_i<\Lambda \iff |\rho_i|<\Lambda/|c|\;}
+  \label{eq:rhocut}
+\end{equation}
+と同じである．つまり閾値の仕組みは，\textbf{目標との相関（の推定値）が小さい成分の修正を捨てる}操作である．
+\S\ref{sec:sample} のとおり，$|\hat\rho|$ が小さい成分は偶然の相関と区別できず，修正の向きも当てにならない．
+それを捨てるので，結果として修正は「本当に効いていそうな場所」に集まる（局所的になる）．
+
+$\sigma_R=\sigma_Y$ のときは $c=(y^*-\bar Y)/(2\sigma_Y)$ なので，切る相関の大きさは
+\begin{equation}
+  \rho_{\rm cut}=\frac{2\Lambda\,\sigma_Y}{|y^*-\bar Y|}.
+\end{equation}
+例えば $N=80$ で偶然の相関の目安 $0.22$（両側 5\%）で切りたければ，$\Lambda=0.11\,|y^*-\bar Y|/\sigma_Y$ とすればよい．
+逆に $\Lambda$ を固定すると，目標が遠い（$|y^*-\bar Y|$ が大きい）ほど，小さい相関まで修正に残る．
+
+\paragraph{目標が複数のとき}
+式 \eqref{eq:dx} では $\Delta x_i/\sigma_i=\sum_k \rho_{ik}\,c_k$（$c_k$ は目標 $k$ ごとの共通の係数）となり，
+相関の重み付きの和で切ることになる．考え方は同じである．
+
+\paragraph{普通の局所化との違い}
+\begin{center}
+\begin{tabular}{lll}\toprule
+ & 普通の局所化（同化） & 閾値の仕組み（Sawada et al.\ 2026） \\ \midrule
+何で切るか & 距離（あらかじめ決める） & 推定した相関の大きさ（データで決まる） \\
+切り方 & なめらかに弱める（Schur 積） & 0 か 1 か \\
+どこに掛けるか & 共分散（ゲインが変わる） & 計算した修正量（後から捨てる） \\
+捨てるもの & 遠い成分．近くの偶然の相関は残る & 相関の小さい成分．大きい偶然の相関は残る \\ \bottomrule
+\end{tabular}
+\end{center}
+どちらも「標本の相関が当てにならない成分を使わない」点で同じ働きをする．
+閾値の仕組みは，距離ではなく相関の大きさで選ぶ，適応的な局所化と見なせる．
+ただし後から捨てるだけなので，残った成分は重み $\bm w$ を計算し直していない．そのぶん目標までの差は詰め切れない．
+
+\paragraph{今回の数字に当てはめると}
+粗い格子（20\,km 四方のパッチ）は領域全体で $12\times12=144$ 個，目標領域はそのうち 1 個（$10\times10$ 格子）である．
+パッチ型の摂動の予報では，
+\begin{itemize}
+  \item 13〜17 時の合計：目標のパッチの相関は $-0.17$．$\rho_{\rm cut}=0.22$ なら\textbf{目標のパッチ自身が切られる}．
+        ほかのパッチで $|r|>0.22$ のものは 4\%（約 6 個）で，偶然の 95\% 点（8\%）より少ない．残るのはほぼ偶然の相関
+  \item 13〜14 時の雨：目標のパッチの相関は $-0.66$ で，閾値を越えて残る
+\end{itemize}
+相関で切るだけでは，偶然の大きい相関を拾ってしまう．
+「目標のパッチと周りの 8 パッチ」のように，物理で選んだ少ない自由度に絞る（距離で切る局所化に近い）ことと組み合わせるとよい．
+
+%======================================================================
+\section{今回の数字}\label{sec:ours}
+%======================================================================
+
+\subsection{修正量の見積もり}
+目標領域（x 70〜90\,km・y 110〜130\,km）の 13〜17 時の雨を $Y$，8 時ごろの土壌水分（第 1 層）を $\theta$ とする（Phase 8 の 80 member）．
+\begin{center}
+\begin{tabular}{lll}\toprule
+量 & 値 & 出どころ \\ \midrule
+$\sigma_\theta$ & 約 0.001\,m$^3$/m$^3$ & 初期の摂動 0.0058 が下の層へ逃げて薄まった \\
+$\sigma_Y$ & 約 3.5\,mm & 目標の雨の member 間の標準偏差 \\
+$\hat\rho$ & 偶然と区別できない（$|\hat\rho|\le 0.22$ 程度） & 相関の地図（有意な格子 4.5〜4.8\%，偶然なら 5\%） \\
+$\alpha$ & 1/2 & $\sigma_R=\sigma_Y$ \\
+$y^*-\bar Y$ & $8-8.75=-0.75$\,mm & 目標 8\,mm，member 平均 8.75\,mm \\ \bottomrule
+\end{tabular}
+\end{center}
+$\hat\rho$ を高めに $0.2$ として，式 \eqref{eq:three} から
+\begin{equation}
+  |\Delta\theta| \approx 0.2\times\frac{0.001}{3.5}\times\frac12\times0.75 \approx 2\times10^{-5}\ \text{m}^3/\text{m}^3 .
+\end{equation}
+土壌水分の平均（0.2）の 1 万分の 1，雨の前の目標領域の潜熱の「まわりとの差」（10〜15\,W/m$^2$）を埋めるのに要りそうな量（$\sim0.02$）の 1000 分の 1 である．
+しかも $\hat\rho$ が雑音なので，格子ごとの向きも当てにならない（図 \ref{fig:scatter}(a) の状況）．
+
+\subsection{雨は大きくばらつくのに，なぜ土壌水分と相関しないか}
+0 時の member の違いは土壌水分だけなので，雨のばらつき（1.7〜19\,mm）のもとは土壌水分である．
+しかしその違いは，大気に伝わってカオスで増幅され，8 時には\textbf{大気の違い}になっている．
+8 時の土壌水分の違いはその名残で，ほとんど残っていない．式 \eqref{eq:model} で言えば，
+雨のばらつきはほぼすべて $\varepsilon$（8 時の土壌水分では説明できない部分）に入っている．
+
+\subsection{台風の制御実験（Sawada et al.\ 2026）との比較}
+\begin{center}
+\begin{tabular}{lll}\toprule
+ & 台風（成功した例） & 今回（対流性降雨） \\ \midrule
+修正する変数 & 最下層の水蒸気（1 時間で効く） & 土壌水分（効くまで数時間） \\
+その変数のばらつき & 大気に摂動．毎時の同化で保たれる & 表層だけの摂動が薄まり，約 0.001 \\
+ホライズン $T_c$ と回数 & 1 時間先を，毎時 72 回 & 数時間先を，1 回 \\
+目標 & 最低気圧（大きく，持続し，予測しやすい） & 20\,km 四方の数時間の雨（短命でカオス的） \\
+member 数 & 100 & 80 \\ \bottomrule
+\end{tabular}
+\end{center}
+台風の例では，\S\ref{sec:decomp} の 3 つの理由がどれも小さかったと考えられる：
+$\sigma_\theta$ は同化で保たれ，水蒸気は対流に直接効き（$g$ が大きい），ホライズン 1 時間ではカオスの揺れ $\sigma_\varepsilon$ も小さい．
+
+%======================================================================
+\section{どう直せばよいか}\label{sec:fix}
+%======================================================================
+
+\S\ref{sec:decomp} の 3 つの理由に対応させると，次のようになる．
+\begin{enumerate}
+  \item \textbf{$\sigma_\theta$ を大きくする}（今回の主な原因への対処）
+    \begin{itemize}
+      \item 初期の摂動を作り直す（振幅を大きく，10〜20\,km の広がりで，表層から数十 cm まで）
+      \item 介入の時刻に摂動を足し直して予報する（案 B）
+      \item 土壌水分が自然にばらついた時刻・場所を選ぶ：雨が一度降った後は，member ごとに降った場所が違うので，
+            ばらつきが 24 時に約 0.016 まで育つ（初期の摂動の約 3 倍）
+    \end{itemize}
+  \item \textbf{$g$ を確かめる}：上の対処で $\sigma_\theta$ を大きくしても相関が出なければ，土壌水分はこの条件では雨に効かない（$g\approx0$）．
+        それ自体が「制御の限界」という結果になる
+  \item \textbf{$\sigma_\varepsilon$ を小さくする}：ホライズンを短くして繰り返す（MPC）．
+        ただし土壌水分は効くまで数時間かかるので，ホライズンを短くしすぎると $g$ も小さくなる．
+        ここに，土壌水分による制御に固有の難しさ（効くまでの時間とカオスの増幅の競争）がある
+  \item \textbf{目標を，カオスの揺れが小さい量に替える}：雨の代わりに，土壌水分に近い診断量（ボーエン比など）を目標にする（\S\ref{sec:proxy}）．
+        雨を減らせるかは，鎖の後半（ボーエン比 $\to$ 雨）にかかる
+\end{enumerate}
+
+\begin{point}[title=まとめ]
+EnKC は「member の違いとして実際に起きたこと」から効き方を学び，その範囲でしか介入できない．
+相関は「効き方」「ばらつき」「カオスの揺れ」の 3 つで決まり，カオスの揺れが大きい目標（雨）では，修正量は制御する変数のばらつきの 2 乗に比例する．
+今回は，効き方を調べる前に，ばらつき（$\sigma_\theta\approx0.001$）が足りていない．
+目標を土壌水分に近いカオスの揺れの小さい量（ボーエン比など）にすれば，ばらつきが小さくても修正は必要な量に届きうる．
+\end{point}
+
+%======================================================================
+\section*{参考文献}
+%======================================================================
+\begin{itemize}
+  \item Sawada, Y. (2024). Ensemble Kalman filter meets model predictive control in chaotic systems. \textit{SOLA}, 20, 400--407.
+  \item Sawada, Y., Minamide, M., Yan, Y., Hashimoto, K., \& Duc, L. (2026). Data-driven exploration of tropical cyclone's controllability.
+        \textit{Geophysical Research Letters}, 53, e2025GL120393.
+  \item 数値は \texttt{docs/control/notes.md}（土壌水分と雨の共分散の下見，土壌水分の動き）．
+\end{itemize}
+
+\end{document}

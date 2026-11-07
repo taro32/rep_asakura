@@ -1,0 +1,21 @@
+#!/bin/sh
+#PJM -g gv42
+#PJM -L rscgrp=share-short
+#PJM -L gpu=1
+#PJM -L elapse=01:00:00
+#PJM -j
+#===============================================================================
+# 制御: 制御の目標領域（x = 80 km・y = 120 km の 20 km 四方）の地表フラックス・ボーエン比・境界層の高さ（80 member、result_m80。Aquarius）
+#   pjsub -o <ログ> analysis/control/20261102_target/plot_target_bowen_job.sh
+# 出力: docs/control/20261102_target_bowen/target_bowen.png・.npz・target_bowen.out
+#===============================================================================
+set -eu
+CONV=/work/02/gv42/v42013/scale-letkc/letkf_control/scale/convection
+export STIME=20000131000000
+export OUTDIR=/work/gv42/v42013/20260923_enkc_convection/result_m80
+export FIGDIR=$CONV/docs/control/20261102_target_bowen
+export MPLCONFIGDIR=/tmp/mpl_$$     # 計算ノードの /pjmhome には書けないため
+cd $CONV/analysis
+echo "[$(date '+%F %T')] 開始"
+/work/02/gv42/v42013/miniconda3/bin/python3 control/20261102_target/plot_target_bowen.py 24 80 > $FIGDIR/target_bowen.out 2>&1
+echo "[$(date '+%F %T')] 終了"

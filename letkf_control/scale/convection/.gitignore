@@ -1,3 +1,6 @@
 
 # Python のキャッシュ
 __pycache__/
+
+# 100 MB を超える解析の中間ファイル（GitHub に上げられない。スクリプトを流し直せば作れる）
+docs/control/20261103_soil_cov_all/soil_cov_all.npz

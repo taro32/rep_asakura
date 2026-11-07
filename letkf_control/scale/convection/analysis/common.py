@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""convection の解析スクリプトの共通部品（2026-10-14、docs/phase7・phase7d のスクリプトから切り出した）。
+"""convection の解析スクリプトの共通部品（2026-10-14、docs/setup/phase7・phase7d のスクリプトから切り出した）。
 
 - 実験の場所と時刻: 環境変数 OUTDIR（結果の場所）・STIME（1 cycle 目の開始時刻）
 - 格子・観測の定数
 - 読み込み: 144 プロセスに分かれた history・restart を (NZ, NY, NX) に組み立てる。観測ファイル（obsmake の出力・OBSIN）
 - 観測演算子: 経度・緯度がいちばん近い格子点の柱を取り、log p で鉛直に線形内挿する
-  （7a で、obsmake の観測との差の標準偏差が観測誤差 0.100 になることを確認。docs/phase7/phase7_notes.md）
+  （7a で、obsmake の観測との差の標準偏差が観測誤差 0.100 になることを確認。docs/setup/phase7/phase7_notes.md）
 - restart の予報変数から物理量（U, V, W, T, P, QV, 雲・降水）への変換、LETKF の sprd の読み替え
 - 図の日本語フォントと色
 """
@@ -288,7 +288,7 @@ def figdir():
     """図の出力先（環境変数 FIGDIR、必須）。実行ごとに別の場所を指定し、前の結果を上書きしないようにする。"""
     d = os.environ.get("FIGDIR")
     if not d:
-        sys.exit("図の出力先を環境変数 FIGDIR で指定してください（例: FIGDIR=../docs/phase7d/run_xxx）。")
+        sys.exit("図の出力先を環境変数 FIGDIR で指定してください（例: FIGDIR=../docs/setup/phase7d/run_xxx）。")
     os.makedirs(d, exist_ok=True)
     return d
 

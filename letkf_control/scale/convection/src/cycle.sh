@@ -464,7 +464,7 @@ while ((time <= ETIME)); do
         BGDIR=$OUTDIR/$time
         # convection: 前の cycle の LETKF が書いた第一推定の平均・ばらつき（$time/gues/{mean,sprd}）は、
         #             このあとの cp と LETKC 自身の出力（GUES_MEAN_INOUT_BASENAME）で解析の値に上書きされるので、
-        #             LETKC の前に gues_letkf/ に取っておく（2 cycle 目以降。docs/phase7/phase7_notes.md 7c）
+        #             LETKC の前に gues_letkf/ に取っておく（2 cycle 目以降。docs/setup/phase7/phase7_notes.md 7c）
         if ((loop > 1)); then
           for mem in mean sprd; do
             if [ -d $OUTDIR/$time/gues/$mem ]; then
@@ -486,14 +486,14 @@ while ((time <= ETIME)); do
           fi
         fi
         if ((SPRD_OUT==1)); then
-            mkdir -p $OUTDIR/$time/anal/sprd   # convection: $atime -> $time（469 行の cp 先に合わせる。docs/phase6/m1_notes.md）
+            mkdir -p $OUTDIR/$time/anal/sprd   # convection: $atime -> $time（469 行の cp 先に合わせる。docs/setup/phase6/m1_notes.md）
             cp -r $BGDIR/anal/mean/* $OUTDIR/$time/anal/sprd/
             mnsp="mean sprd"
         else
             mnsp="mean"
         fi
         # convection: LETKC が anal/mdet を上書きする前に、制御前の mdet を gues/mdet に取っておく
-        #             （制御後 anal/mdet − 制御前 gues/mdet がその cycle の修正量。docs/phase6/m1_notes.md）
+        #             （制御後 anal/mdet − 制御前 gues/mdet がその cycle の修正量。docs/setup/phase6/m1_notes.md）
         mkdir -p $OUTDIR/$time/gues/mdet
         echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...saving mdet before LETKC to gues/mdet" >&2
         cp $BGDIR/anal/mdet/* $OUTDIR/$time/gues/mdet/

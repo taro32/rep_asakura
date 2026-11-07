@@ -100,7 +100,7 @@ safe_init_tmpdir $STAGING_DIR || exit $?
 staging_list_static || exit $?
 config_file_list $TMPS/config || exit $?
 
-# convection: 感度実験（sens/submit.sh）。LETKF の設定ファイル（step 10）の値だけを上書きする。LETKC（step 4）は変えない
+# convection: 感度実験（setup/phase7d_sens/submit.sh）。LETKF の設定ファイル（step 10）の値だけを上書きする。LETKC（step 4）は変えない
 for v in HORI_LOCAL INFL_MUL RELAX_ALPHA GROSS_ERROR; do
   val=$(eval echo "\${SENS_${v}:-}")
   if [ -n "$val" ]; then
