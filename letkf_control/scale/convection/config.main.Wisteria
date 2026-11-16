@@ -36,6 +36,7 @@ DATA_BDY_GRADS=""
 
 OBS="${SENS_OBS:-$OUTDIR/obs}"   # 感度実験は基準の観測を読む（SENS_OBS。setup/phase7d_sens/submit.sh）
 OBSMAKE_RUN=${SENS_OBSMAKE_RUN:-1}
+SENS_CYCLEFLEN=${SENS_CYCLEFLEN:-}   # cycle の予報の長さ [s]（空なら WINDOW_E）。土壌水分の制御（control/20261107_mpc_soil）で使う。cycle_run.sh がジョブ用の config.main の末尾に値を書く
 HIST_CLEAN=${SENS_HIST_CLEAN:-0}   # 1: 各 cycle の LETKF の後に member の history を消す（長い感度実験でディスクを節約）   # 0: obsmake（step 8）を飛ばし、$OBS にある観測を使う（観測を固定する感度実験用）
 # 2 km 格子用の観測地点（Phase 7）。U, V, T・水平 4 格子おき（8 km）・鉛直 2 層おき、86,400 個。
 # make_obsin/obsin/make_obsin.py で作る。cycle_run.sh がジョブの開始時に $TMP/obsin/obsin.dat にコピーする。
@@ -143,7 +144,7 @@ if (( NNODES > MAX_NNODES )); then   # 入らないときは半分（切り上�
 fi
 NNODES=${SENS_NNODES:-$NNODES}   # 感度実験は SENS_NNODES で指定できる
 
-RSCGRP=regular-o    # ジョブの rscgrp（convection/cycle_run.sh が使う。空なら regular-o）
+RSCGRP=${SENS_RSCGRP:-regular-o}    # 試験は SENS_RSCGRP=debug-o（control/20261107_mpc_soil/submit.sh）。 ジョブの rscgrp（convection/cycle_run.sh が使う。空なら regular-o）
                     #   動作確認: debug-o（最大 144 ノード・30 分）
                     #   本番:     regular-o（792 ノードなら large-o に振り分けられる）
 

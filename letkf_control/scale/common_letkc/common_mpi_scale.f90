@@ -827,6 +827,8 @@ subroutine set_scalelib(execname)
     call read_nml_obsope
     call read_nml_letkf
     call read_nml_letkf_obs
+    call read_nml_ctltarget        ! convection: LETKC の制御目標の定義（2026-11-07）
+    call read_nml_letkc_control    ! convection: LETKC で修正する変数と制約（2026-11-07）
     call read_nml_letkf_var_local
     call read_nml_letkf_monitor
     call read_nml_letkf_radar

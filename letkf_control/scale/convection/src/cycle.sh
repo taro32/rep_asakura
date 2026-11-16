@@ -492,6 +492,13 @@ while ((time <= ETIME)); do
         else
             mnsp="mean"
         fi
+        # convection: 試験の検算用（SENS_HIST_GUES_SAVE=1。control/20261107_mpc_soil/submit.sh の KEEP_HIST_GUES）。
+        #             step 7（予報し直し）が hist/ を上書きするので、LETKC が読む step 3 の history を hist_gues/ に写しておく
+        if (( ${SENS_HIST_GUES_SAVE:-0} == 1 )); then
+          rm -rf $OUTDIR/$time/hist_gues
+          cp -r $OUTDIR/$time/hist $OUTDIR/$time/hist_gues
+          echo "[$(datetime_now)] ${time}: ${stepname[$s]} ...saving history of step 3 to hist_gues" >&2
+        fi
         # convection: LETKC が anal/mdet を上書きする前に、制御前の mdet を gues/mdet に取っておく
         #             （制御後 anal/mdet − 制御前 gues/mdet がその cycle の修正量。docs/setup/phase6/m1_notes.md）
         mkdir -p $OUTDIR/$time/gues/mdet
@@ -666,6 +673,13 @@ while ((time <= ETIME)); do
 	
         echo "[$(datetime_now)] ${time}: ${stepname[$s]}: $it: end" >&2
       done
+
+      # convection: 予報を LCYCLE より長くした（SENS_CYCLEFLEN。土壌水分の制御）ときは、SCALE が予報の終わり（t + CYCLEFLEN）にも
+      #             restart を書く。次の cycle は t + LCYCLE の restart から始まるので、終わりの restart は消す（1 cycle 約 18 GB）
+      if (( DET_RUN_UPDATE == 2 && (s == 3 || s == 7) && CYCLEFLEN > LCYCLE )); then
+        rm -f $OUTDIR/$atime/anal/*/init_$(datetime_scale $(datetime $time $CYCLEFLEN s)).pe*.nc
+        echo "[$(datetime_now)] ${time}: 予報の終わりの restart（$(datetime $time $CYCLEFLEN s)）を削除" >&2
+      fi
 
       # convection: 長い感度実験（HIST_CLEAN=1）では、LETKF が終わったらこの cycle の member の history と、予報の初期値に使った
       #             member の restart（$time/anal/0001〜）を消す（mdet・mean・sprd は残す。20 member で 1 cycle 約 30 GB）

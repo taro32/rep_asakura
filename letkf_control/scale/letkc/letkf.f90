@@ -20,7 +20,7 @@ PROGRAM letkf
     mtx_setup
   USE letkf_obs
   USE letkf_tools
-  use obsope_tools, only: &
+  use obsope_tools_ctl, only: &   ! convection: LETKC 用の観測演算子（letkc/obsope_tools_ctl.f90。2026-11-07）
     obsope_cal
   IMPLICIT NONE
 
@@ -76,7 +76,6 @@ PROGRAM letkf
     call set_mem_node_proc(MEMBER+1)
   end if
   call set_scalelib('LETKF')
-
   if (myrank_use) then
 
     call set_common_scale

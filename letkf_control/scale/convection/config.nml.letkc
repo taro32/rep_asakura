@@ -64,6 +64,35 @@ INFL_ADD_REF_ONLY = .true.,
 !--OBSDEP_OUT_BASENAME--
 /
 
+! convection: LETKC で修正する変数と制約（letkc/letkf_tools.f90 の set_letkc_control・letkc_control_constrain。2026-11-07）。
+!   1 行 = 1 つの状態変数。CONTROL_TARGET は変数の局所化の列（'PS': 地上気圧の要素を目標にした従来の制御、'CTL': 要素 19001 などの制御目標）。
+!   その列は、ここに書いた変数だけを修正する（ほかは 0）。下は既定値（これまでコードに固定していた QV の制御）。
+!   土壌水分の制御（要素 19001 で LAND_WATER の第 1・2 層を増やすだけ、0〜0.5、λ = 0）は、control/20261107_mpc_soil/submit.sh が
+!   この節を次に置き換えた設定ファイルを作って使う（SENS_LETKC_NML。cycle_run.sh）:
+!     CONTROL_VAR(1) = 'LAND_WATER_1', CONTROL_TARGET(1) = 'CTL', CONTROL_DIRECTION(1) = 'INCREASE', CONTROL_VMIN(1) = 0.0D0, CONTROL_VMAX(1) = 0.5D0, CONTROL_LAMBDA(1) = 0.0D0,
+!     CONTROL_VAR(2) = 'LAND_WATER_2', CONTROL_TARGET(2) = 'CTL', CONTROL_DIRECTION(2) = 'INCREASE', CONTROL_VMIN(2) = 0.0D0, CONTROL_VMAX(2) = 0.5D0, CONTROL_LAMBDA(2) = 0.0D0,
+&PARAM_LETKC_CONTROL
+ CONTROL_VAR(1) = 'QV',              ! 状態変数（v3d_name: 'QV' など、2 次元: 'LAND_WATER_1'・'LAND_WATER_2'）
+ CONTROL_TARGET(1) = 'PS',           ! この変数を修正する目標の列
+ CONTROL_KMIN(1) = 1,                ! 修正する層（3 次元の変数だけ。下から）
+ CONTROL_KMAX(1) = 1,
+ CONTROL_DIRECTION(1) = 'DECREASE',  ! 'BOTH'・'DECREASE'（減らすだけ）・'INCREASE'（増やすだけ）
+ CONTROL_VMIN(1) = -1.0D30,          ! 修正した値の範囲（既定は切り詰めない）
+ CONTROL_VMAX(1) = 1.0D30,
+ CONTROL_LAMBDA(1) = 0.0D0,          ! |Δx_mdet|/σ < λ × 最大 の点は修正しない（0 で使わない）
+/
+
+! convection: LETKC の制御目標（controltarget の要素 19001 = 領域・時間の積算。common_letkc/common_nml.f90 の read_nml_ctltarget。2026-11-07）。
+!   列の添字 = controltarget の 7 番目の欄（観測の種類 typ）。CTL_VAR が '' の行は使わない。
+!   要素 19001 の目標がない controltarget（制御なしの cycle など）では、この表は使われない。
+!   種類 1: 目標領域（中心から ±10 km）の PREC の平均を、窓（dif ± 15 分 = 予報の t + 45〜75 分）で積算した量 [mm]。
+!           値・誤差は相対（y* = 値 × Ȳ、σ_R = 誤差 × σ_Y。値 0.8・誤差 1.0 は controltarget の側。control/20261107_mpc_soil/submit.sh）
+&PARAM_CTLTARGET
+ CTL_VAR(1) = 'PREC', CTL_HALF_X(1) = 10.0D3, CTL_HALF_Y(1) = 10.0D3, CTL_HALF_T(1) = 900.0D0,
+ CTL_AREA_OP(1) = 'MEAN', CTL_TIME_OP(1) = 'SUM',
+ CTL_REL_TARGET(1) = .true., CTL_REL_ERROR(1) = .true., CTL_REJECT_NEGDEP(1) = .false.,
+/
+
 !*** Attach SCALE configuration below ***
 
 &PARAM_IO

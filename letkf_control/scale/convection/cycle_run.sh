@@ -96,6 +96,24 @@ echo "RUN_LEVEL=4" >> $TMP/config.main
 
 echo "PARENT_REF_TIME=$PARENT_REF_TIME" >> $TMP/config.main
 
+# convection: 土壌水分の制御（control/20261107_mpc_soil/submit.sh）
+#   SENS_CYCLEFLEN     cycle の予報の長さ [s]（ジョブの中の cycle.sh も使うので config.main に書く）
+#   SENS_PREC_TINTERVAL  PREC だけを、この間隔 [s] の時間平均（TAVERAGE）で history に出す
+#   SENS_HIST_GUES_SAVE  1 なら、LETKC の前に step 3 の history を <時刻>/hist_gues/ に写す（step 7 が上書きするので。試験の検算用）
+#   SENS_LETKC_NML     LETKC の設定の雛形（config.nml.letkc）をこのファイルに差し替える（制御する変数・局所化などを実験ごとに変える）
+echo "SENS_CYCLEFLEN=${SENS_CYCLEFLEN:-}" >> $TMP/config.main
+echo "SENS_HIST_GUES_SAVE=${SENS_HIST_GUES_SAVE:-0}" >> $TMP/config.main   # 1: LETKC の前に予報（step 3）の history を hist_gues/ に取っておく（src/cycle.sh）
+if [ -n "${SENS_LETKC_NML:-}" ]; then
+  [ -s "$SENS_LETKC_NML" ] || { echo "[Error] SENS_LETKC_NML（$SENS_LETKC_NML）がありません。" >&2; exit 1; }
+  cp "$SENS_LETKC_NML" $TMP/config.nml.letkc
+  echo "[$(datetime_now)] LETKC の設定の雛形を $SENS_LETKC_NML に差し替えた"
+fi
+if [ -n "${SENS_PREC_TINTERVAL:-}" ]; then
+  grep -q "^&HISTORY_ITEM name='PREC'/" $TMP/config.nml.scale || { echo "[Error] config.nml.scale に PREC の HISTORY_ITEM がありません。" >&2; exit 1; }
+  sed -i -e "s#^&HISTORY_ITEM name='PREC'/.*#\&HISTORY_ITEM name='PREC', TINTERVAL=${SENS_PREC_TINTERVAL}.D0, TAVERAGE=.true. / ! convection: SENS_PREC_TINTERVAL#" $TMP/config.nml.scale
+  echo "[$(datetime_now)] PREC を ${SENS_PREC_TINTERVAL} 秒ごとの時間平均で出力する（$TMP/config.nml.scale）"
+fi
+
 safe_init_tmpdir $STAGING_DIR || exit $?
 staging_list_static || exit $?
 config_file_list $TMPS/config || exit $?

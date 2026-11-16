@@ -52,7 +52,17 @@ MODULE common_scale
   CHARACTER(vname_max),PARAMETER :: v3d_name(nv3d) = &
      (/'DENS      ', 'MOMX      ', 'MOMY      ', 'MOMZ      ', 'RHOT      ', &
        'QV        ', 'QC        ', 'QR        ', 'QI        ', 'QS        ', 'QG        '/)
-  CHARACTER(vname_max) :: v2d_name(nv2d)
+  ! convection（2026-11-07）: 2 次元の状態変数。restart の変数（v2d_name）が層の次元を持つとき（LAND_WATER の (lz, x, y)）、
+  ! v2d_lz の層だけを切り出して読み、書くときは同じ層に戻す（ほかの層はファイルのまま）。v2d_lz = 0 は (x, y) の変数。
+  ! v2d_label は設定（&PARAM_LETKC_CONTROL の CONTROL_VAR）で使う名前。変数を足すときは nv2d（common_nml.f90）とこの 3 つを直す
+  CHARACTER(vname_max),PARAMETER :: v2d_name(nv2d) = &
+     (/'LAND_WATER', 'LAND_WATER'/)
+  INTEGER,PARAMETER :: v2d_lz(nv2d) = &
+     (/1, 2/)
+  CHARACTER(16),PARAMETER :: v2d_label(nv2d) = &
+     (/'LAND_WATER_1    ', 'LAND_WATER_2    '/)
+  INTEGER,PARAMETER :: iv2d_land_water1=1
+  INTEGER,PARAMETER :: iv2d_land_water2=2
 
   ! 
   !--- 3D, 2D diagnostic variables (in SCALE history files)
@@ -307,7 +317,7 @@ END SUBROUTINE set_common_scale
 
 !  do iv2d = 1, nv2d
 !    if (LOG_LEVEL >= 1) then
-!      write(6,'(1x,A,A15)') '*** Read 2D var: ', trim(v2d_name(iv2d))
+!      write(6,'(1x,A,A15)') '*** Read 2D var: ', trim(v2d_label(iv2d))
 !    end if
 !    call FileRead(v2dg(:,:,iv2d), filename, trim(v2d_name(iv2d)), 1, PRC_myrank)
 !  end do
@@ -339,6 +349,7 @@ SUBROUTINE read_restart(filename,v3dg,v2dg)
   integer :: is, js, ks
 
   integer :: istat
+  REAL(RP) :: work_lz(1,nlon,nlat)
 
   is = 1
   js = 1
@@ -387,15 +398,22 @@ SUBROUTINE read_restart(filename,v3dg,v2dg)
 
   do iv2d = 1, nv2d
     if ( LOG_LEVEL >= 1 .and. LOG_OUT ) then
-      write(6,'(1x,A,A15)') '*** Read 2D var: ', trim(v2d_name(iv2d))
+      write(6,'(1x,A,A15)') '*** Read 2D var: ', trim(v2d_label(iv2d))
     end if
     istat = nf90_inq_varid(ncid, trim(v2d_name(iv2d)), varid)
     if ( istat == 0 ) then
-    call ncio_check(nf90_get_var(ncid, varid, v2dg(:,:,iv2d), &
-                                 start = (/ is, js, 1 /),     &
-                                 count = (/ IMAX, JMAX, 1 /)))
+      if (v2d_lz(iv2d) > 0) then ! one layer of (lz, x, y)
+        call ncio_check(nf90_get_var(ncid, varid, work_lz, &
+                                     start = (/ v2d_lz(iv2d), is, js /), &
+                                     count = (/ 1, IMAX, JMAX /)))
+        v2dg(:,:,iv2d) = work_lz(1,:,:)
+      else
+        call ncio_check(nf90_get_var(ncid, varid, v2dg(:,:,iv2d), &
+                                     start = (/ is, js, 1 /),     &
+                                     count = (/ IMAX, JMAX, 1 /)))
+      end if
     else
-      write(6,'(A,A15,A)') " 2D var ", trim(v3d_name(iv3d))," not found."
+      write(6,'(A,A15,A)') " 2D var ", trim(v2d_name(iv2d))," not found."
       if ( FILL_BY_ZERO_MISSING_VARAIBLES ) then
         v2dg(:,:,iv2d) = 0.0_RP
       else
@@ -445,6 +463,8 @@ SUBROUTINE read_restart_par(filename,v3dg,v2dg,comm)
 
   integer :: err, varid, req, reqs(1), sts(1)
   integer(KIND=MPI_OFFSET_KIND) :: start(3), count(3)
+  integer(KIND=MPI_OFFSET_KIND) :: start_lz(3), count_lz(3)
+  REAL(RP) :: work_lz(1,nlon,nlat,nv2d)
 
   ! calculate subarray's start() and count() to the global variables
   start(1) = 1
@@ -482,16 +502,28 @@ SUBROUTINE read_restart_par(filename,v3dg,v2dg,comm)
 
   do iv2d = 1, nv2d
     if ( LOG_LEVEL >= 1 .and. LOG_OUT ) then
-      write(6,'(1x,A,A15)') '*** Read 2D var: ', trim(v2d_name(iv2d))
+      write(6,'(1x,A,A15)') '*** Read 2D var: ', trim(v2d_label(iv2d))
     end if
     err = nfmpi_inq_varid(ncid, trim(v2d_name(iv2d)), varid)
     if ( err .NE. NF_NOERR ) &
        write (6,'(A)') 'failed nfmpi_inq_varid '//' '//nfmpi_strerror(err)
+    if (v2d_lz(iv2d) > 0) then ! one layer of (lz, x, y)
+      start_lz(1) = v2d_lz(iv2d)
+      start_lz(2:3) = start(2:3)
+      count_lz(1) = 1
+      count_lz(2:3) = count(2:3)
 #ifdef SINGLE
-    err = nfmpi_iget_vara_real(ncid, varid, start(2:3), count(2:3), v2dg(:,:,iv2d), req)
+      err = nfmpi_iget_vara_real(ncid, varid, start_lz, count_lz, work_lz(:,:,:,iv2d), req)
 #else
-    err = nfmpi_iget_vara_double(ncid, varid, start(2:3), count(2:3), v2dg(:,:,iv2d), req)
+      err = nfmpi_iget_vara_double(ncid, varid, start_lz, count_lz, work_lz(:,:,:,iv2d), req)
 #endif
+    else
+#ifdef SINGLE
+      err = nfmpi_iget_vara_real(ncid, varid, start(2:3), count(2:3), v2dg(:,:,iv2d), req)
+#else
+      err = nfmpi_iget_vara_double(ncid, varid, start(2:3), count(2:3), v2dg(:,:,iv2d), req)
+#endif
+    end if
     if ( err .NE. NF_NOERR ) &
        write (6,'(A)') 'failed nfmpi_get_vara_double_all '//' '//nfmpi_strerror(err)
   end do
@@ -499,6 +531,10 @@ SUBROUTINE read_restart_par(filename,v3dg,v2dg,comm)
   err = nfmpi_wait_all(ncid, NF_REQ_ALL, reqs, sts)
   if ( err .NE. NF_NOERR ) &
      write (6,'(A)') 'failed nfmpi_wait_all '//' '//nfmpi_strerror(err)
+
+  do iv2d = 1, nv2d
+    if (v2d_lz(iv2d) > 0) v2dg(:,:,iv2d) = work_lz(1,:,:,iv2d)
+  end do
 
   err = nfmpi_close(ncid)
   if ( err .NE. NF_NOERR ) &
@@ -555,7 +591,7 @@ END SUBROUTINE read_restart_par
 
 !  DO iv2d = 1, nv2d
 !    if (LOG_LEVEL >= 1) then
-!      write(6,'(1x,A,A15)') '*** Write 2D var: ', trim(v2d_name(iv2d))
+!      write(6,'(1x,A,A15)') '*** Write 2D var: ', trim(v2d_label(iv2d))
 !    end if
 !    call ncio_write(ncid, trim(v2d_name(iv2d)), nlon, nlat, 1, v2dg(:,:,iv2d))
 !    call ncio_read (ncid, trim(v2d_name(iv2d)), nlon, nlat, 1, v2dgtmp)
@@ -577,7 +613,7 @@ END SUBROUTINE read_restart_par
 
 !!  DO iv2d = 1, nv2d
 !!    if (LOG_LEVEL >= 1) then
-!!      write(6,'(1x,A,A15)') '*** Write 2D var: ', trim(v2d_name(iv2d))
+!!      write(6,'(1x,A,A15)') '*** Write 2D var: ', trim(v2d_label(iv2d))
 !!    end if
 !!    call ncio_check(nf90_inq_varid(ncid, trim(v2d_name(iv2d)), vid))
 !!!    call FileWrite(vid, v2dg(:,:,iv2d), 1.0d0, 1.0d0)
@@ -615,6 +651,7 @@ SUBROUTINE write_restart(filename,v3dg,v2dg)
   integer :: is, js, ks
 
   integer :: istat
+  REAL(RP) :: work_lz(1,nlon,nlat)
 
   is = 1
   js = 1
@@ -658,15 +695,22 @@ SUBROUTINE write_restart(filename,v3dg,v2dg)
 
   do iv2d = 1, nv2d
     if ( LOG_LEVEL >= 1 .and. LOG_OUT ) then
-      write(6,'(1x,A,A15)') '*** Write 2D var: ', trim(v2d_name(iv2d))
+      write(6,'(1x,A,A15)') '*** Write 2D var: ', trim(v2d_label(iv2d))
     end if
 
     
     istat = nf90_inq_varid(ncid, trim(v2d_name(iv2d)), varid)
     if ( istat == 0 ) then
-      call ncio_check(nf90_put_var(ncid, varid, v2dg(:,:,iv2d), &
-                                   start = (/ is, js, 1 /),     &
-                                   count = (/ IMAX, JMAX, 1 /)))
+      if (v2d_lz(iv2d) > 0) then ! write back to the same layer of (lz, x, y); other layers are kept
+        work_lz(1,:,:) = v2dg(:,:,iv2d)
+        call ncio_check(nf90_put_var(ncid, varid, work_lz, &
+                                     start = (/ v2d_lz(iv2d), is, js /), &
+                                     count = (/ 1, IMAX, JMAX /)))
+      else
+        call ncio_check(nf90_put_var(ncid, varid, v2dg(:,:,iv2d), &
+                                     start = (/ is, js, 1 /),     &
+                                     count = (/ IMAX, JMAX, 1 /)))
+      end if
     else
       write(6,'(A,A15,A)') " 2D var ", trim(v2d_name(iv2d))," not found. skip!"
     end if
@@ -713,6 +757,8 @@ SUBROUTINE write_restart_par(filename,v3dg,v2dg,comm)
 
   integer :: err, varid, req, reqs(1), sts(1)
   integer(KIND=MPI_OFFSET_KIND) :: start(3), count(3)
+  integer(KIND=MPI_OFFSET_KIND) :: start_lz(3), count_lz(3)
+  REAL(RP) :: work_lz(1,nlon,nlat,nv2d)
 
   ! calculate subarray's start() and count() to the global variables
   start(1) = 1
@@ -750,16 +796,29 @@ SUBROUTINE write_restart_par(filename,v3dg,v2dg,comm)
 
   do iv2d = 1, nv2d
     if (LOG_LEVEL >= 1) then
-      write(6,'(1x,A,A15)') '*** Write 2D var: ', trim(v2d_name(iv2d))
+      write(6,'(1x,A,A15)') '*** Write 2D var: ', trim(v2d_label(iv2d))
     end if
     err = nfmpi_inq_varid(ncid, trim(v2d_name(iv2d)), varid)
     if ( err .NE. NF_NOERR ) &
        write (6,'(A)') 'failed nfmpi_inq_varid '//' '//nfmpi_strerror(err)
+    if (v2d_lz(iv2d) > 0) then ! write back to the same layer of (lz, x, y); other layers are kept
+      work_lz(1,:,:,iv2d) = v2dg(:,:,iv2d)
+      start_lz(1) = v2d_lz(iv2d)
+      start_lz(2:3) = start(2:3)
+      count_lz(1) = 1
+      count_lz(2:3) = count(2:3)
 #ifdef SINGLE
-    err = nfmpi_iput_vara_real(ncid, varid, start(2:3), count(2:3), v2dg(:,:,iv2d), req)
+      err = nfmpi_iput_vara_real(ncid, varid, start_lz, count_lz, work_lz(:,:,:,iv2d), req)
 #else
-    err = nfmpi_iput_vara_double(ncid, varid, start(2:3), count(2:3), v2dg(:,:,iv2d), req)
+      err = nfmpi_iput_vara_double(ncid, varid, start_lz, count_lz, work_lz(:,:,:,iv2d), req)
 #endif
+    else
+#ifdef SINGLE
+      err = nfmpi_iput_vara_real(ncid, varid, start(2:3), count(2:3), v2dg(:,:,iv2d), req)
+#else
+      err = nfmpi_iput_vara_double(ncid, varid, start(2:3), count(2:3), v2dg(:,:,iv2d), req)
+#endif
+    end if
     if ( err .NE. NF_NOERR ) &
        write (6,'(A)') 'failed nfmpi_iput_vara_double '//' '//nfmpi_strerror(err)
   end do
@@ -2090,4 +2149,31 @@ subroutine rij_rank_g2l(ig, jg, rank, il, jl)
   return
 end subroutine rij_rank_g2l
 !===============================================================================
+!-------------------------------------------------------------------------------
+! convection（2026-11-07）: 状態変数の名前から添字を返す（1〜nv3d: 3 次元、nv3d+1〜nv3d+nv2d: 2 次元。なければ 0）
+!   3 次元は v3d_name（'QV' など）、2 次元は v2d_label（'LAND_WATER_1' など）と比べる
+!-------------------------------------------------------------------------------
+function state_var_index(vname) result(iv)
+  implicit none
+  character(*), intent(in) :: vname
+  integer :: iv
+  integer :: n
+
+  iv = 0
+  do n = 1, nv3d
+    if (trim(adjustl(vname)) == trim(v3d_name(n))) then
+      iv = n
+      return
+    end if
+  end do
+  do n = 1, nv2d
+    if (trim(adjustl(vname)) == trim(v2d_label(n))) then
+      iv = nv3d + n
+      return
+    end if
+  end do
+
+  return
+end function state_var_index
+
 END MODULE common_scale

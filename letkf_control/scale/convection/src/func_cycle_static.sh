@@ -1089,16 +1089,20 @@ while ((time <= ETIME)); do
    #------------------------------------------------------------------------------------------------
    # letkc by Y.Saw 20241010
    #------------------------------------------------------------------------------------------------
+  # 制御目標のファイル（convection 2026-11-09）: SENS_CTL_TIMES=1 なら cycle ごとの controltarget_<t>（t = cycle の開始）を読む。
+  #   ファイルのない cycle は観測 0 個（read_obs_all が警告を出して nobs = 0）になり、制御はかからない（control/20261107_mpc_soil/submit.sh の CTL_HOURS）。
+  #   設定しなければ今までどおり全 cycle で controltarget
+  if [ "${SENS_CTL_TIMES:-0}" = 1 ]; then ctl_file=controltarget_${time}; else ctl_file=controltarget; fi
   OBS_IN_NAME_LIST=
   OBS_IN_NAME_LIST_EFSO=
   for iobs in $(seq $OBSNUM); do
     if [ "${OBSNAME[$iobs]}" != '' ]; then
       OBSFOOT[$iobs]=${OBSFOOT[$iobs]:-dat}
       if ((DISK_MODE_OBS >= 1)); then
-        OBS_IN_NAME_LIST="${OBS_IN_NAME_LIST}'${TMPROOT_OBS}/obs/controltarget', "
+        OBS_IN_NAME_LIST="${OBS_IN_NAME_LIST}'${TMPROOT_OBS}/obs/${ctl_file}', "
         OBS_IN_NAME_LIST_EFSO="${OBS_IN_NAME_LIST_EFSO}'${TMPROOT_OBS}/obs/${OBSNAME[$iobs]}_${time_efso}.${OBSFOOT[$iobs]}', "
       else
-        OBS_IN_NAME_LIST="${OBS_IN_NAME_LIST}'${OBS}/controltarget', "
+        OBS_IN_NAME_LIST="${OBS_IN_NAME_LIST}'${OBS}/${ctl_file}', "
         OBS_IN_NAME_LIST_EFSO="${OBS_IN_NAME_LIST_EFSO}'${OBS}/${OBSNAME[$iobs]}_${time_efso}.${OBSFOOT[$iobs]}', "
       fi
     fi
@@ -1239,6 +1243,18 @@ while ((time <= ETIME)); do
             -e "/!--PRC_DOMAINS--/a PRC_DOMAINS = $PRC_DOMAINS_LIST" \
         > ${conf_file}
 
+    # convection: LETKC のスロットは予報の終わり（CYCLEFLEN）まで広げる（制御目標の窓が t + LCYCLE より後まである。
+    #             letkc/obsope_tools_ctl.f90）。スロット k = history の k 番目の時刻なので、history の間隔 = LTIMESLOT が要る。
+    #             LETKF の設定（SLOT_END = $slot_e）は変えない
+    local slot_e_ctl=$slot_e
+    if ((CYCLEFLEN > WINDOW_E)); then
+      if ((CYCLEFOUT != LTIMESLOT || (CYCLEFLEN - WINDOW_E) % LTIMESLOT != 0)); then
+        echo "[Error] LETKC のスロットを広げるには、history の間隔（$CYCLEFOUT）= LTIMESLOT（$LTIMESLOT）で、CYCLEFLEN − WINDOW_E（$((CYCLEFLEN - WINDOW_E))）が LTIMESLOT の倍数であること" >&2
+        exit 1
+      fi
+      slot_e_ctl=$((slot_e + (CYCLEFLEN - WINDOW_E) / LTIMESLOT))
+    fi
+
     cat $conf_file_src | \
         sed -e "/!--OBS_IN_NUM--/a OBS_IN_NUM = $OBSNUM," \
             -e "/!--OBS_IN_NAME--/a OBS_IN_NAME = $OBS_IN_NAME_LIST" \
@@ -1247,7 +1263,7 @@ while ((time <= ETIME)); do
             -e "/!--OBSDA_OUT_BASENAME--/a OBSDA_OUT_BASENAME = \"<member>/obsgues.d${dfmt}_${time}\"," \
             -e "/!--HISTORY_IN_BASENAME--/a HISTORY_IN_BASENAME = \"${HISTORY_PATH[$d]}/<member>/history\"," \
             -e "/!--SLOT_START--/a SLOT_START = $slot_s," \
-            -e "/!--SLOT_END--/a SLOT_END = $slot_e," \
+            -e "/!--SLOT_END--/a SLOT_END = $slot_e_ctl," \
             -e "/!--SLOT_BASE--/a SLOT_BASE = $slot_b," \
             -e "/!--SLOT_TINTERVAL--/a SLOT_TINTERVAL = ${LTIMESLOT}.D0," \
             -e "/!--OBSDA_IN--/a OBSDA_IN = .false.," \
@@ -1864,7 +1880,9 @@ fi
 
 OUT_CYCLE_SKIP=${OUT_CYCLE_SKIP:-1}
 
-CYCLEFLEN=$WINDOW_E     # Model forecast length in a cycle (second)
+CYCLEFLEN=${SENS_CYCLEFLEN:-$WINDOW_E}     # Model forecast length in a cycle (second)
+                        # convection: 土壌水分の制御（control/20261107_mpc_soil）では、目標の窓（t + 45〜75 分）まで予報するため SENS_CYCLEFLEN で伸ばす。
+                        #             restart は LCYCLE ごと（TIME_DT_*_RESTART）なので、次の cycle の初期値（t + LCYCLE）は変わらない
 if (( EFSO_RUN > 0 )) ; then
   EFSO_FCST_LENGTH=${EFSO_FCST_LENGTH:-$WINDOW_E}
   if (( WINDOW_E < EFSO_FCST_LENGTH )) ; then

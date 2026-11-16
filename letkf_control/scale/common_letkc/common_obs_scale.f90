@@ -41,8 +41,8 @@ MODULE common_obs_scale
   IMPLICIT NONE
   PUBLIC
 
-  INTEGER,PARAMETER :: nid_obs_varlocal=8
-!  INTEGER,PARAMETER :: nid_obs_varlocal=9 !H08
+  INTEGER,PARAMETER :: nid_obs_varlocal=9  ! 9: LETKC control target (convection, 2026-11-07)
+!  INTEGER,PARAMETER :: nid_obs_varlocal=9 !H08 (H08 is not supported; its index is moved to 10)
 !
 ! conventional observations
 !
@@ -71,18 +71,26 @@ MODULE common_obs_scale
 ! Himawari-8 (H08) observations
 !
   INTEGER,PARAMETER :: id_H08IR_obs=8800
+!
+! LETKC control targets (convection, 2026-11-07)
+!   id_ctl_areaacc: a 2D history variable averaged over a rectangle and accumulated (or averaged)
+!                   over a time window. Its definition (variable, half widths, ...) is given
+!                   by the row 'typ' of &PARAM_CTLTARGET (common_nml.f90).
+!   New kinds of targets can be added as new id_ctl_* (and is_ctl_obs below).
+!
+  INTEGER,PARAMETER :: id_ctl_areaacc=19001
 
   INTEGER,PARAMETER :: elem_uid(nid_obs)= &
      (/id_u_obs, id_v_obs, id_t_obs, id_tv_obs, id_q_obs, id_rh_obs, &
        id_ps_obs, id_rain_obs, id_radar_ref_obs, id_radar_ref_zero_obs, id_radar_vr_obs, id_radar_prh_obs, &
-       id_H08IR_obs, id_tclon_obs, id_tclat_obs, id_tcmip_obs/)
+       id_H08IR_obs, id_tclon_obs, id_tclat_obs, id_tcmip_obs, id_ctl_areaacc/)
 
   CHARACTER(3),PARAMETER :: obelmlist(nid_obs)= &
      (/'  U', '  V', '  T', ' Tv', '  Q', ' RH', ' PS', 'PRC', 'REF', 'RE0', ' Vr', 'PRH',&
-       'H08', 'TCX', 'TCY', 'TCP'/)
+       'H08', 'TCX', 'TCY', 'TCP', 'CTA'/)
 
   CHARACTER(3),PARAMETER :: obelmlist_varlocal(nid_obs_varlocal)= &
-     (/'WND', '  T', 'MOI', ' PS', 'PRC', 'TCV', 'REF', ' Vr'/)
+     (/'WND', '  T', 'MOI', ' PS', 'PRC', 'TCV', 'REF', ' Vr', 'CTL'/)
 !     (/'WND', '  T', 'MOI', ' PS', 'PRC', 'TCV', 'REF', ' Vr', 'H08'/)
 
   ! Parameter 'nobtype' is set in common_nml.f90
@@ -213,6 +221,8 @@ function uid_obs(id_obs)
     uid_obs = 15
   case(id_tcmip_obs)
     uid_obs = 16
+  case(id_ctl_areaacc)
+    uid_obs = 17
   case default
     uid_obs = -1     ! error
   end select
@@ -242,12 +252,28 @@ function uid_obs_varlocal(id_obs)
     uid_obs_varlocal = 7
   case(id_radar_vr_obs)
     uid_obs_varlocal = 8
+  case(id_ctl_areaacc)    ! LETKC control target
+    uid_obs_varlocal = 9
   case(id_h08ir_obs)      ! H08
-    uid_obs_varlocal = 9  ! H08
+    uid_obs_varlocal = 10 ! H08 (not supported: out of nid_obs_varlocal)
   case default
     uid_obs_varlocal = -1 ! error
   end select
 end function uid_obs_varlocal
+!-----------------------------------------------------------------------
+! LETKC control target or not (convection, 2026-11-07)
+!-----------------------------------------------------------------------
+logical function is_ctl_obs(id_obs)
+  implicit none
+  integer, intent(in) :: id_obs
+
+  select case(id_obs)
+  case(id_ctl_areaacc)
+    is_ctl_obs = .true.
+  case default
+    is_ctl_obs = .false.
+  end select
+end function is_ctl_obs
 
 !-----------------------------------------------------------------------
 !
@@ -1683,6 +1709,18 @@ subroutine monit_obs(v3dg,v2dg,topo,nobs,bias,rmse,monit_type,use_key,step)
 
       oqc(n) = iqc_otype
 
+      if (is_ctl_obs(obs(iset)%elm(iidx))) then
+        ! convection（2026-11-07）: LETKC の制御目標は history の窓から出す量（letkc/obsope_tools_ctl.f90）なので、
+        !   ここ（restart の状態）では計算できない。y_b − H(x_b) は観測演算子の値（obsda_sort%val = y − 平均 H(x)）を使い、
+        !   y_a − H(x_a) は undef にする（解析からの予報をしないと出せない）。QC は y_b のものを残す
+        oqc(n) = iqc_good
+        if (step == 1) then
+          ohx(n) = obsda_sort%val(nn)
+        else
+          ohx(n) = undef
+        end if
+      else
+
       select case (OBS_IN_FORMAT(iset))
       !=========================================================================
       case (obsfmt_prepbufr)
@@ -1716,6 +1754,8 @@ subroutine monit_obs(v3dg,v2dg,topo,nobs,bias,rmse,monit_type,use_key,step)
         ohx(n) = undef
       end if
 
+      end if ! [ is_ctl_obs(obs(iset)%elm(iidx)) ]
+
       if (step == 1) then
         obsdep_qc(n) = oqc(n)
         obsdep_omb(n) = ohx(n)
@@ -1725,6 +1765,7 @@ subroutine monit_obs(v3dg,v2dg,topo,nobs,bias,rmse,monit_type,use_key,step)
         end if                             !
         obsdep_oma(n) = ohx(n)
         obsdep_omb_emean(n) = obsda_sort%val(nn)
+        if (is_ctl_obs(obs(iset)%elm(iidx))) oqc(n) = iqc_undef ! convection: y_a − H(x_a) は undef なので、統計（monit_dep）には入れない
       end if
 
       if ( OBSDEP_OUT_NOQC ) then

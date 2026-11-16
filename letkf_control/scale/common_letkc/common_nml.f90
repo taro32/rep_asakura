@@ -17,8 +17,9 @@ MODULE common_nml
 
   !----
   integer, parameter :: nv3d = 11    ! number of 3D state variables (in SCALE restart files)
-  integer, parameter :: nv2d = 0     ! number of 2D state variables (in SCALE restart files)
-  integer, parameter :: nid_obs = 16 ! number of variable types
+  integer, parameter :: nv2d = 2     ! number of 2D state variables (in SCALE restart files)
+                                     ! convection（2026-11-07）: LAND_WATER の第 1・2 層（common_scale.f90 の v2d_name・v2d_lz・v2d_label）
+  integer, parameter :: nid_obs = 17 ! number of variable types (17: LETKC control target id_ctl_areaacc, convection 2026-11-07)
   integer, parameter :: nobtype = 24 ! number of observation report types
 
   integer, parameter :: nobsfilemax = 10
@@ -231,6 +232,44 @@ MODULE common_nml
     (/ 0.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, &
       -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, -1.0d0, &
       -1.0d0, -1.0d0, -1.0d0, -1.0d0/)
+
+  !--- PARAM_CTLTARGET (convection, 2026-11-07)
+  ! LETKC の制御目標（controltarget の要素 id_ctl_areaacc など）の種類ごとの定義。
+  ! controltarget の 7 番目の欄（観測の種類 typ）が、この表の行番号になる。
+  ! typ は HORI_LOCAL(typ) などの添字でもあるので、行ごとに局所化も選べる。
+  ! 種類を増やすときは、列（下の配列）と、使う側の select case（観測演算子・set_letkf_obs）を足す。
+  character(len=16) :: CTL_VAR(nobtype) = ''          ! history の変数名（例 'PREC'）。'' はその行を使わない
+  real(r_size) :: CTL_HALF_X(nobtype) = 0.0d0         ! 領域の半幅 x [m]（中心は controltarget の経度・緯度）
+  real(r_size) :: CTL_HALF_Y(nobtype) = 0.0d0         ! 領域の半幅 y [m]
+  real(r_size) :: CTL_HALF_T(nobtype) = 0.0d0         ! 時間の窓の半幅 [s]（中心は controltarget の dif）
+  character(len=8) :: CTL_AREA_OP(nobtype) = 'MEAN'   ! 領域の演算: 'MEAN'（平均）
+  character(len=8) :: CTL_TIME_OP(nobtype) = 'SUM'    ! 時間の演算: 'SUM'（積算。値 × 時間）、'MEAN'（平均）
+  logical :: CTL_REL_TARGET(nobtype) = .false.        ! .true.: 目標 y* = 値 × Ybar（値は比）
+  logical :: CTL_REL_ERROR(nobtype) = .false.         ! .true.: 誤差 sigma_R = 誤差 × sigma_Y（誤差は係数）
+  logical :: CTL_REJECT_NEGDEP(nobtype) = .false.     ! .true.: 目標 − 予報（member 平均）< 0 を捨てる
+
+  !--- PARAM_LETKC_CONTROL (convection, 2026-11-07)
+  ! LETKC で修正する変数と、その修正の制約。1 行 = 1 つの状態変数（CONTROL_VAR）。
+  ! 変数の局所化（letkf_tools.f90 の var_local）の制御目標の列（' PS' = 地上気圧の要素を目標にした従来の制御、
+  ! 'CTL' = id_ctl_* の制御目標）は、この表から作る: その列は全部 0、表の行の変数だけ 1。
+  ! VAR_LOCAL_PS は LETKC では使わない（もとから固定で上書きしていた）。
+  ! 修正のあと、行ごとに次の制約をかける（letkf_tools.f90 の letkc_control_constrain）:
+  !   3 次元の変数: 層 CONTROL_KMIN〜CONTROL_KMAX の外は修正しない（member・mdet とも第一推定に戻す）
+  !   λ: |Δx_mdet| / σ(member) < CONTROL_LAMBDA × (その変数の全格子での最大) の点は修正しない
+  !   向き: 'DECREASE' は Δx_mdet > 0、'INCREASE' は Δx_mdet < 0 の点を修正しない（'BOTH' は制限なし）
+  !   範囲: 修正した値（member・mdet）を [CONTROL_VMIN, CONTROL_VMAX] に切り詰める
+  ! 既定（read_nml_letkc_control で 1 行目に入れる）は、これまでコードに固定していた QV の制御:
+  !   CONTROL_VAR(1) = 'QV', CONTROL_TARGET(1) = 'PS', CONTROL_KMIN(1) = 1, CONTROL_KMAX(1) = 1,
+  !   CONTROL_DIRECTION(1) = 'DECREASE', CONTROL_LAMBDA(1) = 0（範囲なし）
+  integer, parameter :: ncontrol_max = 20
+  character(len=16) :: CONTROL_VAR(ncontrol_max) = ''         ! 状態変数の名前（v3d_name: 'QV' など、2 次元: 'LAND_WATER_1' など）。'' の行は使わない
+  character(len=8)  :: CONTROL_TARGET(ncontrol_max) = ''      ! この変数を修正する目標（変数の局所化の列の名前: 'PS'・'CTL'）
+  integer           :: CONTROL_KMIN(ncontrol_max) = 1         ! 修正する層の範囲（3 次元の変数だけ。下から数える）
+  integer           :: CONTROL_KMAX(ncontrol_max) = 1
+  character(len=8)  :: CONTROL_DIRECTION(ncontrol_max) = 'BOTH' ! 'BOTH'・'DECREASE'（減らすだけ）・'INCREASE'（増やすだけ）
+  real(r_size)      :: CONTROL_VMIN(ncontrol_max) = -1.0d30   ! 修正した値の範囲
+  real(r_size)      :: CONTROL_VMAX(ncontrol_max) =  1.0d30
+  real(r_size)      :: CONTROL_LAMBDA(ncontrol_max) = 0.0d0   ! 信号対雑音比の閾値の係数（0: 使わない）
 
   !--- PARAM_LETKF_VAR_LOCAL
   real(r_size) :: VAR_LOCAL_UV(nv3d+nv2d)        = 1.0d0
@@ -823,6 +862,138 @@ subroutine read_nml_letkf_obs
 
   return
 end subroutine read_nml_letkf_obs
+
+!-------------------------------------------------------------------------------
+! PARAM_CTLTARGET (convection, 2026-11-07)
+!-------------------------------------------------------------------------------
+subroutine read_nml_ctltarget
+  implicit none
+  integer :: itype
+  integer :: ierr
+
+  namelist /PARAM_CTLTARGET/ &
+    CTL_VAR, &
+    CTL_HALF_X, &
+    CTL_HALF_Y, &
+    CTL_HALF_T, &
+    CTL_AREA_OP, &
+    CTL_TIME_OP, &
+    CTL_REL_TARGET, &
+    CTL_REL_ERROR, &
+    CTL_REJECT_NEGDEP
+
+  rewind(IO_FID_CONF)
+  read(IO_FID_CONF,nml=PARAM_CTLTARGET,iostat=ierr)
+  if (ierr < 0) then !--- missing
+    if ( LOG_OUT ) write(6,*) '[Warning] /PARAM_CTLTARGET/ is not found in namelist.'
+  elseif (ierr > 0) then !--- fatal error
+    write(6,*) '[Error] xxx Not appropriate names in namelist PARAM_CTLTARGET. Check!'
+    stop
+  endif
+
+  do itype = 1, nobtype
+    if (len_trim(CTL_VAR(itype)) == 0) cycle
+
+    select case (trim(CTL_AREA_OP(itype)))
+    case ('MEAN')
+    case default
+      write (6, '(A,I3,2A)') "[Error] Unsupported 'CTL_AREA_OP' in PARAM_CTLTARGET: type ", itype, ', ', trim(CTL_AREA_OP(itype))
+      stop 99
+    end select
+
+    select case (trim(CTL_TIME_OP(itype)))
+    case ('SUM', 'MEAN')
+    case default
+      write (6, '(A,I3,2A)') "[Error] Unsupported 'CTL_TIME_OP' in PARAM_CTLTARGET: type ", itype, ', ', trim(CTL_TIME_OP(itype))
+      stop 99
+    end select
+
+    if (CTL_HALF_X(itype) < 0.0d0 .or. CTL_HALF_Y(itype) < 0.0d0 .or. CTL_HALF_T(itype) < 0.0d0) then
+      write (6, '(A,I3)') "[Error] Negative half width in PARAM_CTLTARGET: type ", itype
+      stop 99
+    end if
+  end do
+
+  if (LOG_LEVEL >= 2) then
+    write(6, nml=PARAM_CTLTARGET)
+  end if
+
+  return
+end subroutine read_nml_ctltarget
+
+!-------------------------------------------------------------------------------
+! PARAM_LETKC_CONTROL (convection, 2026-11-07)
+!   変数名・目標の名前の確かめは letkf_tools.f90（set_letkc_control）で行う
+!-------------------------------------------------------------------------------
+subroutine read_nml_letkc_control
+  implicit none
+  integer :: j
+  integer :: ierr
+
+  namelist /PARAM_LETKC_CONTROL/ &
+    CONTROL_VAR, &
+    CONTROL_TARGET, &
+    CONTROL_KMIN, &
+    CONTROL_KMAX, &
+    CONTROL_DIRECTION, &
+    CONTROL_VMIN, &
+    CONTROL_VMAX, &
+    CONTROL_LAMBDA
+
+  ! 既定: これまでの LETKC の QV の制御（地上気圧の目標で、最下層の QV を減らす向きだけ）
+  CONTROL_VAR(1) = 'QV'
+  CONTROL_TARGET(1) = 'PS'
+  CONTROL_KMIN(1) = 1
+  CONTROL_KMAX(1) = 1
+  CONTROL_DIRECTION(1) = 'DECREASE'
+  CONTROL_LAMBDA(1) = 0.0d0
+
+  rewind(IO_FID_CONF)
+  read(IO_FID_CONF,nml=PARAM_LETKC_CONTROL,iostat=ierr)
+  if (ierr < 0) then !--- missing
+    if ( LOG_OUT ) write(6,*) '[Warning] /PARAM_LETKC_CONTROL/ is not found in namelist. Use the default (QV control).'
+  elseif (ierr > 0) then !--- fatal error
+    write(6,*) '[Error] xxx Not appropriate names in namelist PARAM_LETKC_CONTROL. Check!'
+    stop
+  endif
+
+  do j = 1, ncontrol_max
+    if (len_trim(CONTROL_VAR(j)) == 0) cycle
+
+    if (len_trim(CONTROL_TARGET(j)) == 0) then
+      write (6, '(A,I3)') "[Error] 'CONTROL_TARGET' is not set in PARAM_LETKC_CONTROL: row ", j
+      stop 99
+    end if
+
+    select case (trim(CONTROL_DIRECTION(j)))
+    case ('BOTH', 'DECREASE', 'INCREASE')
+    case default
+      write (6, '(A,I3,2A)') "[Error] Unsupported 'CONTROL_DIRECTION' in PARAM_LETKC_CONTROL: row ", j, ', ', trim(CONTROL_DIRECTION(j))
+      stop 99
+    end select
+
+    if (CONTROL_KMIN(j) < 1 .or. CONTROL_KMAX(j) < CONTROL_KMIN(j)) then
+      write (6, '(A,I3,2I6)') "[Error] Wrong 'CONTROL_KMIN/KMAX' in PARAM_LETKC_CONTROL: row ", j, CONTROL_KMIN(j), CONTROL_KMAX(j)
+      stop 99
+    end if
+
+    if (CONTROL_VMAX(j) < CONTROL_VMIN(j)) then
+      write (6, '(A,I3)') "[Error] CONTROL_VMAX < CONTROL_VMIN in PARAM_LETKC_CONTROL: row ", j
+      stop 99
+    end if
+
+    if (CONTROL_LAMBDA(j) < 0.0d0) then
+      write (6, '(A,I3)') "[Error] Negative 'CONTROL_LAMBDA' in PARAM_LETKC_CONTROL: row ", j
+      stop 99
+    end if
+  end do
+
+  if (LOG_LEVEL >= 2) then
+    write(6, nml=PARAM_LETKC_CONTROL)
+  end if
+
+  return
+end subroutine read_nml_letkc_control
 
 !-------------------------------------------------------------------------------
 ! PARAM_LETKF_VAR_LOCAL

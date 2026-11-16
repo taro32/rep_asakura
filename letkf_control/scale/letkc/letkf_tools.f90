@@ -35,6 +35,10 @@ MODULE letkf_tools
 
   real(r_size),save :: var_local(nv3d+nv2d,nid_obs_varlocal)
 
+  ! convection（2026-11-07）: &PARAM_LETKC_CONTROL の行ごとの状態変数の添字・変数の局所化の列（set_letkc_control）
+  integer,save :: control_iv(ncontrol_max) = 0
+  integer,save :: control_col(ncontrol_max) = 0
+
   integer,save :: ctype_merge(nid_obs,nobtype)
   integer,allocatable,save :: n_merge(:)
   integer,allocatable,save :: ic_merge(:,:)
@@ -56,13 +60,8 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size),INTENT(INOUT) :: gues2d(nij1,nens,nv2d)      !  output: destroyed
   REAL(r_size),INTENT(OUT) :: anal3d(nij1,nlev,nens,nv3d)   ! analysis ensemble
   REAL(r_size),INTENT(OUT) :: anal2d(nij1,nens,nv2d)
-  REAL(r_size) :: control_std3d(nij1,nlev,nv3d) ! standard deviation for evaluating control perturbation
-  REAL(r_size) :: control_relativenorm3d(nij1,nlev,nv3d) ! control norm/std for evaluating control perturbation
-  REAL(r_size) :: controlperthreshold ! YSaw 20241101
-  REAL(r_size),PARAMETER :: control_lamda = 0.0 ! YSaw 20241101
-  logical,PARAMETER :: force_check = .TRUE.
-  INTEGER, PARAMETER :: clev = 1                                !YSaw maxlevel for control
-  REAL(r_size) :: local_max, global_max ! YSaw 20250918
+  ! convection（2026-11-07）: YSaw の制御の制約（control_lamda・force_check・clev・QV だけ）は
+  ! &PARAM_LETKC_CONTROL から作る形にした（set_letkc_control・letkc_control_constrain）
 
 
 !  REAL(r_size) :: mean3d(nij1,nlev,nv3d)
@@ -140,16 +139,17 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   var_local(:,3) = VAR_LOCAL_Q(:)
   !var_local(:,4) = VAR_LOCAL_PS(:)
 
-  ! control variable localization by Y.Saw 20241030
-  var_local(:,4) = 0.0d0
-  var_local(6,4) = 1.0d0 !QV only
-  ! end control variable localization
+  var_local(:,4) = VAR_LOCAL_PS(:)  ! LETKC: 制御目標の列は下の set_letkc_control で上書きする
 
   var_local(:,5) = VAR_LOCAL_RAIN(:)
   var_local(:,6) = VAR_LOCAL_TC(:)
   var_local(:,7) = VAR_LOCAL_RADAR_REF(:)
   var_local(:,8) = VAR_LOCAL_RADAR_VR(:)
 !  var_local(:,9) = VAR_LOCAL_H08(:)
+
+  ! LETKC: 制御目標の列（' PS'・'CTL' と、&PARAM_LETKC_CONTROL の CONTROL_TARGET に書いた列）を設定から作る
+  ! （もとは var_local(:,4) = 0; var_local(6,4) = 1 の QV だけ。Y.Saw 20241030）
+  call set_letkc_control
 
   var_local_n2nc_max = 1
   var_local_n2nc(1) = 1
@@ -465,11 +465,6 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
         END DO
 
 
-        ! analysis update of members
-        IF (n == iv3d_q) THEN ! variance
-          CALL com_stdev(MEMBER, gues3d(ij,ilev,:,n), control_std3d(ij,ilev,n))
-        ENDIF
-
         ! analysis update of deterministic run
         if (DET_RUN) then                                                              !GYL
             !write(6,*) "DET_RUN_UPDATE before 3d = ", DET_RUN_UPDATE, beta
@@ -485,9 +480,6 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
           else ! no update
              anal3d(ij,ilev,mmdet,n) = gues3d(ij,ilev,mmdet,n)
           end if
-          if (n == iv3d_q) THEN
-             control_relativenorm3d(ij,ilev,n) = abs(anal3d(ij,ilev,mmdet,n)-gues3d(ij,ilev,mmdet,n))/control_std3d(ij,ilev,n)
-          endif
         end if                                                                         !GYL
 
         ! limit q spread
@@ -646,44 +638,10 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 !$OMP END PARALLEL
 
 !
-! Enforcing control perturbation local
-! picking up perturbations with large S/N ratio
-! by Y.Saw 20241101
-! only first 3-layer
+! Enforcing control perturbation local (Y.Saw 20241101)
+! convection（2026-11-07）: 変数・層・向き・範囲・λ を &PARAM_LETKC_CONTROL から（letkc_control_constrain）
 !
-!  clev = 40 ! all layers
-  local_max = maxval(control_relativenorm3d(:,1:clev,iv3d_q))
-  CALL MPI_ALLREDUCE(local_max, global_max, 1, MPI_r_size, MPI_MAX, MPI_COMM_a, ierr)
-  controlperthreshold = global_max * control_lamda
-  DO ilev = 1, nlev
-   DO ij = 1, nij1
-    IF (ilev <=  clev)THEN
-     IF (control_relativenorm3d(ij,ilev,iv3d_q) < controlperthreshold) THEN
-            DO k = 1, MEMBER
-               anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) + gues3d(ij,ilev,mmean,iv3d_q) ! neglecting small perturbation and reduce gues
-            ENDDO
-            anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
-            anal3d(ij,ilev,mmean,iv3d_q) = gues3d(ij,ilev,mmean,iv3d_q) ! is it necessary?
-     ENDIF
-     IF(force_check)THEN ! checking control force is feasible
-            IF((anal3d(ij,ilev,mmdet,iv3d_q)-gues3d(ij,ilev,mmdet,iv3d_q)) > 0) THEN !positive Q is not allowed
-            DO k = 1, MEMBER
-               anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) + gues3d(ij,ilev,mmean,iv3d_q) ! neglecting small perturbation and reduce gues
-            ENDDO
-            anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
-            anal3d(ij,ilev,mmean,iv3d_q) = gues3d(ij,ilev,mmean,iv3d_q) ! is it necessary?
-            ENDIF
-      ENDIF ! end of force_check            
-    ELSE  ! only 1-3 layer can be controlled by YSaw
-            DO k = 1, MEMBER
-               anal3d(ij,ilev,k,iv3d_q) = gues3d(ij,ilev,k,iv3d_q) + gues3d(ij,ilev,mmean,iv3d_q) ! neglecting small perturbation and reduce gues
-            ENDDO
-            anal3d(ij,ilev,mmdet,iv3d_q) = gues3d(ij,ilev,mmdet,iv3d_q) ! real nature
-            anal3d(ij,ilev,mmean,iv3d_q) = gues3d(ij,ilev,mmean,iv3d_q) ! is it necessary?
-    ENDIF
-   ENDDO ![ij=1,nij1]
-  ENDDO ![ilev=1,nlev]
-! end localizating of control perturbation
+  call letkc_control_constrain(gues3d,gues2d,anal3d,anal2d)
 !
 
 !  deallocate (hdxf,rdiag,rloc,dep)
@@ -1939,6 +1897,8 @@ subroutine obs_local_cal(ri, rj, rlev, rz, nvar, iob, ic, ndist, nrloc, nrdiag)
   !
   if (vert_loc_ctype(ic) == 0.0d0) then
     nd_v = 0.0d0                                                            ! no vertical localization
+  else if (is_ctl_obs(obelm)) then
+    nd_v = 0.0d0                                                            ! convection: LETKC control target (2D area target; no vertical localization)
   else if (obelm == id_ps_obs) then
     nd_v = ABS(LOG(obs(obset)%dat(obidx)) - LOG(rlev)) / vert_loc_ctype(ic) ! for ps, use observed ps value for the base of vertical localization
   else if (obelm == id_rain_obs) then
@@ -2137,5 +2097,265 @@ subroutine weight_RTPS(w, pa, xb, infl, wrlx, infl_out)
 
   return
 end subroutine weight_RTPS
+
+!-----------------------------------------------------------------------
+! convection（2026-11-07）: LETKC の制御の設定（&PARAM_LETKC_CONTROL）から、
+!   行ごとの状態変数の添字・変数の局所化の列を決め、var_local の制御目標の列を作る。
+!   制御目標の列（' PS'・'CTL' と CONTROL_TARGET に書いた列）は全部 0 にして、表の行の変数だけ 1 にする
+!-----------------------------------------------------------------------
+subroutine set_letkc_control
+  implicit none
+  logical :: col_ctl(nid_obs_varlocal)
+  integer :: j, j2, ic, iv
+
+  col_ctl(:) = .false.
+  col_ctl(uid_obs_varlocal(id_ps_obs)) = .true.       ! 従来の LETKC: 地上気圧の要素を制御目標に使う
+  col_ctl(uid_obs_varlocal(id_ctl_areaacc)) = .true.  ! 制御目標の要素（id_ctl_*）
+
+  control_iv(:) = 0
+  control_col(:) = 0
+  do j = 1, ncontrol_max
+    if (len_trim(CONTROL_VAR(j)) == 0) cycle
+
+    iv = state_var_index(CONTROL_VAR(j))
+    if (iv == 0) then
+      write (6, '(A,I3,2A)') "[Error] Unknown state variable 'CONTROL_VAR' in PARAM_LETKC_CONTROL: row ", j, ', ', trim(CONTROL_VAR(j))
+      stop 99
+    end if
+    do j2 = 1, j-1
+      if (control_iv(j2) == iv) then
+        write (6, '(A,I3,2A)') "[Error] Duplicated 'CONTROL_VAR' in PARAM_LETKC_CONTROL: row ", j, ', ', trim(CONTROL_VAR(j))
+        stop 99
+      end if
+    end do
+    if (iv <= nv3d .and. CONTROL_KMAX(j) > nlev) then
+      write (6, '(A,I3,A,I6)') "[Error] 'CONTROL_KMAX' > nlev in PARAM_LETKC_CONTROL: row ", j, ', nlev = ', nlev
+      stop 99
+    end if
+
+    ic = 0
+    do j2 = 1, nid_obs_varlocal
+      if (trim(adjustl(obelmlist_varlocal(j2))) == trim(adjustl(CONTROL_TARGET(j)))) then
+        ic = j2
+        exit
+      end if
+    end do
+    if (ic == 0) then
+      write (6, '(A,I3,2A)') "[Error] Unknown 'CONTROL_TARGET' in PARAM_LETKC_CONTROL: row ", j, ', ', trim(CONTROL_TARGET(j))
+      stop 99
+    end if
+
+    control_iv(j) = iv
+    control_col(j) = ic
+    col_ctl(ic) = .true.
+  end do
+
+  do ic = 1, nid_obs_varlocal
+    if (col_ctl(ic)) var_local(:,ic) = 0.0d0
+  end do
+  do j = 1, ncontrol_max
+    if (control_iv(j) > 0) var_local(control_iv(j),control_col(j)) = 1.0d0
+  end do
+
+  if (LOG_LEVEL >= 1 .and. LOG_OUT) then
+    do j = 1, ncontrol_max
+      if (control_iv(j) == 0) cycle
+      if (control_iv(j) <= nv3d) then
+        write (6, '(A,I3,6A,2(A,I4),A,A,2(A,ES12.4),A,ES12.4)') '[Info] LETKC control #', j, ': var = ', trim(CONTROL_VAR(j)), &
+          ', target = ', trim(adjustl(obelmlist_varlocal(control_col(j)))), ', 3D', &
+          '', ', k = ', CONTROL_KMIN(j), ' -', CONTROL_KMAX(j), &
+          ', direction = ', trim(CONTROL_DIRECTION(j)), ', range = ', CONTROL_VMIN(j), ' -', CONTROL_VMAX(j), &
+          ', lambda = ', CONTROL_LAMBDA(j)
+      else
+        write (6, '(A,I3,8A,2(A,ES12.4),A,ES12.4)') '[Info] LETKC control #', j, ': var = ', trim(CONTROL_VAR(j)), &
+          ', target = ', trim(adjustl(obelmlist_varlocal(control_col(j)))), ', 2D', &
+          '', ', direction = ', trim(CONTROL_DIRECTION(j)), ', range = ', CONTROL_VMIN(j), ' -', CONTROL_VMAX(j), &
+          ', lambda = ', CONTROL_LAMBDA(j)
+      end if
+    end do
+  end if
+
+  return
+end subroutine set_letkc_control
+
+!-----------------------------------------------------------------------
+! convection（2026-11-07）: LETKC の修正の制約（もとは das_letkf に固定。Y.Saw 20241101・20250918）
+!   &PARAM_LETKC_CONTROL の行ごとに（Δx = 修正後 − 第一推定。DET_RUN なら mdet、なければ member 平均）:
+!   1) 3 次元の変数で、層 CONTROL_KMIN〜CONTROL_KMAX の外は第一推定に戻す
+!   2) 層の中で |Δx| / σ(member の第一推定) < CONTROL_LAMBDA × (全格子・層の中での最大) の点は戻す
+!   3) 向き: 'DECREASE' で Δx > 0、'INCREASE' で Δx < 0 の点は戻す
+!   4) 残った点で、変わった値（member・mdet）を [CONTROL_VMIN, CONTROL_VMAX] に切り詰める
+!   「戻す」は member・mdet とも第一推定の値にすること（もとのコードと同じ）。
+!   gues3d・gues2d の member は平均からの差（das_letkf の中で引いた後）
+!-----------------------------------------------------------------------
+subroutine letkc_control_constrain(gues3d,gues2d,anal3d,anal2d)
+  implicit none
+  real(r_size),intent(in) :: gues3d(nij1,nlev,nens,nv3d)
+  real(r_size),intent(in) :: gues2d(nij1,nens,nv2d)
+  real(r_size),intent(inout) :: anal3d(nij1,nlev,nens,nv3d)
+  real(r_size),intent(inout) :: anal2d(nij1,nens,nv2d)
+
+  real(r_size),allocatable :: rnorm(:,:)
+  real(r_size) :: g(nens), a(nens)
+  real(r_size) :: d, sd, local_max, global_max, thr, dmax_l, dmax
+  integer :: j, iv, n, k, k1, k2, ij, ierr
+  integer :: ncnt_l(4), ncnt(4) ! 修正が残った点・λ で戻した点・向きで戻した点・切り詰めた値の数
+  logical :: is3d
+
+  do j = 1, ncontrol_max
+    iv = control_iv(j)
+    if (iv == 0) cycle
+    is3d = (iv <= nv3d)
+    if (is3d) then
+      n = iv
+      k1 = CONTROL_KMIN(j)
+      k2 = CONTROL_KMAX(j)
+    else
+      n = iv - nv3d
+      k1 = 1
+      k2 = 1
+    end if
+
+    ! 1) 層の範囲の外は戻す（3 次元だけ）
+    if (is3d) then
+      do k = 1, nlev
+        if (k >= k1 .and. k <= k2) cycle
+        do ij = 1, nij1
+          call reset_point(gues3d(ij,k,:,n), anal3d(ij,k,:,n))
+        end do
+      end do
+    end if
+
+    ! 2) 信号対雑音比 |Δx| / σ
+    allocate (rnorm(nij1,k1:k2))
+    local_max = 0.0d0
+    do k = k1, k2
+      do ij = 1, nij1
+        call get_point(ij, k, g, a)
+        call com_stdev(MEMBER, g(1:MEMBER), sd)
+        d = point_incr(g, a)
+        if (sd > 0.0d0) then
+          rnorm(ij,k) = abs(d) / sd
+        else
+          rnorm(ij,k) = 0.0d0
+        end if
+        local_max = max(local_max, rnorm(ij,k))
+      end do
+    end do
+    call MPI_ALLREDUCE(local_max, global_max, 1, MPI_r_size, MPI_MAX, MPI_COMM_a, ierr)
+    thr = global_max * CONTROL_LAMBDA(j)
+
+    ncnt_l(:) = 0
+    dmax_l = 0.0d0
+    do k = k1, k2
+      do ij = 1, nij1
+        call get_point(ij, k, g, a)
+        d = point_incr(g, a)
+
+        if (rnorm(ij,k) < thr) then
+          call reset_point(g, a)
+          ncnt_l(2) = ncnt_l(2) + 1
+        else if ((trim(CONTROL_DIRECTION(j)) == 'DECREASE' .and. d > 0.0d0) .or. &
+                 (trim(CONTROL_DIRECTION(j)) == 'INCREASE' .and. d < 0.0d0)) then
+          call reset_point(g, a)
+          ncnt_l(3) = ncnt_l(3) + 1
+        else
+          call clip_point(g, a, CONTROL_VMIN(j), CONTROL_VMAX(j), ncnt_l(4))
+          d = point_incr(g, a)
+          if (d /= 0.0d0) ncnt_l(1) = ncnt_l(1) + 1
+          dmax_l = max(dmax_l, abs(d))
+        end if
+
+        call put_point(ij, k, a)
+      end do
+    end do
+    deallocate (rnorm)
+
+    if (LOG_LEVEL >= 1) then
+      call MPI_ALLREDUCE(ncnt_l, ncnt, 4, MPI_INTEGER, MPI_SUM, MPI_COMM_a, ierr)
+      call MPI_ALLREDUCE(dmax_l, dmax, 1, MPI_r_size, MPI_MAX, MPI_COMM_a, ierr)
+      if (LOG_OUT) then
+        write (6, '(A,I3,3A,2ES12.4)') '[Info] LETKC control #', j, ' (', trim(CONTROL_VAR(j)), '): max |dx|/sigma, threshold = ', global_max, thr
+        write (6, '(A,I3,3A,4I10,ES12.4)') '[Info] LETKC control #', j, ' (', trim(CONTROL_VAR(j)), &
+          '): modified, reset(lambda), reset(direction), clipped values, max |dx| = ', ncnt, dmax
+      end if
+    end if
+  end do
+
+  return
+
+contains
+
+  subroutine get_point(ij, k, g, a)
+    integer, intent(in) :: ij, k
+    real(r_size), intent(out) :: g(nens), a(nens)
+    if (is3d) then
+      g(:) = gues3d(ij,k,:,n)
+      a(:) = anal3d(ij,k,:,n)
+    else
+      g(:) = gues2d(ij,:,n)
+      a(:) = anal2d(ij,:,n)
+    end if
+  end subroutine get_point
+
+  subroutine put_point(ij, k, a)
+    integer, intent(in) :: ij, k
+    real(r_size), intent(in) :: a(nens)
+    if (is3d) then
+      anal3d(ij,k,1:MEMBER,n) = a(1:MEMBER)
+      if (DET_RUN) anal3d(ij,k,mmdet,n) = a(mmdet)
+    else
+      anal2d(ij,1:MEMBER,n) = a(1:MEMBER)
+      if (DET_RUN) anal2d(ij,mmdet,n) = a(mmdet)
+    end if
+  end subroutine put_point
+
+  ! 修正量: DET_RUN なら mdet、なければ member 平均
+  function point_incr(g, a) result(dd)
+    real(r_size), intent(in) :: g(nens), a(nens)
+    real(r_size) :: dd
+    if (DET_RUN) then
+      dd = a(mmdet) - g(mmdet)
+    else
+      dd = sum(a(1:MEMBER)) / real(MEMBER, r_size) - g(mmean)
+    end if
+  end function point_incr
+
+  ! 第一推定に戻す（member は 平均 + 差）
+  subroutine reset_point(g, a)
+    real(r_size), intent(in) :: g(nens)
+    real(r_size), intent(inout) :: a(nens)
+    integer :: m
+    do m = 1, MEMBER
+      a(m) = g(m) + g(mmean)
+    end do
+    if (DET_RUN) a(mmdet) = g(mmdet)
+  end subroutine reset_point
+
+  ! 変わった値だけを範囲に切り詰める（変わっていない値は、範囲の外でもそのまま）
+  subroutine clip_point(g, a, vmin, vmax, nclip)
+    real(r_size), intent(in) :: g(nens)
+    real(r_size), intent(inout) :: a(nens)
+    real(r_size), intent(in) :: vmin, vmax
+    integer, intent(inout) :: nclip
+    real(r_size) :: c
+    integer :: m
+    do m = 1, MEMBER
+      if (a(m) /= g(m) + g(mmean)) then
+        c = min(max(a(m), vmin), vmax)
+        if (c /= a(m)) nclip = nclip + 1
+        a(m) = c
+      end if
+    end do
+    if (DET_RUN) then
+      if (a(mmdet) /= g(mmdet)) then
+        c = min(max(a(mmdet), vmin), vmax)
+        if (c /= a(mmdet)) nclip = nclip + 1
+        a(mmdet) = c
+      end if
+    end if
+  end subroutine clip_point
+
+end subroutine letkc_control_constrain
 
 END MODULE letkf_tools

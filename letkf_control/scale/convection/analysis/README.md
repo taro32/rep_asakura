@@ -42,6 +42,7 @@
 | `setup/phase7d/plot_6cycle.py` | Phase 7d の 6 cycle（ジョブ 9844986）のミーティング用の図 | `docs/setup/phase7d/run_soil_6cycle/` |
 | `setup/phase7d/plot_summary.py` | 2026-10-07 のミーティング用の 1 枚（`plot_6cycle.py` を使う） | `docs/setup/phase7d/meeting_20261007/` |
 | `setup/phase8/plot_member_prec.py` | Phase 8 の 24 時間の、member ごとの積算降水（ジョブは `setup/phase8/plot_member_prec_job.sh`） | `FIGDIR/member_prec_*.png`・`.npz` |
+| `setup/phase8/check_mdet_rank.py` | Phase 8 の追加検証（2026-11-07）: mdet が 80 member の中で何番目か（目標領域の降水・逐次の制御の Y・土壌水分 0〜20 cm、0〜24 時）。`docs/control/20261102_soil_track/soil_track.npz` を読む | `docs/setup/phase8/mdet_rank/` |
 | `setup/phase7d/make_single_obs.py` | 1 点観測試験の観測ファイルを、基準の観測から作る | `<出力ディレクトリ>/obs_<T>.dat` ほか |
 
 ## スクリプト（制御: control/）
@@ -57,6 +58,8 @@
 | `control/20261103_patch_fcst/check_patch_lcl.py` | 同じ予報の LCL・境界層の高さと降り始め | `docs/control/20261103_patch_fcst/patch_lcl.*` |
 | `control/20261103_patch_fcst/check_patch_bowen_map.py` | 同じ予報の格子ごとのボーエン比の相関の地図（2026-11-04） | `docs/control/20261103_patch_fcst/patch_bowen_map_*` |
 | `control/20261103_enkc_once/check_control.py` | 8 時に 1 回の EnKC の制御実験（11 本）の評価 | `docs/control/20261103_enkc_once/` |
+| `control/20261107_mpc_soil/check_letkc_ctl_test.py` | LETKC の制御目標（要素 19001）の試験の検算: history から Y、y*・σ_R、ETKF の式で LAND_WATER の第 1・2 層の修正量を出し、anal − gues と比べる（2026-11-07） | 標準出力（試験の結果は `mpc_soil/<実験名>/check_letkc_ctl_test.txt`） |
+| `control/20261107_mpc_soil/compare_mpc_soil.py` | MPC の本番（r080）と制御なし（nocontrol）の比較: 各 cycle の mdet・mean の予報し直しから目標領域の Y（t+45〜75 分）と t〜t+60 分の雨、obsdepcont から y*・σ_R・Ȳ（2026-11-07） | 標準出力、FIGDIR/mpc_target.png（結果は `docs/control/notes.md` 3.9） |
 
 実験の入力を作るスクリプトとジョブは `convection/control/<日付>_<目的>/` にある（`make_patch_fcst.py`・`run_fcst.sh`・`make_control.py`）。
 

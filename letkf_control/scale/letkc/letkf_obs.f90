@@ -152,6 +152,14 @@ SUBROUTINE set_letkf_obs
 
   logical :: ctype_use(nid_obs,nobtype)
 
+  ! convection: LETKC control targets (relative target / relative error), 2026-11-07
+  integer :: ityp_ctl, nctl, k
+  real(r_size) :: ymean_ctl, ysprd_ctl
+  logical, allocatable :: ctl_rel_done(:)    ! (obsda%nobs) relative target/error is set in this process
+  integer, allocatable :: ctl_offset(:)      ! (OBS_IN_NUM) offset of each obs file in the linear index
+  integer, allocatable :: ctl_k(:)           ! (total obs) linear index -> index of relative control targets (0: not)
+  real(r_size), allocatable :: ctl_buf(:,:)  ! (3,nctl) y*, sigma_R, count
+
 !  character(len=timer_name_width) :: timer_str
 
   call mpi_timer('', 2)
@@ -354,8 +362,10 @@ SUBROUTINE set_letkf_obs
   !-----------------------------------------------------------------------------
 
   allocate(tmpelm(obsda%nobs))
+  allocate(ctl_rel_done(obsda%nobs))
+  ctl_rel_done(:) = .false.
 
-!$OMP PARALLEL PRIVATE(n,i,iof,iidx,mem_ref)
+!$OMP PARALLEL PRIVATE(n,i,iof,iidx,mem_ref,ityp_ctl,ymean_ctl,ysprd_ctl)
 !$OMP DO
   do n = 1, obsda%nobs
     IF(obsda%qc(n) > 0) CYCLE
@@ -443,6 +453,52 @@ SUBROUTINE set_letkf_obs
 !    end if
 !!!###### end RADAR assimilation ######
 
+!!!###### LETKC control target (convection, 2026-11-07) ######
+    ! The definition is the row 'typ' of &PARAM_CTLTARGET.
+    ! Relative target (y* = ratio * Ybar) and relative error (sigma_R = coef * sigma_Y) are set here,
+    ! after H(x) of all members are available and before QC.
+    ! Ybar, sigma_Y: mean and spread (denominator MEMBER-1) of H(x) of the members (mdet is not included).
+    ! The new values are shared among subdomains after this loop (obs(:) is used in all processes).
+    if (is_ctl_obs(obs(iof)%elm(iidx))) then
+      ityp_ctl = obs(iof)%typ(iidx)
+      if (ityp_ctl < 1 .or. ityp_ctl > nobtype) then
+        obsda%qc(n) = iqc_otype
+        cycle
+      end if
+      if (len_trim(CTL_VAR(ityp_ctl)) == 0) then
+        obsda%qc(n) = iqc_otype   ! the type is not defined in &PARAM_CTLTARGET
+        cycle
+      end if
+
+      if (CTL_REL_TARGET(ityp_ctl) .or. CTL_REL_ERROR(ityp_ctl)) then
+        ymean_ctl = sum(obsda%ensval(1:MEMBER,n)) / real(MEMBER, r_size)
+        if (MEMBER > 1) then
+          ysprd_ctl = sqrt(sum((obsda%ensval(1:MEMBER,n) - ymean_ctl)**2) / real(MEMBER-1, r_size))
+        else
+          ysprd_ctl = 0.0d0
+        end if
+
+        if (CTL_REL_TARGET(ityp_ctl)) then
+          obs(iof)%dat(iidx) = obs(iof)%dat(iidx) * ymean_ctl
+        end if
+        if (CTL_REL_ERROR(ityp_ctl)) then
+          obs(iof)%err(iidx) = obs(iof)%err(iidx) * ysprd_ctl
+        end if
+        ctl_rel_done(n) = .true.
+
+        if ( LOG_LEVEL >= 1 .and. LOG_OUT ) then
+          write (6, '(A,I6,I3,4(A,ES12.4))') '[Info] LETKC control target (elm, typ) =', obs(iof)%elm(iidx), ityp_ctl, &
+                ': Ybar =', ymean_ctl, ', sigma_Y =', ysprd_ctl, ', y* =', obs(iof)%dat(iidx), ', sigma_R =', obs(iof)%err(iidx)
+        end if
+
+        if (obs(iof)%err(iidx) <= 0.0d0) then
+          obsda%qc(n) = iqc_obs_bad   ! e.g. no ensemble spread with relative error
+          cycle
+        end if
+      end if
+    end if
+!!!###### end LETKC control target ######
+
     obsda%val(n) = obsda%ensval(1,n)
     DO i=2,MEMBER
       obsda%val(n) = obsda%val(n) + obsda%ensval(i,n)
@@ -506,6 +562,13 @@ SUBROUTINE set_letkf_obs
       IF(ABS(obsda%val(n)) > GROSS_ERROR_RADAR_PRH * obs(iof)%err(iidx)) THEN
         obsda%qc(n) = iqc_gross_err
       END IF
+    case (id_ctl_areaacc) ! convection: LETKC control target; the rule is selected in &PARAM_CTLTARGET
+      IF(ABS(obsda%val(n)) > GROSS_ERROR * obs(iof)%err(iidx)) THEN
+        obsda%qc(n) = iqc_gross_err
+      END IF
+      IF(CTL_REJECT_NEGDEP(obs(iof)%typ(iidx)) .and. obsda%val(n) < 0) THEN ! y* - Ybar < 0
+        obsda%qc(n) = iqc_gross_err
+      END IF
     case default
       IF(ABS(obsda%val(n)) > GROSS_ERROR * obs(iof)%err(iidx)) THEN
         obsda%qc(n) = iqc_gross_err
@@ -530,6 +593,59 @@ SUBROUTINE set_letkf_obs
   END DO ! [ n = 1, obsda%nobs ]
 !$OMP END DO
 !$OMP END PARALLEL
+
+  ! convection: share the relative target / relative error of LETKC control targets (2026-11-07)
+  !   Each observation is in obsda of only one subdomain, but obs(:)%dat and obs(:)%err are
+  !   used in all processes (localization weights in letkf_tools.f90, obsdep output).
+  !   All processes have the same obs(:), so nctl is the same in all processes of MPI_COMM_d.
+  !-----------------------------------------------------------------------------
+  allocate (ctl_offset(OBS_IN_NUM))
+  nctl = 0
+  k = 0
+  do iof = 1, OBS_IN_NUM
+    ctl_offset(iof) = k
+    k = k + obs(iof)%nobs
+  end do
+  allocate (ctl_k(k))
+  ctl_k(:) = 0
+  do iof = 1, OBS_IN_NUM
+    do iidx = 1, obs(iof)%nobs
+      if (.not. is_ctl_obs(obs(iof)%elm(iidx))) cycle
+      ityp_ctl = obs(iof)%typ(iidx)
+      if (ityp_ctl < 1 .or. ityp_ctl > nobtype) cycle
+      if (CTL_REL_TARGET(ityp_ctl) .or. CTL_REL_ERROR(ityp_ctl)) then
+        nctl = nctl + 1
+        ctl_k(ctl_offset(iof)+iidx) = nctl
+      end if
+    end do
+  end do
+
+  if (nctl > 0) then
+    allocate (ctl_buf(3,nctl))
+    ctl_buf(:,:) = 0.0d0
+    do n = 1, obsda%nobs
+      if (.not. ctl_rel_done(n)) cycle
+      iof = obsda%set(n)
+      iidx = obsda%idx(n)
+      k = ctl_k(ctl_offset(iof)+iidx)
+      ctl_buf(1,k) = obs(iof)%dat(iidx)
+      ctl_buf(2,k) = obs(iof)%err(iidx)
+      ctl_buf(3,k) = 1.0d0
+    end do
+    call MPI_ALLREDUCE(MPI_IN_PLACE, ctl_buf, 3*nctl, MPI_r_size, MPI_SUM, MPI_COMM_d, ierr)
+    do iof = 1, OBS_IN_NUM
+      do iidx = 1, obs(iof)%nobs
+        k = ctl_k(ctl_offset(iof)+iidx)
+        if (k <= 0) cycle
+        if (ctl_buf(3,k) > 0.5d0) then
+          obs(iof)%dat(iidx) = ctl_buf(1,k) / ctl_buf(3,k)
+          obs(iof)%err(iidx) = ctl_buf(2,k) / ctl_buf(3,k)
+        end if
+      end do
+    end do
+    deallocate (ctl_buf)
+  end if
+  deallocate (ctl_k, ctl_offset, ctl_rel_done)
 
   call mpi_timer('set_letkf_obs:departure_cal_qc:', 2)
 
