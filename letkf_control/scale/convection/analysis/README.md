@@ -60,6 +60,8 @@
 | `control/20261103_enkc_once/check_control.py` | 8 時に 1 回の EnKC の制御実験（11 本）の評価 | `docs/control/20261103_enkc_once/` |
 | `control/20261107_mpc_soil/check_letkc_ctl_test.py` | LETKC の制御目標（要素 19001）の試験の検算: history から Y、y*・σ_R、ETKF の式で LAND_WATER の第 1・2 層の修正量を出し、anal − gues と比べる（2026-11-07） | 標準出力（試験の結果は `mpc_soil/<実験名>/check_letkc_ctl_test.txt`） |
 | `control/20261107_mpc_soil/compare_mpc_soil.py` | MPC の本番（r080）と制御なし（nocontrol）の比較: 各 cycle の mdet・mean の予報し直しから目標領域の Y（t+45〜75 分）と t〜t+60 分の雨、obsdepcont から y*・σ_R・Ȳ（2026-11-07） | 標準出力、FIGDIR/mpc_target.png（結果は `docs/control/notes.md` 3.9） |
+| `control/20261116_mpc_same/plot_hyeto.py` | 同じ増分に直した MPC（mpc_same）の目標領域のハイエトグラフ: 5 分ごとの降水強度・12 時からの積算・介入した cycle ごとの Ȳ ± σ_Y・y*・Y_mdet。mpc_same と mpc_soil の実験を `--runs` で並べる（2026-11-18） | 標準出力、`FIGDIR/hyeto.png`（結果は `docs/control/notes.md` 3.11） |
+| `control/20261116_mpc_same/plot_increment.py` | 同じく、LAND_WATER 第 1 層の増分の地図（λ = 0・0.5 を並べる）と足した水の量。20261107 版の `plot_increment.py` を import。mdet と member 平均の増分が同じかも出す（2026-11-18） | 標準出力、`FIGDIR/increment_maps.png`・`increment_amount.png` |
 
 実験の入力を作るスクリプトとジョブは `convection/control/<日付>_<目的>/` にある（`make_patch_fcst.py`・`run_fcst.sh`・`make_control.py`）。
 

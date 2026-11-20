@@ -102,6 +102,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
   REAL(r_size) :: tmpinfl                        !GYL
   REAL(r_size) :: q_mean,q_sprd                  !GYL
   REAL(r_size) :: q_anal(MEMBER)                 !GYL
+  REAL(r_size) :: dxc                            ! convection（2026-11-16）: 制御の増分（mdet と全 member に同じく足す）
 
   INTEGER :: mshuf,ierr                          !GYL
   INTEGER :: ishuf(MEMBER)                       !GYL
@@ -303,7 +304,7 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 
   call mpi_timer('das_letkf:allocation_shared_vars:', 2)
 
-!$OMP PARALLEL PRIVATE(ilev,ij,n,m,k,hdxf,rdiag,rloc,dep,depd,nobsl,nobsl_t,cutd_t,parm,beta,n2n,n2nc,trans,transm,transmd,transrlx,pa,trans_done,tmpinfl,q_mean,q_sprd,q_anal,timer_str)
+!$OMP PARALLEL PRIVATE(ilev,ij,n,m,k,hdxf,rdiag,rloc,dep,depd,nobsl,nobsl_t,cutd_t,parm,beta,n2n,n2nc,trans,transm,transmd,transrlx,pa,trans_done,tmpinfl,q_mean,q_sprd,q_anal,timer_str,dxc)
   allocate (hdxf (nobstotal,MEMBER))
   allocate (rdiag(nobstotal))
   allocate (rloc (nobstotal))
@@ -433,6 +434,30 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 
         END IF
 
+        ! convection（2026-11-16）: 制御の増分を 1 本だけ作り、mdet と全 member に同じく足す
+        ! （Sawada 2024 の Algorithm 1 Step 4）。Δx = β Xᵇ w̄、w̄ = transm（∝ r − Ȳ）。
+        ! member のばらつきは第一推定のまま（ETKF のばらつきの変換・RTPP・RTPS は使わない）。
+        ! 以下の「IF (CONTROL_LEGACY_TRANSMD)」の中は 2026-11-16 より前の更新（過去の結果の再現用）
+        IF (.not. CONTROL_LEGACY_TRANSMD) THEN
+          dxc = 0.0d0
+          DO k=1,MEMBER
+            dxc = dxc + gues3d(ij,ilev,k,n) * transm(k,n2nc)
+          END DO
+          dxc = dxc * beta
+          DO m=1,MEMBER
+            anal3d(ij,ilev,m,n) = gues3d(ij,ilev,mmean,n) + gues3d(ij,ilev,m,n) + dxc
+          END DO
+          if (DET_RUN) then
+            if (DET_RUN_UPDATE) then
+              anal3d(ij,ilev,mmdet,n) = gues3d(ij,ilev,mmdet,n) + dxc
+            else ! no update
+              anal3d(ij,ilev,mmdet,n) = gues3d(ij,ilev,mmdet,n)
+            end if
+          end if
+          cycle   ! 下の limit q spread も使わない（member に同じ増分を足すため）
+        END IF
+
+        ! ---- ここから CONTROL_LEGACY_TRANSMD = .true. のときだけ ----
         ! relaxation via LETKF weight
         IF(RELAX_ALPHA /= 0.0d0) THEN                                                  !GYL - RTPP method (Zhang et al. 2004)
           CALL weight_RTPP(trans(:,:,n2nc),parm,transrlx)                              !GYL
@@ -573,6 +598,27 @@ SUBROUTINE das_letkf(gues3d,gues2d,anal3d,anal2d)
 
           END IF
 
+          ! convection（2026-11-16）: 3 次元の変数と同じ。制御の増分 Δx = β Xᵇ w̄ を mdet と全 member に同じく足す
+          IF (.not. CONTROL_LEGACY_TRANSMD) THEN
+            dxc = 0.0d0
+            DO k=1,MEMBER
+              dxc = dxc + gues2d(ij,k,n) * transm(k,n2nc)
+            END DO
+            dxc = dxc * beta
+            DO m=1,MEMBER
+              anal2d(ij,m,n) = gues2d(ij,mmean,n) + gues2d(ij,m,n) + dxc
+            END DO
+            if (DET_RUN) then
+              if (DET_RUN_UPDATE) then
+                anal2d(ij,mmdet,n) = gues2d(ij,mmdet,n) + dxc
+              else ! no update
+                anal2d(ij,mmdet,n) = gues2d(ij,mmdet,n)
+              end if
+            end if
+            cycle
+          END IF
+
+          ! ---- ここから CONTROL_LEGACY_TRANSMD = .true. のときだけ ----
           ! relaxation via LETKF weight
           IF(RELAX_ALPHA /= 0.0d0) THEN                                              !GYL - RTPP method (Zhang et al. 2004)
             CALL weight_RTPP(trans(:,:,n2nc),parm,transrlx)                          !GYL
@@ -2187,6 +2233,9 @@ end subroutine set_letkc_control
 !   4) 残った点で、変わった値（member・mdet）を [CONTROL_VMIN, CONTROL_VMAX] に切り詰める
 !   「戻す」は member・mdet とも第一推定の値にすること（もとのコードと同じ）。
 !   gues3d・gues2d の member は平均からの差（das_letkf の中で引いた後）
+!   2026-11-16: 既定（CONTROL_LEGACY_TRANSMD = .false.）では mdet と全 member に同じ増分を足しているので、
+!   1〜3 の判定に使う Δx（mdet の増分）は member 平均の増分と同じ。4 の切り詰めは値ごとに行うので、
+!   切り詰めた点だけは、足した量が mdet・member で違うことがある（件数はログの clipped values）
 !-----------------------------------------------------------------------
 subroutine letkc_control_constrain(gues3d,gues2d,anal3d,anal2d)
   implicit none

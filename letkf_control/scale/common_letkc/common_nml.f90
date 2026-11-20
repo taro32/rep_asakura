@@ -270,6 +270,12 @@ MODULE common_nml
   real(r_size)      :: CONTROL_VMIN(ncontrol_max) = -1.0d30   ! 修正した値の範囲
   real(r_size)      :: CONTROL_VMAX(ncontrol_max) =  1.0d30
   real(r_size)      :: CONTROL_LAMBDA(ncontrol_max) = 0.0d0   ! 信号対雑音比の閾値の係数（0: 使わない）
+  ! 修正の足し方（2026-11-16）:
+  !   .false.（既定）: Sawada (2024, SOLA) の Algorithm 1 Step 4 のとおり、制御の増分 Δx = Xᵇ w̄（member 平均の移動、
+  !                    w̄ = transm ∝ r − Ȳ）を 1 本だけ作り、mdet と全 member に同じく足す（member のばらつきは第一推定のまま）
+  !   .true.        : 2026-11-16 より前の動き（case_tc の LETKC）。member は ETKF の変換（RTPP など）、
+  !                    mdet は自分の差 r − H(x_mdet) の重み transmd で更新する。過去の結果の再現用。正しい形に一本化したら消す
+  logical           :: CONTROL_LEGACY_TRANSMD = .false.
 
   !--- PARAM_LETKF_VAR_LOCAL
   real(r_size) :: VAR_LOCAL_UV(nv3d+nv2d)        = 1.0d0
@@ -938,7 +944,8 @@ subroutine read_nml_letkc_control
     CONTROL_DIRECTION, &
     CONTROL_VMIN, &
     CONTROL_VMAX, &
-    CONTROL_LAMBDA
+    CONTROL_LAMBDA, &
+    CONTROL_LEGACY_TRANSMD
 
   ! 既定: これまでの LETKC の QV の制御（地上気圧の目標で、最下層の QV を減らす向きだけ）
   CONTROL_VAR(1) = 'QV'
@@ -987,6 +994,14 @@ subroutine read_nml_letkc_control
       stop 99
     end if
   end do
+
+  if (LOG_OUT) then
+    if (CONTROL_LEGACY_TRANSMD) then
+      write (6, '(A)') '[Warning] CONTROL_LEGACY_TRANSMD = T: old LETKC update (members by ETKF, mdet by its own departure, transmd)'
+    else
+      write (6, '(A)') '[Info] LETKC update: the same control increment Xb*transm (mean shift) is added to mdet and all members'
+    end if
+  end if
 
   if (LOG_LEVEL >= 2) then
     write(6, nml=PARAM_LETKC_CONTROL)
